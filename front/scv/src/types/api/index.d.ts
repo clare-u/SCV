@@ -12,13 +12,6 @@ export type ConditionalData<M extends HttpMethod, D> = M extends
   ? undefined
   : D;
 
-export interface ApiResponse<T> {
-  data: T;
-  message: string;
-  timestamp: string;
-  statusCode: string;
-}
-
 export interface ApiErrorResponse {
   data: {
     code: string;

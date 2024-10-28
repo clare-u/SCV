@@ -2,7 +2,6 @@ import axios, { AxiosError } from "axios";
 import {
   ApiErrorResponse,
   ApiRequestConfig,
-  ApiResponse,
   ConditionalData,
   HttpMethod,
 } from "@/types";
@@ -20,13 +19,13 @@ export const handleApiRequest = async <T, M extends HttpMethod, D = undefined>(
   config?: ApiRequestConfig,
 ): Promise<T> => {
   try {
-    const response = await api.request<ApiResponse<T>>({
+    const response = await api.request<T>({
       url,
       method,
       data,
       ...config,
     });
-    return response.data.data;
+    return response.data;
   } catch (error) {
     if (axios.isAxiosError(error) && error.response) {
       const apiError: ApiErrorResponse = error.response.data;
