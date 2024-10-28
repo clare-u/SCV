@@ -2,6 +2,7 @@
 
 import Button from "@/components/button/Button";
 import Badge from "@/components/badge/Badge";
+import Chips from "@/components/chips/Chips";
 
 export default function Home() {
   return (
@@ -44,6 +45,55 @@ export default function Home() {
         <Badge color="blue">Badge</Badge>
         <Badge color="amber">Badge</Badge>
         <Badge color="teal">Badge</Badge>
+      </div>
+
+      {/* Chips */}
+      <div className="flex gap-10">
+        <Chips color="indigo" design="fill">
+          Chips
+        </Chips>
+        <Chips color="teal" design="fill">
+          Chips
+        </Chips>
+        <Chips color="gray" design="fill">
+          Chips
+        </Chips>
+        <Chips color="amber" design="fill">
+          Chips
+        </Chips>
+        <Chips color="red" design="fill">
+          Chips
+        </Chips>
+        <Chips color="green" design="fill">
+          Chips
+        </Chips>
+        <Chips color="black" design="fill">
+          Chips
+        </Chips>
+      </div>
+
+      <div className="flex gap-10">
+        <Chips color="indigo" design="outline">
+          Chips
+        </Chips>
+        <Chips color="teal" design="outline">
+          Chips
+        </Chips>
+        <Chips color="gray" design="outline">
+          Chips
+        </Chips>
+        <Chips color="amber" design="outline">
+          Chips
+        </Chips>
+        <Chips color="red" design="outline">
+          Chips
+        </Chips>
+        <Chips color="green" design="outline">
+          Chips
+        </Chips>
+        <Chips color="black" design="outline">
+          Chips
+        </Chips>
       </div>
     </div>
   );
