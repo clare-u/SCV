@@ -1,6 +1,7 @@
 "use client";
 
 import Button from "@/components/button/Button";
+import Badge from "@/components/badge/Badge";
 
 export default function Home() {
   return (
@@ -33,6 +34,16 @@ export default function Home() {
         <Button size="m" design="fill" color="red" disabled icon="add_box">
           Disabled Button
         </Button>
+      </div>
+
+      {/* Badge */}
+      <div className="flex gap-10">
+        <Badge color="red">Badge</Badge>
+        <Badge color="gray">Badge</Badge>
+        <Badge color="green">Badge</Badge>
+        <Badge color="blue">Badge</Badge>
+        <Badge color="amber">Badge</Badge>
+        <Badge color="teal">Badge</Badge>
       </div>
     </div>
   );
