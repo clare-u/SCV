@@ -36,7 +36,7 @@ const SearchInput: React.FC<SearchInputProps> = ({
           className="material-symbols-outlined cursor-pointer text-gray-400"
           onClick={clearInput}
         >
-          close
+          cancel
         </span>
       )}
     </div>
