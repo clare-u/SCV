@@ -5,6 +5,10 @@ import { fetchMember } from "@/libs";
 export const useFetchMember = () => {
   return useQuery<MemberResponse, Error>({
     queryKey: ["member"],
-    queryFn: () => fetchMember(),
+    queryFn: async () => {
+      const data = await fetchMember();
+      console.log("Member Data:", data);
+      return data;
+    },
   });
 };
