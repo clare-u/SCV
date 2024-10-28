@@ -1,27 +1,10 @@
 "use client";
 
-import { useState } from "react";
-import { useRouter, useSearchParams } from "next/navigation";
 import Button from "@/components/button/Button";
 import Badge from "@/components/badge/Badge";
 import Chips from "@/components/chips/Chips";
-import SearchInput from "@/components/input/SearchInput";
 
 export default function Home() {
-  // 검색 인풋
-  const router = useRouter();
-  const [searchValue, setSearchValue] = useState("");
-
-  const handleSearchChange = (e: React.ChangeEvent<HTMLInputElement>) => {
-    setSearchValue(e.target.value);
-  };
-
-  const handleKeyDown = (event: React.KeyboardEvent<HTMLInputElement>) => {
-    if (event.key === "Enter") {
-      router.push(`/?keyword=${searchValue}`);
-    }
-  };
-
   return (
     <div className="flex flex-col gap-10 p-20">
       {/* Indigo fill 버튼 */}
@@ -111,16 +94,6 @@ export default function Home() {
         <Chips color="black" design="outline">
           Chips
         </Chips>
-      </div>
-
-      {/* Input */}
-      <div className="flex gap-10">
-        <SearchInput
-          placeholder="placeholder"
-          value={searchValue}
-          onChange={handleSearchChange}
-          handleKeyDown={handleKeyDown}
-        ></SearchInput>
       </div>
     </div>
   );
