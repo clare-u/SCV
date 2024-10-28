@@ -22,7 +22,7 @@ const config: Config = {
         foreground: "var(--foreground)",
       },
       fontFamily: {
-        sans: ["Pretendard", "sans-serif"],
+        sans: ["Pretendard"],
       },
       fontSize: {
         ...fontSize, // 사용자 정의 폰트 크기 확장
