@@ -4,13 +4,14 @@ import lombok.Builder;
 import lombok.Getter;
 
 import java.time.LocalDateTime;
+import java.util.UUID;
 
 @Builder
 @Getter
 public class OAuth2UserDTO {
 
     private Long userId;
-    private String userUuid;
+    private UUID userUuid;
     private String userEmail;
     private String userImageUrl;
     private String userNickname;
