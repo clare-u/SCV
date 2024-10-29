@@ -26,10 +26,12 @@ public class OAuth2GithubResponse implements OAuth2Response {
         return attributes.get("login").toString();
     }
 
+    @Override
     public LocalDateTime getUserCreatedAt() {
         return (LocalDateTime) attributes.get("created_at");
     }
 
+    @Override
     public LocalDateTime getUserUpdatedAt() {
         return (LocalDateTime) attributes.get("updated_at");
     }

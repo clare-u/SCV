@@ -1,5 +1,7 @@
 package com.scv.domain.oauth2.user;
 
+import java.time.LocalDateTime;
+
 public interface OAuth2Response {
 
     String getUserEmail();
@@ -7,4 +9,8 @@ public interface OAuth2Response {
     String getUserImageUrl();
 
     String getUserNickname();
+
+    LocalDateTime getUserCreatedAt();
+
+    LocalDateTime getUserUpdatedAt();
 }
