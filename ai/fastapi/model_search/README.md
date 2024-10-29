@@ -13,3 +13,5 @@ sudo docker-compose up -d
 # Creating milvus-minio ... done
 # Creating milvus-standalone ... done
 ```
+
+test
