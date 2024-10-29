@@ -11,6 +11,7 @@ public enum ErrorCode {
     EXPIRED_TOKEN(403, "EXPIRED_TOKEN", "만료된 토큰입니다."),
     USER_NOT_FOUND(404, "USER_NOT_FOUND", "사용자를 찾을 수 없습니다."),
     RESULT_NOT_FOUND(404, "RESULT_NOT_FOUND", "결과를 찾을 수 없습니다."),
+    DATA_NOT_FOUND(404, "DATA_NOT_FOUND", "데이터를 찾을 수 없습니다."),
     MODEL_VERSION_NOT_FOUND(404, "MODEL_VERSION_NOT_FOUND", "버전을 찾을 수 없습니다."),
     MODEL_NOT_FOUND(404, "MODEL_NOT_FOUND", "모델을 찾을 수 없습니다.");
 
