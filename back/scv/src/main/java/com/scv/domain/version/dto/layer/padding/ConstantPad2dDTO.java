@@ -1,6 +1,6 @@
-package com.scv.domain.model.dto.layer.padding;
+package com.scv.domain.version.dto.layer.padding;
 
-import com.scv.domain.model.dto.layer.LayerDTO;
+import com.scv.domain.version.dto.layer.LayerDTO;
 
 public record ConstantPad2dDTO(
         String type,

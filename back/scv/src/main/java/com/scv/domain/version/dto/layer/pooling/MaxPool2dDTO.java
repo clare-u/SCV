@@ -1,6 +1,6 @@
-package com.scv.domain.model.dto.layer.pooling;
+package com.scv.domain.version.dto.layer.pooling;
 
-import com.scv.domain.model.dto.layer.LayerDTO;
+import com.scv.domain.version.dto.layer.LayerDTO;
 
 public record MaxPool2dDTO(
         String type,

@@ -1,7 +1,7 @@
-package com.scv.domain.model.dto.layer.nonlinear;
+package com.scv.domain.version.dto.layer.nonlinear;
 
 
-import com.scv.domain.model.dto.layer.LayerDTO;
+import com.scv.domain.version.dto.layer.LayerDTO;
 
 public record LogSoftmaxDTO(
         String type,

@@ -1,17 +1,18 @@
-package com.scv.domain.model.dto.layer;
+package com.scv.domain.version.dto.layer;
 
 import com.fasterxml.jackson.annotation.JsonSubTypes;
 import com.fasterxml.jackson.annotation.JsonTypeInfo;
-import com.scv.domain.model.dto.layer.convolution.Conv2dDTO;
-import com.scv.domain.model.dto.layer.convolution.ConvTranspose2dDTO;
-import com.scv.domain.model.dto.layer.linear.LinearDTO;
+import com.scv.domain.version.dto.layer.convolution.Conv2dDTO;
+import com.scv.domain.version.dto.layer.convolution.ConvTranspose2dDTO;
+import com.scv.domain.version.dto.layer.linear.LinearDTO;
 import com.scv.domain.model.dto.layer.nonlinear.*;
-import com.scv.domain.model.dto.layer.padding.ConstantPad2dDTO;
-import com.scv.domain.model.dto.layer.padding.ReflectionPad2dDTO;
-import com.scv.domain.model.dto.layer.padding.ReplicationPad2dDTO;
-import com.scv.domain.model.dto.layer.padding.ZeroPad2dDTO;
-import com.scv.domain.model.dto.layer.pooling.AvgPool2dDTO;
-import com.scv.domain.model.dto.layer.pooling.MaxPool2dDTO;
+import com.scv.domain.version.dto.layer.nonlinear.*;
+import com.scv.domain.version.dto.layer.padding.ConstantPad2dDTO;
+import com.scv.domain.version.dto.layer.padding.ReflectionPad2dDTO;
+import com.scv.domain.version.dto.layer.padding.ReplicationPad2dDTO;
+import com.scv.domain.version.dto.layer.padding.ZeroPad2dDTO;
+import com.scv.domain.version.dto.layer.pooling.AvgPool2dDTO;
+import com.scv.domain.version.dto.layer.pooling.MaxPool2dDTO;
 
 @JsonTypeInfo(
         use = JsonTypeInfo.Id.NAME, // "type" 필드로 구분

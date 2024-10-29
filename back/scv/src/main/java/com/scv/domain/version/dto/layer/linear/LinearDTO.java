@@ -1,6 +1,6 @@
-package com.scv.domain.model.dto.layer.linear;
+package com.scv.domain.version.dto.layer.linear;
 
-import com.scv.domain.model.dto.layer.LayerDTO;
+import com.scv.domain.version.dto.layer.LayerDTO;
 
 public record LinearDTO(
         String type,
