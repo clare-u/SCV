@@ -1,4 +1,4 @@
-package com.scv.domain.user.contoller;
+package com.scv.domain.user.controller;
 
 import org.springframework.web.bind.annotation.RestController;
 
