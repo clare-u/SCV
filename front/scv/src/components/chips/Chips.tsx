@@ -1,6 +1,6 @@
 "use client";
 
-interface ChipsProps {
+export interface ChipsProps {
   color:
     | "red"
     | "orange"
