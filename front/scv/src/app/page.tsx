@@ -6,20 +6,27 @@ import Button from "@/components/button/Button";
 import Badge from "@/components/badge/Badge";
 import Chips from "@/components/chips/Chips";
 import SearchInput from "@/components/input/SearchInput";
+import ModalInput from "@/components/input/ModalInput";
 
 export default function Home() {
   // 검색 인풋
   const router = useRouter();
-  const [searchValue, setSearchValue] = useState("");
 
-  const handleSearchChange = (e: React.ChangeEvent<HTMLInputElement>) => {
-    setSearchValue(e.target.value);
+  const handleSearchSubmit = (value: string) => {
+    router.push(`/?keyword=${value}`);
   };
 
-  const handleKeyDown = (event: React.KeyboardEvent<HTMLInputElement>) => {
-    if (event.key === "Enter") {
-      router.push(`/?keyword=${searchValue}`);
-    }
+  // 모달 인풋
+  const [inputValue, setInputValue] = useState("");
+
+  const handleInputChange = (e: React.ChangeEvent<HTMLInputElement>) => {
+    setInputValue(e.target.value);
+  };
+
+  const [input2Value, setInput2Value] = useState("");
+
+  const handleInput2Change = (e: React.ChangeEvent<HTMLInputElement>) => {
+    setInput2Value(e.target.value);
   };
 
   return (
@@ -114,13 +121,19 @@ export default function Home() {
       </div>
 
       {/* Input */}
-      <div className="flex gap-10">
-        <SearchInput
+      <div className="flex flex-col gap-10">
+        <SearchInput placeholder="placeholder" onSubmit={handleSearchSubmit} />
+        <ModalInput
           placeholder="placeholder"
-          value={searchValue}
-          onChange={handleSearchChange}
-          handleKeyDown={handleKeyDown}
-        ></SearchInput>
+          value={inputValue}
+          onChange={handleInputChange}
+        />
+        <ModalInput
+          placeholder="placeholder"
+          value={input2Value}
+          onChange={handleInput2Change}
+          color="dark"
+        />
       </div>
     </div>
   );
