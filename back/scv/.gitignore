@@ -40,4 +40,4 @@ out/
 gradle-wrapper.jar
 
 ### Ignore sensitive configuration files ###
-applications.yml
+application.yml
