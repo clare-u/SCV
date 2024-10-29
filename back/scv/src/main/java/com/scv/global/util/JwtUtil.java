@@ -10,6 +10,7 @@ import java.nio.charset.StandardCharsets;
 import java.time.ZoneOffset;
 import java.time.ZonedDateTime;
 import java.util.Date;
+import java.util.UUID;
 
 @Slf4j
 @Component
@@ -78,4 +79,8 @@ public class JwtUtil {
         return false;
     }
 
+    public UUID getUserUuid(String accessToken) {
+        return UUID.fromString(Jwts.parserBuilder().setSigningKey(ACCESS_TOKEN_SECRET_KEY_BYTES).build()
+                .parseClaimsJws(accessToken).getBody().getSubject());
+    }
 }
