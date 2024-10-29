@@ -4,7 +4,7 @@ import com.scv.domain.model.dto.layer.LayerDTO;
 
 public record LeakyReLUDTO(
         String type,
-        float negativeSlope
+        double negativeSlope
 ) implements LayerDTO {
     @Override
     public String getType() {

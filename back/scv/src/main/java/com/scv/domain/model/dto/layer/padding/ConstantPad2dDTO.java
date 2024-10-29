@@ -5,7 +5,7 @@ import com.scv.domain.model.dto.layer.LayerDTO;
 public record ConstantPad2dDTO(
         String type,
         int padding,
-        float value
+        double value
 ) implements LayerDTO {
     @Override
     public String getType() {
