@@ -8,7 +8,7 @@ import lombok.Getter;
 import lombok.NoArgsConstructor;
 
 import java.time.ZonedDateTime;
-import java.util.UUID;
+import java.util.List;
 
 @Entity
 @Table(name = "user")
@@ -46,5 +46,5 @@ public class User {
     
     // Model과 양방향 매핑
     @OneToMany(mappedBy = "user", fetch = FetchType.LAZY)
-    private List<Model> models;  
+    private List<Model> models;
 }
