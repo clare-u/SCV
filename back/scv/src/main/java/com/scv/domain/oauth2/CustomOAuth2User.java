@@ -5,9 +5,10 @@ import lombok.RequiredArgsConstructor;
 import org.springframework.security.core.GrantedAuthority;
 import org.springframework.security.oauth2.core.user.OAuth2User;
 
-import java.time.LocalDateTime;
+import java.time.ZonedDateTime;
 import java.util.Collection;
 import java.util.Map;
+import java.util.UUID;
 
 @RequiredArgsConstructor
 public class CustomOAuth2User implements OAuth2User {
@@ -26,7 +27,7 @@ public class CustomOAuth2User implements OAuth2User {
 
     @Override
     public String getName() {
-        return oauth2UserDTO.getUserUuid();
+        return oauth2UserDTO.getUserUuid().toString();
     }
 
     public Long getUserId() {
@@ -49,11 +50,11 @@ public class CustomOAuth2User implements OAuth2User {
         return oauth2UserDTO.getUserNickname();
     }
 
-    public LocalDateTime getUserCreatedAt() {
+    public ZonedDateTime getUserCreatedAt() {
         return oauth2UserDTO.getUserCreatedAt();
     }
 
-    public LocalDateTime getUserUpdatedAt() {
+    public ZonedDateTime getUserUpdatedAt() {
         return oauth2UserDTO.getUserUpdatedAt();
     }
 
