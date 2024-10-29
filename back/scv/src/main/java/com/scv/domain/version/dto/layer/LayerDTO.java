@@ -5,7 +5,6 @@ import com.fasterxml.jackson.annotation.JsonTypeInfo;
 import com.scv.domain.version.dto.layer.convolution.Conv2dDTO;
 import com.scv.domain.version.dto.layer.convolution.ConvTranspose2dDTO;
 import com.scv.domain.version.dto.layer.linear.LinearDTO;
-import com.scv.domain.model.dto.layer.nonlinear.*;
 import com.scv.domain.version.dto.layer.nonlinear.*;
 import com.scv.domain.version.dto.layer.padding.ConstantPad2dDTO;
 import com.scv.domain.version.dto.layer.padding.ReflectionPad2dDTO;

@@ -1,5 +1,6 @@
 package com.scv.domain.user.domain;
 
+import com.scv.domain.model.domain.Model;
 import jakarta.persistence.*;
 import lombok.AllArgsConstructor;
 import lombok.Builder;
@@ -7,6 +8,7 @@ import lombok.Getter;
 import lombok.NoArgsConstructor;
 
 import java.time.LocalDateTime;
+import java.util.List;
 
 @Entity
 @Table(name = "user")
@@ -41,4 +43,8 @@ public class User {
 
     @Column(name = "user_is_deleted", nullable = false)
     private boolean userIsDeleted;
+    
+    // Model과 양방향 매핑
+    @OneToMany(mappedBy = "user", fetch = FetchType.LAZY)
+    private List<Model> models;  
 }
