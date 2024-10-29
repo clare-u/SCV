@@ -7,6 +7,8 @@ import Badge from "@/components/badge/Badge";
 import Chips from "@/components/chips/Chips";
 import SearchInput from "@/components/input/SearchInput";
 import ModalInput from "@/components/input/ModalInput";
+import ListboxComponent from "@/components/input/ListBoxComponent";
+import { Listbox } from "@headlessui/react";
 
 export default function Home() {
   // 검색 인풋
@@ -28,6 +30,25 @@ export default function Home() {
   const handleInput2Change = (e: React.ChangeEvent<HTMLInputElement>) => {
     setInput2Value(e.target.value);
   };
+
+  // 리스트박스
+  const option = [
+    { id: 1, name: "새 레포지토리와 연동" },
+    { id: 2, name: "기존 레포지토리와 연동" },
+  ];
+
+  const version = [
+    { id: 1, name: "v1" },
+    { id: 2, name: "v2" },
+    { id: 3, name: "v3" },
+    { id: 4, name: "v4" },
+    { id: 5, name: "v5" },
+    { id: 6, name: "v6" },
+  ];
+
+  const [selectedOption, setSelectedOption] = useState(option[0]);
+
+  const [selectedVersion, setSelectedVersion] = useState(version[0]);
 
   return (
     <div className="flex flex-col gap-10 p-20">
@@ -133,6 +154,17 @@ export default function Home() {
           value={input2Value}
           onChange={handleInput2Change}
           color="dark"
+        />
+        <ListboxComponent
+          value={selectedOption}
+          onChange={setSelectedOption}
+          options={option}
+          color="dark"
+        />
+        <ListboxComponent
+          value={selectedVersion}
+          onChange={setSelectedVersion}
+          options={version}
         />
       </div>
     </div>
