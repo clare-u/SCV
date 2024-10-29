@@ -8,7 +8,8 @@ import Chips from "@/components/chips/Chips";
 import SearchInput from "@/components/input/SearchInput";
 import ModalInput from "@/components/input/ModalInput";
 import ListboxComponent from "@/components/input/ListBoxComponent";
-import { Listbox } from "@headlessui/react";
+import NewModal from "@/components/modal/NewModal";
+import CloneModal from "@/components/modal/CloneModal";
 
 export default function Home() {
   // 검색 인풋
@@ -166,6 +167,11 @@ export default function Home() {
           onChange={setSelectedVersion}
           options={version}
         />
+      </div>
+
+      <div className="flex gap-10">
+        <NewModal />
+        <CloneModal />
       </div>
     </div>
   );
