@@ -8,6 +8,7 @@ import org.springframework.security.oauth2.core.user.OAuth2User;
 import java.time.LocalDateTime;
 import java.util.Collection;
 import java.util.Map;
+import java.util.UUID;
 
 @RequiredArgsConstructor
 public class CustomOAuth2User implements OAuth2User {
@@ -26,14 +27,14 @@ public class CustomOAuth2User implements OAuth2User {
 
     @Override
     public String getName() {
-        return oauth2UserDTO.getUserUuid();
+        return oauth2UserDTO.getUserUuid().toString();
     }
 
     public Long getUserId() {
         return oauth2UserDTO.getUserId();
     }
 
-    public String getUserUuid() {
+    public UUID getUserUuid() {
         return oauth2UserDTO.getUserUuid();
     }
 
