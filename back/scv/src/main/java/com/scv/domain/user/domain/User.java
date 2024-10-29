@@ -6,7 +6,7 @@ import lombok.Builder;
 import lombok.Getter;
 import lombok.NoArgsConstructor;
 
-import java.time.LocalDateTime;
+import java.time.ZonedDateTime;
 import java.util.UUID;
 
 @Entity
@@ -23,7 +23,7 @@ public class User {
     private Long userId;
 
     @Column(name = "user_uuid", unique = true, nullable = false, length = 36)
-    private UUID userUuid;
+    private String userUuid;
 
     @Column(name = "user_email", unique = true, nullable = false, length = 100)
     private String userEmail;
@@ -35,10 +35,10 @@ public class User {
     private String userNickname;
 
     @Column(name = "user_created_at", nullable = false)
-    private LocalDateTime userCreatedAt;
+    private ZonedDateTime userCreatedAt;
 
     @Column(name = "user_updated_at", nullable = false)
-    private LocalDateTime userUpdatedAt;
+    private ZonedDateTime userUpdatedAt;
 
     @Column(name = "user_is_deleted", nullable = false)
     private boolean userIsDeleted;

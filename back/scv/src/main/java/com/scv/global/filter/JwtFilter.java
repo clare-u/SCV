@@ -43,7 +43,7 @@ public class JwtFilter extends OncePerRequestFilter {
             return;
         }
 
-        UUID userUuid = jwtUtil.getUserUuid(accessToken);
+        String userUuid = jwtUtil.getUserUuid(accessToken);
 
         OAuth2UserDTO oAuth2UserDTO = OAuth2UserDTO.builder()
                 .userUuid(userUuid)

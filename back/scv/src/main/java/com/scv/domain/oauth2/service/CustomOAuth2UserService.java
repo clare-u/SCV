@@ -47,11 +47,11 @@ public class CustomOAuth2UserService extends DefaultOAuth2UserService {
             }
         }
 
-        User existUser = userRepository.findByUserEmail(oAuth2Response.getUserEmail());
+        User existUser = userRepository.findByUserEmail(oAuth2Response.getUserEmail()).orElse(null);
 
         if (existUser == null) {
             User user = User.builder()
-                    .userUuid(UUID.randomUUID())
+                    .userUuid(UUID.randomUUID().toString())
                     .userEmail(oAuth2Response.getUserEmail())
                     .userImageUrl(oAuth2Response.getUserImageUrl())
                     .userNickname(oAuth2Response.getUserNickname())

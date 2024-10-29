@@ -79,8 +79,8 @@ public class JwtUtil {
         return false;
     }
 
-    public UUID getUserUuid(String accessToken) {
-        return UUID.fromString(Jwts.parserBuilder().setSigningKey(ACCESS_TOKEN_SECRET_KEY_BYTES).build()
-                .parseClaimsJws(accessToken).getBody().getSubject());
+    public String getUserUuid(String accessToken) {
+        return Jwts.parserBuilder().setSigningKey(ACCESS_TOKEN_SECRET_KEY_BYTES).build()
+                .parseClaimsJws(accessToken).getBody().getSubject();
     }
 }
