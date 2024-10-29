@@ -7,8 +7,8 @@ import lombok.Builder;
 import lombok.Getter;
 import lombok.NoArgsConstructor;
 
-import java.time.LocalDateTime;
-import java.util.List;
+import java.time.ZonedDateTime;
+import java.util.UUID;
 
 @Entity
 @Table(name = "user")
@@ -36,10 +36,10 @@ public class User {
     private String userNickname;
 
     @Column(name = "user_created_at", nullable = false)
-    private LocalDateTime userCreatedAt;
+    private ZonedDateTime userCreatedAt;
 
     @Column(name = "user_updated_at", nullable = false)
-    private LocalDateTime userUpdatedAt;
+    private ZonedDateTime userUpdatedAt;
 
     @Column(name = "user_is_deleted", nullable = false)
     private boolean userIsDeleted;
