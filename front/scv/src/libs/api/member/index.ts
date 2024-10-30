@@ -3,7 +3,7 @@ import { handleApiRequest } from "../client";
 
 // member
 export const fetchMember = async () => {
-  return handleApiRequest<MemberResponse, "get">("/member", "get");
+  return handleApiRequest<MemberResponse, "get">("/users", "get");
 };
 
 export const logOut = async () => {
