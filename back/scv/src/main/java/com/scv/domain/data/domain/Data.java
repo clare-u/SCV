@@ -1,7 +1,10 @@
 package com.scv.domain.data.domain;
 
+import com.scv.domain.model.domain.Model;
 import jakarta.persistence.*;
 import lombok.*;
+
+import java.util.List;
 
 @Table(name = "data")
 @Entity
@@ -31,7 +34,6 @@ public class Data {
     @Column(name = "data_epock_cnt")
     private int epochCnt;
 
-//    model과 단방향 연결
-//    @OneToOne(mappedBy = "data", fetch = FetchType.LAZY)
-//    private Model model;
+    @OneToMany(mappedBy = "data", fetch = FetchType.LAZY)
+    private List<Model> model;
 }

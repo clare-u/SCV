@@ -5,11 +5,14 @@ import com.scv.domain.data.exception.DataNotFoundException;
 import com.scv.domain.data.repository.DataRepository;
 import com.scv.domain.model.domain.Model;
 import com.scv.domain.model.dto.request.ModelCreateRequest;
+import com.scv.domain.model.dto.response.ModelResponse;
 import com.scv.domain.model.repository.ModelRepository;
 import com.scv.domain.user.domain.User;
 import com.scv.domain.version.domain.ModelVersion;
 import com.scv.domain.version.repository.ModelVersionRepository;
 import lombok.RequiredArgsConstructor;
+import org.springframework.data.domain.Page;
+import org.springframework.data.domain.Pageable;
 import org.springframework.stereotype.Service;
 
 import java.util.ArrayList;
@@ -24,7 +27,7 @@ public class ModelService {
 
     public void createModel(ModelCreateRequest request, User user) {
         Data data = dataRepository.findById(request.dataId()).orElseThrow(DataNotFoundException::new);
-    
+
         // 요청에 따라 모델 생성
         Model model = Model.builder()
                 .user(user)
@@ -50,5 +53,12 @@ public class ModelService {
         // 모델 버전 저장
         modelVersionRepository.save(firstVersion);
     }
+
+    public Page<ModelResponse> findAllModels(Pageable pageable) {
+        Page<Model> models = modelRepository.findAll(pageable);
+
+        return models.map(ModelResponse::new);
+    }
+
 
 }
