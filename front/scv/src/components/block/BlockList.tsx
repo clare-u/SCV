@@ -39,8 +39,8 @@ const BlockList: React.FC = () => {
             key={category}
             className={({ selected }) =>
               selected
-                ? "flex w-[120px] flex-col items-center gap-[5px] rounded-lg border-none bg-stone-400 px-5 py-10"
-                : "flex w-[120px] flex-col items-center gap-[5px] rounded-lg px-5 py-10 hover:bg-stone-300"
+                ? "flex w-[120px] flex-col items-center gap-[5px] rounded-[20px] border-none bg-stone-400 px-3 py-10 text-16 focus:border-none focus:outline-none"
+                : "flex w-[120px] flex-col items-center gap-[5px] rounded-[20px] px-3 py-10 text-16 hover:bg-stone-300"
             }
           >
             <div
