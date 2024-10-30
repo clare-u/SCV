@@ -10,6 +10,8 @@ import ModalInput from "@/components/input/ModalInput";
 import ListboxComponent from "@/components/input/ListBoxComponent";
 import NewModal from "@/components/modal/NewModal";
 import CloneModal from "@/components/modal/CloneModal";
+import BoardCard from "@/components/card/BoardCard";
+import WorkspaceCard from "@/components/card/WorkspaceCard";
 
 export default function Home() {
   // 검색 인풋
@@ -50,6 +52,44 @@ export default function Home() {
   const [selectedOption, setSelectedOption] = useState(option[0]);
 
   const [selectedVersion, setSelectedVersion] = useState(version[0]);
+
+  // board카드
+  const datasets = ["MNIST", "Fashion", "CIFAR-10", "SVHN", "EMNIST"];
+
+  // 더미 데이터 생성을 위한 헬퍼 함수
+  const cards = datasets.map((dataset, index) => ({
+    modelId: `model-${index + 1}`,
+    versionId: `version-${index + 1}`,
+    title: `Model ${index + 1}`,
+    version: `v${index + 1}`,
+    dataset: dataset,
+    profileImg: `/profile.png`,
+    nickname: `User${index + 1}`,
+    accuracy: parseFloat((85 + index * 2).toFixed(2)), // float 형식으로 소수점 2자리까지
+    updatedAt: new Date(Date.now() - index * 100000000).toISOString(),
+  }));
+
+  // workspace카드
+  const workspaceDatasets = [
+    "MNIST",
+    "Fashion",
+    "CIFAR-10",
+    "SVHN",
+    "EMNIST",
+    "Editing",
+  ];
+
+  // 더미 데이터 생성
+  const workspaceCards = workspaceDatasets.map((dataset, i) => ({
+    modelId: `model-${i + 1}`,
+    versionId: `v-${i + 1}`,
+    title: `Model ${i + 1}`,
+    version: `v${i + 1}`,
+    dataset: dataset,
+    accuracy: parseFloat((85 + i * 1.5).toFixed(2)), // 정확도 값
+    createdAt: new Date(Date.now() - i * 10000000).toISOString(), // 예시 생성일
+    updatedAt: new Date(Date.now() - i * 5000000).toISOString(), // 예시 수정일
+  }));
 
   return (
     <div className="flex flex-col gap-10 p-20">
@@ -169,9 +209,24 @@ export default function Home() {
         />
       </div>
 
+      {/* Modal */}
       <div className="flex gap-10">
         <NewModal />
         <CloneModal />
+      </div>
+
+      {/* boardCard */}
+      <div className="grid w-[1100px] grid-cols-3 gap-10">
+        {cards.map((card) => (
+          <BoardCard key={card.modelId} {...card} />
+        ))}
+      </div>
+
+      {/* workspaceCard */}
+      <div className="grid w-[1100px] grid-cols-3 gap-10">
+        {workspaceCards.map((card) => (
+          <WorkspaceCard key={card.modelId} {...card} />
+        ))}
       </div>
     </div>
   );
