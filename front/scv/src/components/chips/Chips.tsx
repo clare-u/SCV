@@ -1,6 +1,6 @@
 "use client";
 
-interface ChipsProps {
+export interface ChipsProps {
   color:
     | "red"
     | "orange"
@@ -111,7 +111,7 @@ const colorClasses: Record<
 const Chips: React.FC<ChipsProps> = ({ color, design, onClick, children }) => {
   const colorClass = colorClasses[color][design];
 
-  const className = `flex justify-center items-center px-10 py-[3px] rounded-[30px] whitespace-nowrap text-12 ${colorClass}`;
+  const className = `inline-flex shrink-0 w-auto justify-center items-center px-10 py-[3px] rounded-[30px] whitespace-nowrap text-12 ${colorClass}`;
 
   return (
     <div className={className} onClick={onClick}>

@@ -3,37 +3,50 @@ import { useState } from "react";
 
 interface SearchInputProps {
   placeholder: string;
-  value: string;
-  onChange: (e: React.ChangeEvent<HTMLInputElement>) => void;
-  handleKeyDown: (event: React.KeyboardEvent<HTMLInputElement>) => void;
+  onSubmit: (value: string) => void;
 }
 
-const SearchInput: React.FC<SearchInputProps> = ({
-  placeholder,
-  value,
-  onChange,
-  handleKeyDown,
-}) => {
-  // 입력 내용을 지우는 함수
-  const clearInput = () => {
-    onChange({ target: { value: "" } } as React.ChangeEvent<HTMLInputElement>);
+const SearchInput: React.FC<SearchInputProps> = ({ placeholder, onSubmit }) => {
+  const [value, setValue] = useState<string>("");
+
+  const clearInput = () => setValue("");
+
+  const handleChange = (e: React.ChangeEvent<HTMLInputElement>) => {
+    setValue(e.target.value);
+  };
+
+  const handleKeyDown = (event: React.KeyboardEvent<HTMLInputElement>) => {
+    if (event.key === "Enter" && value.trim()) {
+      onSubmit(value.trim()); // Enter 키를 눌렀을 때 검색어가 있을 경우만 전달
+    }
+  };
+
+  const handleSearchClick = () => {
+    if (value.trim()) {
+      onSubmit(value.trim()); // 검색어가 있을 경우만 실행
+    }
   };
 
   return (
-    <div className="flex w-full items-center gap-10 rounded-lg border border-gray-400 p-10">
-      <span className="material-symbols-outlined text-gray-400">search</span>
+    <div className="flex w-full items-center gap-10 rounded-12 border border-gray-400 p-10">
+      <span
+        className="material-symbols-outlined cursor-pointer text-gray-400 hover:text-gray-200"
+        onClick={handleSearchClick}
+      >
+        search
+      </span>
       <Input
         className="w-full outline-none"
         placeholder={placeholder}
         type="text"
         name={placeholder}
         value={value}
-        onChange={onChange}
+        onChange={handleChange}
         onKeyDown={handleKeyDown}
       />
       {value && (
         <span
-          className="material-symbols-outlined cursor-pointer text-gray-400"
+          className="material-symbols-outlined cursor-pointer text-gray-400 hover:text-gray-200"
           onClick={clearInput}
         >
           cancel

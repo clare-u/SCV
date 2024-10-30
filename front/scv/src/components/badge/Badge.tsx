@@ -1,4 +1,4 @@
-interface BadgeProps {
+export interface BadgeProps {
   color:
     | "red"
     | "orange"
@@ -45,7 +45,7 @@ const Badge: React.FC<BadgeProps> = ({ color, children }) => {
 
   return (
     <div
-      className={`inline-flex items-center justify-center whitespace-nowrap rounded-[5px] px-[5px] py-2 text-12 ${colorClasses[color]}`}
+      className={`inline-flex w-auto items-center justify-center whitespace-nowrap rounded-[5px] px-[5px] py-2 text-12 ${colorClasses[color]}`}
     >
       {children}
     </div>

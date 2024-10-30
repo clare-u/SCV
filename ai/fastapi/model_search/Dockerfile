@@ -1,9 +1,19 @@
+# 베이스 이미지
 FROM python:3.12.4-slim
 
+# 작업 디렉토리 설정
 WORKDIR /app
 
-RUN apt-get update && rm -rf /var/lib/apt/lists/* 
+# 시스템 패키지 업데이트 및 캐시 정리
+RUN apt-get update && \
+    apt-get install -y --no-install-recommends && \
+    rm -rf /var/lib/apt/lists/*
 
-COPY . .
+# 의존성을 먼저 설치하여 Docker 레이어 캐시 활용
+COPY requirements.txt .
+
 RUN --mount=type=cache,target=/root/.cache/pip \
     pip install -r requirements.txt --no-cache-dir
+
+# 소스 코드 복사
+COPY . .

@@ -1,6 +1,7 @@
 import type { Metadata } from "next";
-import Navigation from "@/components/navigation/Navigation";
+import { NavigationWrapper } from "@/components/navigation/NavigationWrapper";
 import QueryProvider from "@/components/QueryProvider";
+
 import "./globals.css";
 
 export const metadata: Metadata = {
@@ -23,8 +24,8 @@ export default function RootLayout({
       </head>
       <body>
         <QueryProvider>
-          {/* // TODO: /workspace/edit 부분에서 네비게이션 렌더링 하지 않는 로직 */}
-          <Navigation /> {children}
+          <NavigationWrapper />
+          {children}
         </QueryProvider>
       </body>
     </html>
