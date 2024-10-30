@@ -2,6 +2,9 @@ package com.scv.global.filter;
 
 import com.scv.domain.oauth2.CustomOAuth2User;
 import com.scv.domain.oauth2.dto.OAuth2UserDTO;
+import com.scv.domain.user.domain.User;
+import com.scv.domain.user.exception.UserNotFoundException;
+import com.scv.domain.user.repository.UserRepository;
 import com.scv.global.util.JwtUtil;
 import jakarta.servlet.FilterChain;
 import jakarta.servlet.ServletException;
@@ -16,14 +19,13 @@ import org.springframework.stereotype.Component;
 import org.springframework.web.filter.OncePerRequestFilter;
 
 import java.io.IOException;
-import java.util.UUID;
 
 @Component
 @RequiredArgsConstructor
 public class JwtFilter extends OncePerRequestFilter {
 
     private final JwtUtil jwtUtil;
-
+    private final UserRepository userRepository;
 
     @Override
     protected void doFilterInternal(HttpServletRequest request, HttpServletResponse response, FilterChain filterChain) throws ServletException, IOException {
@@ -44,9 +46,17 @@ public class JwtFilter extends OncePerRequestFilter {
         }
 
         String userUuid = jwtUtil.getUserUuid(accessToken);
+        User user = userRepository.findByUserUuid(userUuid).orElseThrow(UserNotFoundException::getInstance);
 
         OAuth2UserDTO oAuth2UserDTO = OAuth2UserDTO.builder()
-                .userUuid(userUuid)
+                .userId(user.getUserId())
+                .userUuid(user.getUserUuid())
+                .userEmail(user.getUserEmail())
+                .userImageUrl(user.getUserImageUrl())
+                .userNickname(user.getUserNickname())
+                .userCreatedAt(user.getUserCreatedAt())
+                .userUpdatedAt(user.getUserUpdatedAt())
+                .userIsDeleted(user.isUserIsDeleted())
                 .build();
 
         CustomOAuth2User customOAuth2User = new CustomOAuth2User(oAuth2UserDTO);
