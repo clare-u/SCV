@@ -1,0 +1,21 @@
+.git
+.gitignore
+.gradle
+.idea
+*.iml
+*.iws
+*.ipr
+build
+out
+logs
+*.log
+.DS_Store
+README.md
+Dockerfile
+.dockerignore
+
+# gradle wrapper는 제외하지 않음
+!gradle/wrapper/gradle-wrapper.jar
+!gradle/wrapper/gradle-wrapper.properties
+!gradlew
+!gradlew.bat
