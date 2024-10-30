@@ -1,6 +1,6 @@
 "use client";
 
-import { useState } from "react";
+import { useState, useEffect } from "react";
 import { useRouter, useSearchParams } from "next/navigation";
 import Button from "@/components/button/Button";
 import Badge from "@/components/badge/Badge";
@@ -12,6 +12,7 @@ import NewModal from "@/components/modal/NewModal";
 import CloneModal from "@/components/modal/CloneModal";
 import BoardCard from "@/components/card/BoardCard";
 import WorkspaceCard from "@/components/card/WorkspaceCard";
+import Pagination from "@/components/pagination/Pagination";
 
 export default function Home() {
   // 검색 인풋
@@ -90,6 +91,16 @@ export default function Home() {
     createdAt: new Date(Date.now() - i * 10000000).toISOString(), // 예시 생성일
     updatedAt: new Date(Date.now() - i * 5000000).toISOString(), // 예시 수정일
   }));
+
+  // 페이지네이션
+  const [totalItems, setTotalItems] = useState(0);
+  const searchParams = useSearchParams();
+  const page = searchParams.get("page");
+
+  useEffect(() => {
+    window.scrollTo(0, 0); // 페이지 이동 시 스크롤 위치 맨 위로 초기화
+    /* api 호출 및 데이터(totalItems, books) 저장 */
+  }, [page]);
 
   return (
     <div className="flex flex-col gap-10 p-20">
@@ -228,6 +239,14 @@ export default function Home() {
           <WorkspaceCard key={card.modelId} {...card} />
         ))}
       </div>
+
+      {/* 페이지네이션 */}
+      <Pagination
+        totalItems={10000}
+        currentPage={page && parseInt(page) > 0 ? parseInt(page) : 1}
+        pageCount={10}
+        itemCountPerPage={50}
+      />
     </div>
   );
 }
