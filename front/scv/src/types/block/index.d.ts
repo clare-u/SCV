@@ -8,6 +8,8 @@ export type BlockCategory =
 export interface BlockParam {
   name: string;
   type: "int" | "float";
+  min?: number;
+  max?: number;
 }
 
 export interface BlockDefinition {
