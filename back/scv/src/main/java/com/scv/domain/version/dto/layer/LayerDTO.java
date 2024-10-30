@@ -14,7 +14,7 @@ import com.scv.domain.version.dto.layer.pooling.AvgPool2dDTO;
 import com.scv.domain.version.dto.layer.pooling.MaxPool2dDTO;
 
 @JsonTypeInfo(
-        use = JsonTypeInfo.Id.NAME, // "type" 필드로 구분
+        use = JsonTypeInfo.Id.NAME, // "name" 필드로 구분
         include = JsonTypeInfo.As.PROPERTY,
         property = "type"
 )
@@ -37,5 +37,5 @@ import com.scv.domain.version.dto.layer.pooling.MaxPool2dDTO;
         @JsonSubTypes.Type(value = LinearDTO.class, name = "linear")
 })
 public interface LayerDTO {
-    String getType();
+    String getName();
 }
