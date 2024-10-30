@@ -35,7 +35,8 @@ public class ModelVersion extends BaseEntity {
     @Column(name = "version_layer_at", nullable = false)
     private String layers;
 
-    @Column(name = "is_working_on", nullable = false)
+    @Builder.Default
+    @Column(name = "is_working_on", nullable = false, columnDefinition = "TINYINT(1)")
     private boolean isWorkingOn = true;
 
 }
