@@ -1,11 +1,14 @@
 package com.scv.domain.user.exception;
 
-public class UserNotFoundException extends RuntimeException {
+import com.scv.global.error.ErrorCode;
+import com.scv.global.error.ServiceException;
 
-    private static final UserNotFoundException INSTANCE = new UserNotFoundException("해당 유저를 찾지 못했습니다.");
+public class UserNotFoundException extends ServiceException {
 
-    private UserNotFoundException(String message) {
-        super(message);
+    private static final UserNotFoundException INSTANCE = new UserNotFoundException();
+
+    private UserNotFoundException() {
+        super(ErrorCode.USER_NOT_FOUND);
     }
 
     public static UserNotFoundException getInstance() {
