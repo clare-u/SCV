@@ -42,6 +42,7 @@ const BlockItem: React.FC<BlockItemProps> = ({
   small = false,
 }) => {
   const [isOpen, setIsOpen] = useState(false);
+  // TODO: Params 유효성 검증
 
   const toggleOpen = () => {
     if (!small) {
@@ -75,8 +76,8 @@ const BlockItem: React.FC<BlockItemProps> = ({
                     {param.name}
                   </label>
                   <input
-                    type="text"
-                    className={`rounded-[20px] border ${colorClasses.border} w-[60px] bg-white p-2 text-center text-sm placeholder-gray-500 transition-all duration-200 ease-in-out focus:shadow-md focus:ring-2 focus:ring-opacity-50 ${colorClasses.border.replace("border", "ring")}`}
+                    type="number"
+                    className={`appearance-none rounded-[20px] border ${colorClasses.border} w-[60px] bg-white p-2 text-center text-sm placeholder-gray-500 transition-all duration-200 ease-in-out focus:shadow-md focus:ring-2 focus:ring-opacity-50 ${colorClasses.border.replace("border", "ring")}`}
                     placeholder={
                       param.type === "int"
                         ? "0"
@@ -84,6 +85,8 @@ const BlockItem: React.FC<BlockItemProps> = ({
                           ? "0.0"
                           : ""
                     }
+                    min={param.min}
+                    max={param.max}
                   />
                 </li>
               ))}

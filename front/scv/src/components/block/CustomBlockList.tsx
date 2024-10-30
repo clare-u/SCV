@@ -5,9 +5,9 @@ export const CustomBlockList: Record<BlockCategory, BlockDefinition[]> = {
     {
       name: "nn.Conv2d",
       params: [
-        { name: "in_channels", type: "int" },
-        { name: "out_channels", type: "int" },
-        { name: "kernel_size", type: "int" },
+        { name: "in_channels", type: "int", min: 1, max: 512 },
+        { name: "out_channels", type: "int", min: 1, max: 512 },
+        { name: "kernel_size", type: "int", min: 1, max: 7 },
       ],
     },
     {
