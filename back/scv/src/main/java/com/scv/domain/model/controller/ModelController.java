@@ -67,4 +67,17 @@ public class ModelController {
         return ResponseEntity.status(200).body(pages);
     }
 
+    @DeleteMapping("/{modelId}")
+    @Operation(summary = "모델 삭제", description = "모델 삭제하고, 모든 모델 버전을 삭제합니다.(soft delete)")
+    @ApiResponses(value = {
+            @ApiResponse(responseCode = "204", description = "모델 삭제 성공"),
+            @ApiResponse(responseCode = "400", description = "잘못된 요청", content = @Content(schema = @Schema(implementation = ErrorResponse.class))),
+            @ApiResponse(responseCode = "401", description = "인가되지 않은 사용자", content = @Content(schema = @Schema(implementation = ErrorResponse.class))),
+            @ApiResponse(responseCode = "404", description = "모델을 찾을 수 없음", content = @Content(schema = @Schema(implementation = ErrorResponse.class)))
+    })
+    public ResponseEntity<Void> deleteModel(@PathVariable("modelId") Long modelId) {
+        modelService.deleteModel(modelId);
+        return ResponseEntity.status(204).build();
+    }
+
 }
