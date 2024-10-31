@@ -1,6 +1,6 @@
 "use client";
 
-import { useState, useEffect } from "react";
+import { Suspense, useState, useEffect } from "react";
 import { useRouter, useSearchParams } from "next/navigation";
 import Button from "@/components/button/Button";
 import Badge from "@/components/badge/Badge";
@@ -14,7 +14,7 @@ import BoardCard from "@/components/card/BoardCard";
 import WorkspaceCard from "@/components/card/WorkspaceCard";
 import Pagination from "@/components/pagination/Pagination";
 
-export default function Home() {
+function Home() {
   // 검색 인풋
   const router = useRouter();
 
@@ -248,5 +248,13 @@ export default function Home() {
         itemCountPerPage={50}
       />
     </div>
+  );
+}
+
+export default function Page() {
+  return (
+    <Suspense fallback={<div>Loading...</div>}>
+      <Home />
+    </Suspense>
   );
 }

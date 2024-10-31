@@ -1,5 +1,5 @@
 {
-  "ignores": ["**/dist/**/*", "**/.eslintrc.js"],
+  "ignorePatterns": ["**/dist/**/*", "**/.eslintrc.js"],
   "extends": [
     "eslint:recommended",
     "plugin:react/recommended",
