@@ -3,6 +3,7 @@ package com.scv.global.config;
 import com.scv.domain.oauth2.handler.CustomLoginFailureHandler;
 import com.scv.domain.oauth2.handler.CustomLoginSuccessHandler;
 import com.scv.domain.oauth2.service.CustomOAuth2UserService;
+import com.scv.global.filter.CustomJwtLogoutFilter;
 import com.scv.global.filter.JwtFilter;
 import lombok.RequiredArgsConstructor;
 import org.springframework.context.annotation.Bean;
@@ -13,6 +14,7 @@ import org.springframework.security.config.annotation.web.configurers.AbstractHt
 import org.springframework.security.config.http.SessionCreationPolicy;
 import org.springframework.security.web.SecurityFilterChain;
 import org.springframework.security.web.authentication.UsernamePasswordAuthenticationFilter;
+import org.springframework.security.web.authentication.logout.LogoutFilter;
 import org.springframework.web.cors.CorsConfiguration;
 
 import java.util.Collections;
@@ -23,6 +25,7 @@ import java.util.Collections;
 public class SecurityConfig {
 
     private final JwtFilter jwtFilter;
+    private final CustomJwtLogoutFilter customJwtLogoutFilter;
     private final CustomOAuth2UserService customOAuth2UserService;
     private final CustomLoginSuccessHandler customLoginSuccessHandler;
     private final CustomLoginFailureHandler customLoginFailureHandler;
@@ -58,6 +61,9 @@ public class SecurityConfig {
 
         // JwtFilter 추가
         http.addFilterBefore(jwtFilter, UsernamePasswordAuthenticationFilter.class);
+
+        // 로그아웃 필터 추가
+        http.addFilterBefore(customJwtLogoutFilter, LogoutFilter.class);
 
         // oauth2
         http.oauth2Login(oauth2 -> oauth2
