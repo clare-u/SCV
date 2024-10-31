@@ -5,8 +5,8 @@ services:
     image: minio/minio
     container_name: scv-minio
     ports:
-      - "9002:9000"
-      - "9003:9001"
+      - "9002:9002"
+      - "9003:9003"
     environment:
       - MINIO_ROOT_USER=${MINIO_ROOT_USER}
       - MINIO_ROOT_PASSWORD=${MINIO_ROOT_PASSWORD}
@@ -14,4 +14,4 @@ services:
     volumes:
       - ${VOLUME_PATH}:/data # 원하는 경로로 수정하세요
       - ${CONFIG_DIR}:/etc # 환경 변수 파일 경로로 수정하세요
-    command: server --console-address ":9001"
+    command: server --address ":9002" --console-address ":9003"
