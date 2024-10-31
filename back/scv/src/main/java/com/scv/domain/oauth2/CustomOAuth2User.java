@@ -7,8 +7,8 @@ import org.springframework.security.oauth2.core.user.OAuth2User;
 
 import java.time.ZonedDateTime;
 import java.util.Collection;
+import java.util.Collections;
 import java.util.Map;
-import java.util.UUID;
 
 @RequiredArgsConstructor
 public class CustomOAuth2User implements OAuth2User {
@@ -22,12 +22,12 @@ public class CustomOAuth2User implements OAuth2User {
 
     @Override
     public Collection<? extends GrantedAuthority> getAuthorities() {
-        return null;
+        return Collections.emptyList();
     }
 
     @Override
     public String getName() {
-        return oauth2UserDTO.getUserUuid().toString();
+        return oauth2UserDTO.getUserUuid();
     }
 
     public Long getUserId() {
