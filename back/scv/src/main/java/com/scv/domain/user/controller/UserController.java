@@ -1,5 +1,6 @@
 package com.scv.domain.user.controller;
 
+import com.scv.domain.oauth2.AuthUser;
 import com.scv.domain.oauth2.CustomOAuth2User;
 import com.scv.domain.user.dto.response.UserProfileResponseDTO;
 import com.scv.domain.user.service.UserService;
@@ -34,7 +35,7 @@ public class UserController {
             @ApiResponse(responseCode = "200", description = "유저 프로필 조회 성공"),
             @ApiResponse(responseCode = "404", description = "사용자를 찾을 수 없음", content = @Content(schema = @Schema(implementation = ErrorResponse.class)))
     })
-    public ResponseEntity<UserProfileResponseDTO> getUserProfile(@AuthenticationPrincipal CustomOAuth2User user) {
+    public ResponseEntity<UserProfileResponseDTO> getUserProfile(@AuthUser CustomOAuth2User user) {
         UserProfileResponseDTO responseDTO = userService.getUserProfile(user.getUserId());
         return new ResponseEntity<>(responseDTO, HttpStatus.OK);
     }
