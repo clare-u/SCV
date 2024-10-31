@@ -45,4 +45,11 @@ public class Model extends BaseEntity {
     public void updateLatestVersion() {
         this.latestVersion++;
     }
+    
+    /**
+     * 이름 변경
+     */
+    public void updateName(String name) {
+        this.name = name;
+    }
 }

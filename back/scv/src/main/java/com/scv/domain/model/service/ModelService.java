@@ -13,6 +13,7 @@ import com.scv.domain.user.domain.User;
 import com.scv.domain.user.exception.UserNotFoundException;
 import com.scv.domain.user.repository.UserRepository;
 import com.scv.domain.version.domain.ModelVersion;
+import com.scv.domain.version.dto.ModelVersionResponse;
 import com.scv.domain.version.repository.ModelVersionRepository;
 import lombok.RequiredArgsConstructor;
 import org.apache.coyote.BadRequestException;
@@ -23,6 +24,7 @@ import org.springframework.transaction.annotation.Transactional;
 
 import java.util.ArrayList;
 import java.util.List;
+import java.util.stream.Collectors;
 
 @Service
 @RequiredArgsConstructor
@@ -66,7 +68,7 @@ public class ModelService {
     }
 
     // 모든 모델 조회
-    public Page<ModelResponse> findAllModels(Pageable pageable) {
+    public Page<ModelResponse> getAllModels(Pageable pageable) {
         Page<Model> models = modelRepository.findAllByDeletedFalse(pageable);
         // TODO 최신버전 = run 된 버전만. modelResponse에 정확도 표시
         return models.map(ModelResponse::new);
@@ -74,8 +76,12 @@ public class ModelService {
 
     // 모델 삭제
     @Transactional
-    public void deleteModel(Long modelId) {
+    public void deleteModel(Long modelId, CustomOAuth2User user) throws BadRequestException {
         Model model = modelRepository.findById(modelId).orElseThrow(ModelNotFoundException::new);
+        if (user.getUserId() != model.getUser().getUserId()) {
+            throw new BadRequestException("자신의 모델만 수정할 수 있습니다.");
+        }
+
         List<ModelVersion> modelVersionsList = modelVersionRepository.findAllByModel_IdAndDeletedFalse(modelId);
 
         for (ModelVersion modelVersion : modelVersionsList) {
@@ -95,15 +101,13 @@ public class ModelService {
             throw new BadRequestException("자신의 모델만 수정할 수 있습니다.");
         }
 
-        model = model.toBuilder()
-                .name(name)
-                .build();
+        model.updateName(name);
 
         modelRepository.save(model);
     }
 
     // 내 모델 찾기
-    public Page<ModelResponse> findMyModels(Pageable pageable, CustomOAuth2User user) {
+    public Page<ModelResponse> getMyModels(Pageable pageable, CustomOAuth2User user) {
         User existingUser = userRepository.findById(user.getUserId()).orElseThrow(UserNotFoundException::getInstance);
         Page<Model> models = modelRepository.findAllByDeletedFalseAndUser(pageable, existingUser);
         // TODO 모델 정확도 Response에 추가
@@ -116,6 +120,15 @@ public class ModelService {
         Page<Model> models = modelRepository.findAllByDeletedFalseAndData(pageable, data);
         // TODO 모델 정확도 Response에 추가
         return models.map(ModelResponse::new);
+    }
+
+    // 모델 버전 조회
+    public List<ModelVersionResponse> getModelVersions(Long modelId) {
+        List<ModelVersion> modelVersions = modelVersionRepository.findAllByModel_IdAndDeletedFalse(modelId);
+
+        return modelVersions.stream()
+                .map(ModelVersionResponse::new)
+                .collect(Collectors.toList());
     }
 
 

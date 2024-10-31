@@ -3,8 +3,9 @@ package com.scv.domain.model.controller;
 import com.scv.domain.model.dto.request.ModelCreateRequest;
 import com.scv.domain.model.dto.response.ModelResponse;
 import com.scv.domain.model.service.ModelService;
+import com.scv.domain.oauth2.AuthUser;
 import com.scv.domain.oauth2.CustomOAuth2User;
-import com.scv.domain.user.domain.User;
+import com.scv.domain.version.dto.ModelVersionResponse;
 import com.scv.global.error.ErrorResponse;
 import io.swagger.v3.oas.annotations.Operation;
 import io.swagger.v3.oas.annotations.media.Content;
@@ -19,8 +20,9 @@ import org.springframework.data.domain.PageRequest;
 import org.springframework.data.domain.Pageable;
 import org.springframework.data.domain.Sort;
 import org.springframework.http.ResponseEntity;
-import org.springframework.security.core.annotation.AuthenticationPrincipal;
 import org.springframework.web.bind.annotation.*;
+
+import java.util.List;
 
 @RestController
 @RequestMapping("/api/v1/models")
@@ -38,7 +40,7 @@ public class ModelController {
             @ApiResponse(responseCode = "401", description = "인가되지 않은 사용자", content = @Content(schema = @Schema(implementation = ErrorResponse.class))),
             @ApiResponse(responseCode = "404", description = "사용자를 찾을 수 없음", content = @Content(schema = @Schema(implementation = ErrorResponse.class)))
     })
-    ResponseEntity<Void> createModel(ModelCreateRequest request, @AuthenticationPrincipal CustomOAuth2User user) {
+    ResponseEntity<Void> createModel(ModelCreateRequest request, @AuthUser CustomOAuth2User user) {
         modelService.createModel(request, user);
         return ResponseEntity.status(201).build();
     }
@@ -49,7 +51,7 @@ public class ModelController {
             @ApiResponse(responseCode = "200", description = "모델 조회 성공"),
             @ApiResponse(responseCode = "400", description = "잘못된 요청", content = @Content(schema = @Schema(implementation = ErrorResponse.class))),
     })
-    public ResponseEntity<Page<ModelResponse>> findAllModels(
+    public ResponseEntity<Page<ModelResponse>> getAllModels(
             @RequestParam(defaultValue = "0") int page,
             @RequestParam(defaultValue = "12") int size,
             @RequestParam(defaultValue = "") String orderBy,
@@ -64,7 +66,7 @@ public class ModelController {
             pageable = PageRequest.of(page, size);
         }
 
-        Page<ModelResponse> pages = modelService.findAllModels(pageable);
+        Page<ModelResponse> pages = modelService.getAllModels(pageable);
 
         return ResponseEntity.status(200).body(pages);
     }
@@ -77,8 +79,8 @@ public class ModelController {
             @ApiResponse(responseCode = "401", description = "인가되지 않은 사용자", content = @Content(schema = @Schema(implementation = ErrorResponse.class))),
             @ApiResponse(responseCode = "404", description = "모델을 찾을 수 없음", content = @Content(schema = @Schema(implementation = ErrorResponse.class)))
     })
-    public ResponseEntity<Void> deleteModel(@PathVariable("modelId") Long modelId) {
-        modelService.deleteModel(modelId);
+    public ResponseEntity<Void> deleteModel(@PathVariable("modelId") Long modelId, @AuthUser CustomOAuth2User user) throws BadRequestException {
+        modelService.deleteModel(modelId, user);
         return ResponseEntity.status(204).build();
     }
 
@@ -91,7 +93,7 @@ public class ModelController {
             @ApiResponse(responseCode = "401", description = "인가되지 않은 사용자", content = @Content(schema = @Schema(implementation = ErrorResponse.class))),
             @ApiResponse(responseCode = "404", description = "모델을 찾을 수 없음", content = @Content(schema = @Schema(implementation = ErrorResponse.class)))
     })
-    public ResponseEntity<Void> updateModelName(@PathVariable("modelId") Long modelId, String newName, @AuthenticationPrincipal CustomOAuth2User user) throws BadRequestException {
+    public ResponseEntity<Void> updateModelName(@PathVariable("modelId") Long modelId, String newName, @AuthUser CustomOAuth2User user) throws BadRequestException {
         modelService.updateModelName(modelId, newName, user);
         return ResponseEntity.status(200).build();
     }
@@ -103,12 +105,12 @@ public class ModelController {
             @ApiResponse(responseCode = "200", description = "모델 조회 성공"),
             @ApiResponse(responseCode = "400", description = "잘못된 요청", content = @Content(schema = @Schema(implementation = ErrorResponse.class))),
     })
-    public ResponseEntity<Page<ModelResponse>> findMyModels(
+    public ResponseEntity<Page<ModelResponse>> getdMyModels(
             @RequestParam(defaultValue = "0") int page,
             @RequestParam(defaultValue = "12") int size,
             @RequestParam(defaultValue = "") String orderBy,
             @RequestParam(defaultValue = "") String direction,
-            @AuthenticationPrincipal CustomOAuth2User user
+            @AuthUser CustomOAuth2User user
     ) {
 
         Pageable pageable;
@@ -119,10 +121,49 @@ public class ModelController {
             pageable = PageRequest.of(page, size);
         }
 
-        Page<ModelResponse> pages = modelService.findMyModels(pageable, user);
+        Page<ModelResponse> pages = modelService.getMyModels(pageable, user);
 
         return ResponseEntity.status(200).body(pages);
     }
 
+    @GetMapping("/data")
+    @Operation(summary = "데이터로 모델 조회", description = "내 데이터로 모델을 조회합니다. orderBy = createdAt or updatedAt, direction = asc or desc. 미입력시 정렬 안함.")
+    @ApiResponses(value = {
+            @ApiResponse(responseCode = "200", description = "모델 조회 성공"),
+            @ApiResponse(responseCode = "400", description = "잘못된 요청", content = @Content(schema = @Schema(implementation = ErrorResponse.class))),
+    })
+    public ResponseEntity<Page<ModelResponse>> findModelsByData(
+            @RequestParam(defaultValue = "0") int page,
+            @RequestParam(defaultValue = "12") int size,
+            @RequestParam(defaultValue = "") String orderBy,
+            @RequestParam(defaultValue = "") String direction,
+            @RequestParam String data
+    ) {
+
+        Pageable pageable;
+        if (!orderBy.isEmpty()) {
+            Sort sort = direction.equalsIgnoreCase("desc") ? Sort.by(orderBy).descending() : Sort.by(orderBy).ascending();
+            pageable = PageRequest.of(page, size, sort);
+        } else {
+            pageable = PageRequest.of(page, size);
+        }
+
+        Page<ModelResponse> pages = modelService.findModelsByData(pageable, data);
+
+        return ResponseEntity.status(200).body(pages);
+    }
+
+    @GetMapping("/{modelId}")
+    @Operation(summary = "모델의 버전들 조회", description = "모델 버전들을 조회합니다.")
+    @ApiResponses(value = {
+            @ApiResponse(responseCode = "200", description = "모델버전 조회 성공"),
+            @ApiResponse(responseCode = "400", description = "잘못된 요청", content = @Content(schema = @Schema(implementation = ErrorResponse.class))),
+    })
+    public ResponseEntity<List<ModelVersionResponse>> getModelVersion(@PathVariable("modelId") Long modelId) {
+
+        List<ModelVersionResponse> modelVersions = modelService.getModelVersions(modelId);
+
+        return ResponseEntity.status(200).body(modelVersions);
+    }
 
 }
