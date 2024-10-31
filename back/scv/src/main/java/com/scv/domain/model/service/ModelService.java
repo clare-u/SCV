@@ -8,10 +8,14 @@ import com.scv.domain.model.dto.request.ModelCreateRequest;
 import com.scv.domain.model.dto.response.ModelResponse;
 import com.scv.domain.model.exception.ModelNotFoundException;
 import com.scv.domain.model.repository.ModelRepository;
+import com.scv.domain.oauth2.CustomOAuth2User;
 import com.scv.domain.user.domain.User;
+import com.scv.domain.user.exception.UserNotFoundException;
+import com.scv.domain.user.repository.UserRepository;
 import com.scv.domain.version.domain.ModelVersion;
 import com.scv.domain.version.repository.ModelVersionRepository;
 import lombok.RequiredArgsConstructor;
+import org.apache.coyote.BadRequestException;
 import org.springframework.data.domain.Page;
 import org.springframework.data.domain.Pageable;
 import org.springframework.stereotype.Service;
@@ -28,19 +32,22 @@ public class ModelService {
     private final ModelRepository modelRepository;
     private final ModelVersionRepository modelVersionRepository;
     private final DataRepository dataRepository;
+    private final UserRepository userRepository;
 
-    public void createModel(ModelCreateRequest request, User user) {
+    // 모델 생성
+    public void createModel(ModelCreateRequest request, CustomOAuth2User user) {
         Data data = dataRepository.findByName(request.dataName()).orElseThrow(DataNotFoundException::new);
+        User existingUser = userRepository.findById(user.getUserId()).orElseThrow(UserNotFoundException::getInstance);
 
         // 요청에 따라 모델 생성
         Model model = Model.builder()
-                .user(user)
+                .user(existingUser)
                 .data(data)
                 .name(request.modelName())
-                .latestVersion(1)
+//                .latestVersion(1)
                 .modelVersions(new ArrayList<>())
                 .build();
-        
+
         // 모델 저장
         Model savedModel = modelRepository.save(model);
 
@@ -53,30 +60,62 @@ public class ModelService {
 
         // 모델에 추가
         savedModel.getModelVersions().add(firstVersion);
-        
+
         // 모델 버전 저장
         modelVersionRepository.save(firstVersion);
     }
 
+    // 모든 모델 조회
     public Page<ModelResponse> findAllModels(Pageable pageable) {
         Page<Model> models = modelRepository.findAllByDeletedFalse(pageable);
         // TODO 최신버전 = run 된 버전만. modelResponse에 정확도 표시
         return models.map(ModelResponse::new);
     }
 
+    // 모델 삭제
     @Transactional
     public void deleteModel(Long modelId) {
         Model model = modelRepository.findById(modelId).orElseThrow(ModelNotFoundException::new);
-        List<ModelVersion> modelVersionsList = modelVersionRepository.findAllByModel_Id(modelId);
+        List<ModelVersion> modelVersionsList = modelVersionRepository.findAllByModel_IdAndDeletedFalse(modelId);
 
         for (ModelVersion modelVersion : modelVersionsList) {
             modelVersion.delete();
             modelVersionRepository.save(modelVersion);
         } // 소프트 딜리트
-
         model.delete();
 
         modelRepository.save(model);
+    }
+
+    // 이름 수정
+    public void updateModelName(Long modelId, String name, CustomOAuth2User user) throws BadRequestException {
+        Model model = modelRepository.findById(modelId).orElseThrow(ModelNotFoundException::new);
+
+        if (user.getUserId() != model.getUser().getUserId()) {
+            throw new BadRequestException("자신의 모델만 수정할 수 있습니다.");
+        }
+
+        model = model.toBuilder()
+                .name(name)
+                .build();
+
+        modelRepository.save(model);
+    }
+
+    // 내 모델 찾기
+    public Page<ModelResponse> findMyModels(Pageable pageable, CustomOAuth2User user) {
+        User existingUser = userRepository.findById(user.getUserId()).orElseThrow(UserNotFoundException::getInstance);
+        Page<Model> models = modelRepository.findAllByDeletedFalseAndUser(pageable, existingUser);
+        // TODO 모델 정확도 Response에 추가
+        return models.map(ModelResponse::new);
+    }
+
+    // 데이터 이름으로 모델 조회
+    public Page<ModelResponse> findModelsByData(Pageable pageable, String dataName) {
+        Data data = dataRepository.findByName(dataName).orElseThrow(DataNotFoundException::new);
+        Page<Model> models = modelRepository.findAllByDeletedFalseAndData(pageable, data);
+        // TODO 모델 정확도 Response에 추가
+        return models.map(ModelResponse::new);
     }
 
 

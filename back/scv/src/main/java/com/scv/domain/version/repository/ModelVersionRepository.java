@@ -9,5 +9,5 @@ import java.util.List;
 @Repository
 public interface ModelVersionRepository extends JpaRepository<ModelVersion, Long> {
 
-    List<ModelVersion> findAllByModel_Id(Long id);
+    List<ModelVersion> findAllByModel_IdAndDeletedFalse(Long id);
 }
