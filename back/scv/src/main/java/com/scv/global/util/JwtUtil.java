@@ -10,24 +10,26 @@ import java.nio.charset.StandardCharsets;
 import java.time.ZoneOffset;
 import java.time.ZonedDateTime;
 import java.util.Date;
-import java.util.UUID;
 
 @Slf4j
 @Component
 public class JwtUtil {
 
-    private final String ACCESS = "access";
-    private final String REFRESH = "refresh";
-
-    private final int ACCESS_TOKEN_EXPIRATION;
-    private final int REFRESH_TOKEN_EXPIRATION;
+    private final String ACCESS_TOKEN_NAME;
+    private final String REFRESH_TOKEN_NAME;
     private final byte[] ACCESS_TOKEN_SECRET_KEY_BYTES;
     private final byte[] REFRESH_TOKEN_SECRET_KEY_BYTES;
+    private final int ACCESS_TOKEN_EXPIRATION;
+    private final int REFRESH_TOKEN_EXPIRATION;
 
-    public JwtUtil(@Value("${spring.jwt.token.access.secret-key}") String ACCESS_TOKEN_SECRET_KEY,
+    public JwtUtil(@Value("${spring.jwt.token.access.name}") String ACCESS_TOKEN_NAME,
+                   @Value("${spring.jwt.token.refresh.name}") String REFRESH_TOKEN_NAME,
+                   @Value("${spring.jwt.token.access.secret-key}") String ACCESS_TOKEN_SECRET_KEY,
                    @Value("${spring.jwt.token.refresh.secret-key}") String REFRESH_TOKEN_SECRET_KEY,
                    @Value("${spring.jwt.token.access.expiration}") int ACCESS_TOKEN_EXPIRATION,
                    @Value("${spring.jwt.token.refresh.expiration}") int REFRESH_TOKEN_EXPIRATION) {
+        this.ACCESS_TOKEN_NAME = ACCESS_TOKEN_NAME;
+        this.REFRESH_TOKEN_NAME = REFRESH_TOKEN_NAME;
         this.ACCESS_TOKEN_SECRET_KEY_BYTES = ACCESS_TOKEN_SECRET_KEY.getBytes(StandardCharsets.UTF_8);
         this.REFRESH_TOKEN_SECRET_KEY_BYTES = REFRESH_TOKEN_SECRET_KEY.getBytes(StandardCharsets.UTF_8);
         this.ACCESS_TOKEN_EXPIRATION = ACCESS_TOKEN_EXPIRATION;
@@ -45,11 +47,11 @@ public class JwtUtil {
     }
 
     public String createAccessToken(String userUuid) {
-        return createToken(userUuid, ACCESS, ACCESS_TOKEN_SECRET_KEY_BYTES, ACCESS_TOKEN_EXPIRATION);
+        return createToken(userUuid, ACCESS_TOKEN_NAME, ACCESS_TOKEN_SECRET_KEY_BYTES, ACCESS_TOKEN_EXPIRATION);
     }
 
     public String createRefreshToken(String userUuid) {
-        return createToken(userUuid, REFRESH, REFRESH_TOKEN_SECRET_KEY_BYTES, REFRESH_TOKEN_EXPIRATION);
+        return createToken(userUuid, REFRESH_TOKEN_NAME, REFRESH_TOKEN_SECRET_KEY_BYTES, REFRESH_TOKEN_EXPIRATION);
     }
 
     public boolean validateToken(String token) {
@@ -59,7 +61,7 @@ public class JwtUtil {
                         @Override
                         public byte[] resolveSigningKeyBytes(JwsHeader header, Claims claims) {
                             String type = claims.get("type", String.class);
-                            return type.equals(ACCESS) ? ACCESS_TOKEN_SECRET_KEY_BYTES : REFRESH_TOKEN_SECRET_KEY_BYTES;
+                            return type.equals(ACCESS_TOKEN_NAME) ? ACCESS_TOKEN_SECRET_KEY_BYTES : REFRESH_TOKEN_SECRET_KEY_BYTES;
                         }
                     })
                     .build()
