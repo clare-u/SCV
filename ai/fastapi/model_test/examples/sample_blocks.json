@@ -1,0 +1,26 @@
+{
+  "model": [
+    {
+      "name": "Conv2d",
+      "in_channels": 3,
+      "out_channels": 64,
+      "kernel_size": 3,
+      "stride": 1,
+      "padding": 1
+    },
+    {
+      "name": "ReLU",
+      "inplace": true
+    },
+    {
+      "name": "MaxPool2d",
+      "kernel_size": 2,
+      "stride": 2
+    },
+    {
+      "name": "Linear",
+      "in_features": 64,
+      "out_features": 10
+    }
+  ]
+}
