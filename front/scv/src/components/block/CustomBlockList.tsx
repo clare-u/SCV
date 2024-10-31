@@ -1,6 +1,10 @@
 import { BlockCategory, BlockDefinition } from "@/types";
 
 export const CustomBlockList: Record<BlockCategory, BlockDefinition[]> = {
+  Basic: [
+    { name: "start", params: [] },
+    { name: "end", params: [] },
+  ],
   Convolution: [
     {
       name: "nn.Conv2d",

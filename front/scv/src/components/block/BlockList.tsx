@@ -8,6 +8,7 @@ import BlockItem from "./BlockItem";
 
 // 카테고리 표시 이름 매핑
 const categoryDisplayNames: Record<BlockCategory, string> = {
+  Basic: "Basic",
   Convolution: "Convolution Layers",
   Pooling: "Pooling Layers",
   Padding: "Padding Layers",
@@ -17,6 +18,7 @@ const categoryDisplayNames: Record<BlockCategory, string> = {
 
 // 카테고리별 색상 스타일 매핑
 const categoryColors: Record<BlockCategory, string> = {
+  Basic: "border-gray-700, bg-gray-500",
   Convolution: "border-blue-700 bg-blue-500",
   Pooling: "border-violet-700 bg-violet-500",
   Padding: "border-yellow-700 bg-yellow-500",
@@ -30,17 +32,79 @@ interface DroppedBlock extends BlockDefinition {
 }
 
 const BlockList: React.FC = () => {
-  const categories = Object.entries(CustomBlockList) as [
-    BlockCategory,
-    BlockDefinition[],
-  ][];
-  const [droppedBlocks, setDroppedBlocks] = useState<DroppedBlock[]>([]);
+  const categories = Object.entries(CustomBlockList).filter(
+    ([category]) => category !== "Basic",
+  ) as [BlockCategory, BlockDefinition[]][];
+
+  // 기본 블록 정의: start와 end를 고정된 위치로 추가
+  const initialBlocks: DroppedBlock[] = [
+    {
+      id: "start",
+      name: "start",
+      category: "Basic",
+      params: [{ name: "start", type: "int" }],
+    },
+    {
+      id: "end",
+      name: "end",
+      category: "Basic",
+      params: [] as { name: string; type: "int" | "float" }[],
+    },
+  ];
+
+  const [droppedBlocks, setDroppedBlocks] =
+    useState<DroppedBlock[]>(initialBlocks);
 
   const handleDragEnd = (result: any) => {
     const { source, destination } = result;
 
     // 드롭이 유효한 위치에서 일어나지 않은 경우
     if (!destination) return;
+
+    // 왼쪽에서 오른쪽으로 드래그 시 추가를 가장 먼저 체크
+    if (
+      source.droppableId.startsWith("left") &&
+      destination.droppableId === "right"
+    ) {
+      const categoryIndex = parseInt(source.droppableId.split("-")[1], 10);
+      const sourceCategory = categories[categoryIndex][0];
+      const sourceBlocks = categories[categoryIndex][1];
+      const blockToAdd = sourceBlocks[source.index];
+
+      const newBlock: DroppedBlock = {
+        ...blockToAdd,
+        id: `${blockToAdd.name}-${Date.now()}`,
+        category: sourceCategory,
+      };
+
+      setDroppedBlocks((blocks) => {
+        const updatedBlocks = Array.from(blocks);
+        // start와 end 블록 사이에만 추가되도록 제한
+        const targetIndex = Math.max(
+          1,
+          Math.min(destination.index, updatedBlocks.length - 1),
+        );
+        updatedBlocks.splice(targetIndex, 0, newBlock);
+        return updatedBlocks;
+      });
+      return; // 추가 후 즉시 리턴
+    }
+
+    // 드래그한 블록이 start 또는 end가 아닐 때만 순서 변경
+    if (source.index > 0 && source.index < droppedBlocks.length - 1) {
+      const updatedBlocks = Array.from(droppedBlocks);
+      const [movedBlock] = updatedBlocks.splice(source.index, 1);
+
+      // `destination.index`를 1과 마지막 index 사이로 제한
+      const targetIndex = Math.max(
+        1,
+        Math.min(destination.index, updatedBlocks.length - 1),
+      );
+      updatedBlocks.splice(targetIndex, 0, movedBlock);
+
+      setDroppedBlocks(updatedBlocks);
+      return;
+    }
 
     // 오른쪽에서 왼쪽으로 드래그 시 삭제
     if (
@@ -69,30 +133,6 @@ const BlockList: React.FC = () => {
 
       setDroppedBlocks(reorderedBlocks);
       return;
-    }
-
-    // 왼쪽에서 오른쪽으로 드래그 시 추가 (드롭한 위치에 맞게 삽입)
-    if (
-      source.droppableId.startsWith("left") &&
-      destination.droppableId === "right"
-    ) {
-      const categoryIndex = parseInt(source.droppableId.split("-")[1], 10);
-      const sourceCategory = categories[categoryIndex][0];
-      const sourceBlocks = categories[categoryIndex][1];
-      const blockToAdd = sourceBlocks[source.index];
-
-      const newBlock: DroppedBlock = {
-        ...blockToAdd,
-        id: `${blockToAdd.name}-${Date.now()}`,
-        category: sourceCategory,
-      };
-
-      // 새로운 블록을 드롭한 위치의 인덱스에 추가
-      setDroppedBlocks((blocks) => {
-        const updatedBlocks = Array.from(blocks);
-        updatedBlocks.splice(destination.index, 0, newBlock);
-        return updatedBlocks;
-      });
     }
   };
 
@@ -172,7 +212,14 @@ const BlockList: React.FC = () => {
               className="flex max-h-[92vh] flex-1 flex-col items-center gap-4 overflow-y-scroll bg-stone-300 p-20"
             >
               {droppedBlocks.map((block, index) => (
-                <Draggable key={block.id} draggableId={block.id} index={index}>
+                <Draggable
+                  key={block.id}
+                  draggableId={block.id}
+                  index={index}
+                  isDragDisabled={
+                    block.name === "start" || block.name === "end"
+                  }
+                >
                   {(provided) => (
                     <div
                       ref={provided.innerRef}

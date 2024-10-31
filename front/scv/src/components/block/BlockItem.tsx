@@ -9,6 +9,11 @@ interface BlockItemProps {
 }
 
 const categoryColors = {
+  Basic: {
+    bg: "bg-gray-700",
+    openBg: "bg-gray-500",
+    border: "border-gray-700",
+  },
   Convolution: {
     bg: "bg-blue-700",
     openBg: "bg-blue-500",
