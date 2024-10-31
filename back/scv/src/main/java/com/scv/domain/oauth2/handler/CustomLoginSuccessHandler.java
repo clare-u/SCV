@@ -18,6 +18,12 @@ public class CustomLoginSuccessHandler extends SimpleUrlAuthenticationSuccessHan
 
     private final JwtUtil jwtUtil;
 
+    @Value("${spring.jwt.token.access.name}")
+    private String ACCESS_TOKEN_NAME;
+
+    @Value("${spring.jwt.token.refresh.name}")
+    private String REFRESH_TOKEN_NAME;
+
     @Value("${spring.jwt.token.access.expiration}")
     private int ACCESS_TOKEN_EXPIRATION;
 
@@ -29,8 +35,8 @@ public class CustomLoginSuccessHandler extends SimpleUrlAuthenticationSuccessHan
         String accessToken = jwtUtil.createAccessToken(authentication.getName());
         String refreshToken = jwtUtil.createRefreshToken(authentication.getName());
 
-        response.addCookie(createCookie("access_token", accessToken, ACCESS_TOKEN_EXPIRATION));
-        response.addCookie(createCookie("refresh_token", refreshToken, REFRESH_TOKEN_EXPIRATION));
+        response.addCookie(createCookie(ACCESS_TOKEN_NAME, accessToken, ACCESS_TOKEN_EXPIRATION));
+        response.addCookie(createCookie(REFRESH_TOKEN_NAME, refreshToken, REFRESH_TOKEN_EXPIRATION));
 
         response.sendRedirect("http://localhost:3000/");
     }

@@ -12,6 +12,7 @@ import jakarta.servlet.http.Cookie;
 import jakarta.servlet.http.HttpServletRequest;
 import jakarta.servlet.http.HttpServletResponse;
 import lombok.RequiredArgsConstructor;
+import org.springframework.beans.factory.annotation.Value;
 import org.springframework.security.authentication.UsernamePasswordAuthenticationToken;
 import org.springframework.security.core.Authentication;
 import org.springframework.security.core.context.SecurityContextHolder;
@@ -27,21 +28,33 @@ public class JwtFilter extends OncePerRequestFilter {
     private final JwtUtil jwtUtil;
     private final UserRepository userRepository;
 
+    @Value("${spring.jwt.token.access.name}")
+    private String ACCESS_TOKEN_NAME;
+
+    @Value("${spring.jwt.token.refresh.name}")
+    private String REFRESH_TOKEN_NAME;
+
     @Override
     protected void doFilterInternal(HttpServletRequest request, HttpServletResponse response, FilterChain filterChain) throws ServletException, IOException {
         String accessToken = null;
+        String refreshToken = null;
 
         Cookie[] cookies = request.getCookies();
-        if (cookies != null) {
-            for (Cookie cookie : cookies) {
-                if (cookie.getName().equals("access_token")) {
-                    accessToken = cookie.getValue();
-                }
+
+        if (cookies == null) {
+            filterChain.doFilter(request, response);
+            return;
+        }
+
+        for (Cookie cookie : cookies) {
+            if (cookie.getName().equals(ACCESS_TOKEN_NAME)) {
+                accessToken = cookie.getValue();
+            } else if (cookie.getName().equals(REFRESH_TOKEN_NAME)) {
+                refreshToken = cookie.getValue();
             }
         }
 
         if (accessToken == null) {
-            filterChain.doFilter(request, response);
             return;
         }
 
