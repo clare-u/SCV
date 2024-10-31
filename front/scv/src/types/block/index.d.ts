@@ -1,4 +1,5 @@
 export type BlockCategory =
+  | "Basic"
   | "Convolution"
   | "Pooling"
   | "Padding"
