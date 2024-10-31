@@ -43,7 +43,7 @@ public class CustomLoginSuccessHandler extends SimpleUrlAuthenticationSuccessHan
 
     private Cookie createCookie(String key, String value, int expiration) {
         Cookie cookie = new Cookie(key, value);
-        cookie.setMaxAge(expiration);
+        cookie.setMaxAge(expiration * 60);
 //        cookie.setSecure(true);
         cookie.setPath("/");
 //        cookie.setHttpOnly(true);
