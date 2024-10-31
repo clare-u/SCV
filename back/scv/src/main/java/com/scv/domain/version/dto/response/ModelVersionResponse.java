@@ -1,4 +1,4 @@
-package com.scv.domain.version.dto;
+package com.scv.domain.version.dto.response;
 
 import com.scv.domain.version.domain.ModelVersion;
 

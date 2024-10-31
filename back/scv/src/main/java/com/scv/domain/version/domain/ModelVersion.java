@@ -39,4 +39,13 @@ public class ModelVersion extends BaseEntity {
     @Column(name = "is_working_on", nullable = false, columnDefinition = "TINYINT(1)")
     private boolean isWorkingOn = true;
 
+
+    /**
+     * 레이어 수정
+     * @param layers
+     */
+    public void updateLayers(String layers) {
+        this.layers = layers;
+    }
 }
+

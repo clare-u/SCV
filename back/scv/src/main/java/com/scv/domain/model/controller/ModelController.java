@@ -5,7 +5,7 @@ import com.scv.domain.model.dto.response.ModelResponse;
 import com.scv.domain.model.service.ModelService;
 import com.scv.domain.oauth2.AuthUser;
 import com.scv.domain.oauth2.CustomOAuth2User;
-import com.scv.domain.version.dto.ModelVersionResponse;
+import com.scv.domain.version.dto.response.ModelVersionResponse;
 import com.scv.global.error.ErrorResponse;
 import io.swagger.v3.oas.annotations.Operation;
 import io.swagger.v3.oas.annotations.media.Content;

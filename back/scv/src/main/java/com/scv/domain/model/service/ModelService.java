@@ -13,7 +13,7 @@ import com.scv.domain.user.domain.User;
 import com.scv.domain.user.exception.UserNotFoundException;
 import com.scv.domain.user.repository.UserRepository;
 import com.scv.domain.version.domain.ModelVersion;
-import com.scv.domain.version.dto.ModelVersionResponse;
+import com.scv.domain.version.dto.response.ModelVersionResponse;
 import com.scv.domain.version.repository.ModelVersionRepository;
 import lombok.RequiredArgsConstructor;
 import org.apache.coyote.BadRequestException;
