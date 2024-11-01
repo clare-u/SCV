@@ -49,8 +49,7 @@ public class ModelVersionService {
 
     // 개발중인 모델 조회
     public Page<ModelVersionResponse> getModelVersionsOnWorking(CustomOAuth2User user, Pageable pageable) {
-        Page<ModelVersion> modelVersions = modelVersionRepository.findAllByUserAndIsWorkingTrue(user.getUserId(), pageable);
-
+        Page<ModelVersion> modelVersions = modelVersionRepository.findAllByUserAndIsWorkingTrueAndDeletedFalse(user.getUserId(), pageable);
         return modelVersions.map(ModelVersionResponse::new);
     }
 

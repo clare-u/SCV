@@ -45,31 +45,31 @@ public class ModelController {
         return ResponseEntity.status(201).build();
     }
 
-    @GetMapping("")
-    @Operation(summary = "전체 모델 목록 조회", description = "모든 모델을 조회합니다. orderBy = createdAt or updatedAt, direction = asc or desc. 미입력시 정렬 안함.")
-    @ApiResponses(value = {
-            @ApiResponse(responseCode = "200", description = "모델 조회 성공"),
-            @ApiResponse(responseCode = "400", description = "잘못된 요청", content = @Content(schema = @Schema(implementation = ErrorResponse.class))),
-    })
-    public ResponseEntity<Page<ModelResponse>> getAllModels(
-            @RequestParam(defaultValue = "0") int page,
-            @RequestParam(defaultValue = "12") int size,
-            @RequestParam(defaultValue = "") String orderBy,
-            @RequestParam(defaultValue = "") String direction
-    ) {
-
-        Pageable pageable;
-        if (!orderBy.isEmpty()) {
-            Sort sort = direction.equalsIgnoreCase("desc") ? Sort.by(orderBy).descending() : Sort.by(orderBy).ascending();
-            pageable = PageRequest.of(page, size, sort);
-        } else {
-            pageable = PageRequest.of(page, size);
-        }
-
-        Page<ModelResponse> pages = modelService.getAllModels(pageable);
-
-        return ResponseEntity.status(200).body(pages);
-    }
+//    @GetMapping("")
+//    @Operation(summary = "전체 모델 목록 조회", description = "모든 모델을 조회합니다. orderBy = createdAt or updatedAt, direction = asc or desc. 미입력시 정렬 안함.")
+//    @ApiResponses(value = {
+//            @ApiResponse(responseCode = "200", description = "모델 조회 성공"),
+//            @ApiResponse(responseCode = "400", description = "잘못된 요청", content = @Content(schema = @Schema(implementation = ErrorResponse.class))),
+//    })
+//    public ResponseEntity<Page<ModelResponse>> getAllModels(
+//            @RequestParam(defaultValue = "0") int page,
+//            @RequestParam(defaultValue = "12") int size,
+//            @RequestParam(defaultValue = "") String orderBy,
+//            @RequestParam(defaultValue = "") String direction
+//    ) {
+//
+//        Pageable pageable;
+//        if (!orderBy.isEmpty()) {
+//            Sort sort = direction.equalsIgnoreCase("desc") ? Sort.by(orderBy).descending() : Sort.by(orderBy).ascending();
+//            pageable = PageRequest.of(page, size, sort);
+//        } else {
+//            pageable = PageRequest.of(page, size);
+//        }
+//
+//        Page<ModelResponse> pages = modelService.getAllModels(pageable);
+//
+//        return ResponseEntity.status(200).body(pages);
+//    }
 
     @DeleteMapping("/{modelId}")
     @Operation(summary = "모델 삭제", description = "모델 삭제하고, 모든 모델 버전을 삭제합니다.(soft delete)")
@@ -81,7 +81,7 @@ public class ModelController {
     })
     public ResponseEntity<Void> deleteModel(@PathVariable("modelId") Long modelId, @AuthUser CustomOAuth2User user) throws BadRequestException {
         modelService.deleteModel(modelId, user);
-        return ResponseEntity.status(204).build();
+        return ResponseEntity.noContent().build();
     }
 
 
@@ -95,7 +95,7 @@ public class ModelController {
     })
     public ResponseEntity<Void> updateModelName(@PathVariable("modelId") Long modelId, String newName, @AuthUser CustomOAuth2User user) throws BadRequestException {
         modelService.updateModelName(modelId, newName, user);
-        return ResponseEntity.status(200).build();
+        return ResponseEntity.ok().build();
     }
 
 
@@ -123,10 +123,10 @@ public class ModelController {
 
         Page<ModelResponse> pages = modelService.getMyModels(pageable, user);
 
-        return ResponseEntity.status(200).body(pages);
+        return ResponseEntity.ok(pages);
     }
 
-    @GetMapping("/data")
+    @GetMapping("/models")
     @Operation(summary = "데이터로 모델 조회", description = "내 데이터로 모델을 조회합니다. orderBy = createdAt or updatedAt, direction = asc or desc. 미입력시 정렬 안함.")
     @ApiResponses(value = {
             @ApiResponse(responseCode = "200", description = "모델 조회 성공"),
@@ -137,9 +137,8 @@ public class ModelController {
             @RequestParam(defaultValue = "12") int size,
             @RequestParam(defaultValue = "") String orderBy,
             @RequestParam(defaultValue = "") String direction,
-            @RequestParam String data
+            @RequestParam(defaultValue = "") String data
     ) {
-
         Pageable pageable;
         if (!orderBy.isEmpty()) {
             Sort sort = direction.equalsIgnoreCase("desc") ? Sort.by(orderBy).descending() : Sort.by(orderBy).ascending();
@@ -148,10 +147,16 @@ public class ModelController {
             pageable = PageRequest.of(page, size);
         }
 
-        Page<ModelResponse> pages = modelService.findModelsByData(pageable, data);
+        Page<ModelResponse> pages;
+        if (data.isEmpty()) {
+            pages = modelService.getAllModels(pageable);
+        } else {
+            pages = modelService.findModelsByData(pageable, data);
+        }
 
-        return ResponseEntity.status(200).body(pages);
+        return ResponseEntity.ok(pages);
     }
+
 
     @GetMapping("/{modelId}")
     @Operation(summary = "모델의 버전들 조회", description = "모델 버전들을 조회합니다.")
@@ -163,7 +168,7 @@ public class ModelController {
 
         List<ModelVersionResponse> modelVersions = modelService.getModelVersions(modelId);
 
-        return ResponseEntity.status(200).body(modelVersions);
+        return ResponseEntity.ok(modelVersions);
     }
 
 }
