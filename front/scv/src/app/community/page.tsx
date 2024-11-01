@@ -7,53 +7,97 @@ import BoardCard from "@/components/card/BoardCard";
 import Pagination from "@/components/pagination/Pagination";
 import DatasetRadio from "@/components/input/DatasetRadio";
 import SearchInput from "@/components/input/SearchInput";
+import { useFetchModels } from "@/hooks/models";
+import { ModelQueryParams } from "@/types";
 
 export default function Community() {
-  // 필터 라디오
+  const router = useRouter();
+  const searchParams = useSearchParams();
+  // 검색 인풋
+  // 검색어 상태 추가
+  const currentKeyword = searchParams.get("keyword") || "";
+  const [searchValue, setSearchValue] = useState(currentKeyword);
+
+  const handleSearchChange = (e: React.ChangeEvent<HTMLInputElement>) => {
+    setSearchValue(e.target.value);
+  };
+
+  // URL 파라미터 가져오기
+  const currentPage = searchParams.get("page")
+    ? parseInt(searchParams.get("page")!)
+    : 1;
+  const currentDataset = searchParams.get("dataset") || "전체";
+  const currentOrder = searchParams.get("order") || "추천순";
+
+  // 상태 관리
   const dataset = ["전체", "MNIST", "Fashion", "CIFAR-10", "SVHN", "EMNIST"];
-  const [selected, setSelected] = useState(dataset[0]);
+  const [selected, setSelected] = useState(currentDataset);
+  const [selectedFilter, setSelectedFilter] = useState(currentOrder);
+  const filterOptions = ["추천순", "최신순", "오래된순"];
 
-  // 정렬 필터
-  const [selectedFilter, setSelectedFilter] = useState("추천순");
-  const filterOptions = ["추천순", "최신순", "오래된순"]; // 필터 옵션 리스트
+  // Query 파라미터 변환 함수
+  const getSortParams = (
+    filter: string,
+  ): Partial<Pick<ModelQueryParams, "orderBy" | "direction">> => {
+    switch (filter) {
+      case "최신순":
+        return { orderBy: "updatedAt", direction: "desc" };
+      case "오래된순":
+        return { orderBy: "updatedAt", direction: "asc" };
+      case "추천순":
+      default:
+        return {};
+    }
+  };
+  // 모델 데이터 fetch
+  const { data, isLoading, error } = useFetchModels({
+    page: currentPage - 1,
+    size: 12,
+    ...getSortParams(selectedFilter),
+    data: selected !== "전체" ? selected : undefined,
+  });
 
+  // URL 업데이트 함수
+  const updateURL = (params: { [key: string]: string | number }) => {
+    const current = new URLSearchParams(Array.from(searchParams.entries()));
+
+    Object.entries(params).forEach(([key, value]) => {
+      if (value) {
+        current.set(key, String(value));
+      } else {
+        current.delete(key);
+      }
+    });
+
+    router.push(`/community?${current.toString()}`);
+  };
+
+  // 이벤트 핸들러
   const handleFilterChange = (filter: string) => {
     setSelectedFilter(filter);
-    // 필터 변경에 따른 추가 로직을 여기에 추가
+    updateURL({ order: filter, page: 1 });
   };
 
-  // 검색 인풋
-  const router = useRouter();
+  const handleDatasetChange = (dataset: string) => {
+    setSelected(dataset);
+    updateURL({ dataset, page: 1 });
+  };
 
   const handleSearchSubmit = (value: string) => {
-    router.push(`/community?keyword=${value}`);
+    updateURL({ keyword: value, page: 1 });
   };
 
-  // board카드
-  const datasets = ["MNIST", "Fashion", "CIFAR-10", "SVHN", "EMNIST"];
-
-  // 더미 데이터 생성을 위한 헬퍼 함수
-  const cards = datasets.map((dataset, index) => ({
-    modelId: `model-${index + 1}`,
-    versionId: `version-${index + 1}`,
-    title: `Model ${index + 1}`,
-    version: `v${index + 1}`,
-    dataset: dataset,
-    profileImg: `/profile.png`,
-    nickname: `User${index + 1}`,
-    accuracy: parseFloat((85 + index * 2).toFixed(2)), // float 형식으로 소수점 2자리까지
-    updatedAt: new Date(Date.now() - index * 100000000).toISOString(),
-  }));
-
-  // 페이지네이션
-  const [totalItems, setTotalItems] = useState(1000);
-  const searchParams = useSearchParams();
-  const page = searchParams.get("page");
-
   useEffect(() => {
-    window.scrollTo(0, 0); // 페이지 이동 시 스크롤 위치 맨 위로 초기화
-    /* api 호출 및 데이터(totalItems, books) 저장 */
-  }, [page]);
+    window.scrollTo(0, 0);
+  }, [currentPage]);
+
+  // data 로드 시 콘솔에 출력
+  if (data) {
+    console.log(data); // 데이터가 로드되었을 때만 출력
+  }
+
+  if (isLoading) return <div>로딩 중...</div>;
+  if (error) return <div>에러 발생: {error.message}</div>;
 
   return (
     <div className="flex flex-col gap-10 py-10">
@@ -67,27 +111,46 @@ export default function Community() {
         <DatasetRadio
           options={dataset}
           selected={selected}
-          onChange={setSelected}
+          onChange={handleDatasetChange}
         />
         <div className="w-[400px]">
           <SearchInput
-            placeholder="placeholder"
+            placeholder="모델명을 검색하세요."
+            value={currentKeyword}
+            onChange={handleSearchChange}
             onSubmit={handleSearchSubmit}
           />
         </div>
       </div>
+
       {/* boardCard */}
       <div className="grid grid-cols-3 gap-10 px-10 py-20">
-        {cards.map((card) => (
-          <BoardCard key={card.modelId} {...card} />
-        ))}
+        {data?.content.length === 0 ? (
+          <div>모델이 없습니다.</div> // 데이터가 없을 경우 메시지 출력
+        ) : (
+          data?.content.map((model) => (
+            <BoardCard
+              key={model.modelId}
+              modelId={model.modelId}
+              versionId={`${model.latestNumber}`}
+              title={model.modelName}
+              version={`v${model.latestNumber}`} // version 값 수정
+              dataset={model.dataName}
+              // profileImg={model.profileImage || "/profile.png"}
+              nickname={model.modelName}
+              // accuracy={model.accuracy || "N/A"} // 기본값 설정
+              updatedAt={model.updatedAt}
+            />
+          ))
+        )}
       </div>
+
       {/* 페이지네이션 */}
       <Pagination
-        totalItems={totalItems}
-        currentPage={page && parseInt(page) > 0 ? parseInt(page) : 1}
+        totalItems={data!.pageable.pageSize * 12 || 0}
+        currentPage={currentPage}
         pageCount={10}
-        itemCountPerPage={50}
+        itemCountPerPage={12}
       />
     </div>
   );

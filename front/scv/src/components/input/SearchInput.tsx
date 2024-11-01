@@ -1,29 +1,30 @@
 import { Input } from "@headlessui/react";
-import { useState } from "react";
 
 interface SearchInputProps {
   placeholder: string;
+  value: string;
+  onChange: (e: React.ChangeEvent<HTMLInputElement>) => void;
   onSubmit: (value: string) => void;
 }
 
-const SearchInput: React.FC<SearchInputProps> = ({ placeholder, onSubmit }) => {
-  const [value, setValue] = useState<string>("");
-
-  const clearInput = () => setValue("");
-
-  const handleChange = (e: React.ChangeEvent<HTMLInputElement>) => {
-    setValue(e.target.value);
-  };
+const SearchInput: React.FC<SearchInputProps> = ({
+  placeholder,
+  value,
+  onChange,
+  onSubmit,
+}) => {
+  const clearInput = () =>
+    onChange({ target: { value: "" } } as React.ChangeEvent<HTMLInputElement>);
 
   const handleKeyDown = (event: React.KeyboardEvent<HTMLInputElement>) => {
     if (event.key === "Enter" && value.trim()) {
-      onSubmit(value.trim()); // Enter 키를 눌렀을 때 검색어가 있을 경우만 전달
+      onSubmit(value.trim());
     }
   };
 
   const handleSearchClick = () => {
     if (value.trim()) {
-      onSubmit(value.trim()); // 검색어가 있을 경우만 실행
+      onSubmit(value.trim());
     }
   };
 
@@ -41,7 +42,7 @@ const SearchInput: React.FC<SearchInputProps> = ({ placeholder, onSubmit }) => {
         type="text"
         name={placeholder}
         value={value}
-        onChange={handleChange}
+        onChange={onChange}
         onKeyDown={handleKeyDown}
       />
       {value && (

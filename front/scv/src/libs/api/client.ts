@@ -31,15 +31,13 @@ export const handleApiRequest = async <T, M extends HttpMethod, D = undefined>(
       const apiError: ApiErrorResponse = error.response.data;
       const { message, data, statusCode } = apiError;
 
+      // 콘솔에 개선된 오류 메시지 출력
       console.error(
-        "🚨 API Request Error 🚨",
-        `\nEndpoint: %c${url}`,
+        `%c🚨 API Request Error 🚨\nEndpoint: %c${url}\nStatus Code: %c${statusCode}\nMessage: %c${message}\nError Data:`,
         "color: black; background-color: yellow; font-weight: bold;",
-        `\nStatus Code: %c${statusCode}`,
         "color: black; background-color: orange; font-weight: bold;",
-        `\nMessage: %c${message}`,
+        "color: black; background-color: red; font-weight: bold;",
         "color: white; background-color: red; font-weight: bold;",
-        `\nError Data:`,
         data,
       );
 
