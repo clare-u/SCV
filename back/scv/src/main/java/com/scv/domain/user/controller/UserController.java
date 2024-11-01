@@ -46,7 +46,7 @@ public class UserController {
     })
     public ResponseEntity<CommonSuccessResponseDTO> createGithubRepository(@AuthUser CustomOAuth2User user,
                                                                            @RequestBody CreateGithubRepositoryRequestDTO requestDTO) {
-        CommonSuccessResponseDTO responseDTO = userService.createGithubRepository(user, requestDTO);
+        CommonSuccessResponseDTO responseDTO = userService.createGithubRepository(user.getName(), requestDTO);
         return new ResponseEntity<>(responseDTO, HttpStatus.CREATED);
     }
 
