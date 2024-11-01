@@ -8,14 +8,14 @@ import Badge from "../badge/Badge";
 import { BadgeProps } from "../badge/Badge";
 
 interface BoardCardProps {
-  modelId: string;
+  modelId: number;
   versionId: string;
   title: string;
   version: string;
   dataset: string;
-  profileImg: string;
+  profileImg?: string;
   nickname: string;
-  accuracy: number;
+  accuracy?: number;
   updatedAt: string;
 }
 
@@ -61,17 +61,25 @@ export default function BoardCard({
 
         <div className="flex items-center justify-between">
           <div className="flex items-center gap-10">
-            <Image
-              src={profileImg}
-              alt={`${nickname}'s profile`}
-              width={40}
-              height={40}
-              className="rounded-full"
-            />
+            {profileImg ? (
+              <Image
+                src={profileImg}
+                alt={`${nickname}'s profile`}
+                width={40}
+                height={40}
+                className="rounded-full"
+              />
+            ) : (
+              ""
+            )}
             <p className="text-14 font-semibold">{nickname}</p>
           </div>
           <div className="flex flex-col items-end justify-center">
-            <p className="text-12 font-semibold">{accuracy.toFixed(2)}%</p>
+            {accuracy ? (
+              <p className="text-12 font-semibold">{accuracy.toFixed(2)}%</p>
+            ) : (
+              <p></p>
+            )}
             <p className="text-12 text-gray-400">
               {new Date(updatedAt).toISOString().replace("T", " ").slice(0, 19)}
             </p>
