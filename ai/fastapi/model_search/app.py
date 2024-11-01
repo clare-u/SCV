@@ -51,11 +51,12 @@ def read_model(model_version_id: str, layer_id: str):
 @app.post("/{model_version_id}/{layer_id}", response_model=Model_Insert_Response)
 def insert_model(model_version_id: str, layer_id: str, req: Model_Insert_Request):
 
-    res = client.upsert(
+    res = client.insert(
         collection_name=collection_name,
         data=[
             {
                 "model_version_layer_id" : model_version_id + "_" + layer_id,
+                "model_version_id" : int(model_version_id),
                 "test_accuracy" : req.test_accuracy,
                 "layers" : json.dumps([layer.json() for layer in req.layers]),
                 "cka_vec" : req.cka_vec
@@ -71,6 +72,26 @@ def insert_model(model_version_id: str, layer_id: str, req: Model_Insert_Request
         return {"model_version_layer_id" : model_version_id + "_" + layer_id, "success": True}
 
     return {"model_version_layer_id" : model_version_id + "_" + layer_id, "success": False}
+
+# vectordb에서 모델 삭제
+@app.delete("/{model_version_id}")
+def delete_model(model_version_id: str):
+    
+    print(f"{model_version_id} 의 model_version_id를 가진 레이어를 지웁니다.")
+
+    res = client.delete(
+        collection_name=collection_name,
+        filter="model_version_id == {}".format(model_version_id)
+    )
+
+    res = dict(res)
+    print("{}개의 layer가 삭제되었습니다.".format(res["delete_count"]))
+    return JSONResponse(
+        status_code=status.HTTP_200_OK,
+        content = {
+            "content": f"{res["delete_count"]}개의 layer가 삭제되었습니다."
+        }
+    )
 
 # 유사 모델 검색
 @app.get("/{model_version_id}/{layer_id}/search", response_model=Model_Search_Response)

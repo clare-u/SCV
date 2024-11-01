@@ -5,6 +5,7 @@ from model_layer_class import Layer
 
 class Model_Read_Response(BaseModel):
     model_version_layer_id: str
+    model_version_id: int
     test_accuracy: float
     layers: List[Layer]
     cka_vec: List[float]

@@ -28,6 +28,11 @@ id_field = FieldSchema(
     is_primary=True, 
     description="model, version, layer id 를 concat 해서 사용")
 
+model_version_field = FieldSchema(
+    name="model_version_id", 
+    dtype=DataType.INT64, 
+    description="model, version를 concat함. delete 요청에 사용")
+
 accuracy_field = FieldSchema(
     name="test_accuracy", 
     dtype=DataType.FLOAT, 
@@ -47,7 +52,7 @@ vector_field = FieldSchema(
     description="cka 행렬 X 의 XX^T 를 취한 후에 Frobenius Norm으로 나눈 값")
 
 
-schema = CollectionSchema(fields=[id_field, accuracy_field, layer_field, vector_field], description="collection with cka. pk is model_version_layer_id")
+schema = CollectionSchema(fields=[id_field, model_version_field, accuracy_field, layer_field, vector_field], description="collection with cka. pk is model_version_layer_id")
 
 index_params = client.prepare_index_params()
 
@@ -60,6 +65,11 @@ index_params.add_index(
     field_name="cka_vec", 
     index_type="FLAT",
     metric_type="IP",
+)
+
+index_params.add_index(
+    field_name="model_version_id",
+    index_type="INVERTED"
 )
 
 client.create_collection(
