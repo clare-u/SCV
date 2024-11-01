@@ -38,8 +38,3 @@ out/
 
 ### Ignore Gradle Wrapper JAR ###
 gradle-wrapper.jar
-
-### Ignore sensitive configuration files ###
-application.yml
-application-jwt.yml
-application-oauth2.yml
