@@ -15,7 +15,7 @@ class Model_Insert_Request(BaseModel):
     cka_vec: List[float]
 
 class Model_Insert_Response(BaseModel):
-    model_version_layer_id: int
+    model_version_layer_id: str
     success: bool
 
 class Model_Search_Response(BaseModel):
@@ -23,3 +23,4 @@ class Model_Search_Response(BaseModel):
     layer_id: int
     gpt_description: str
     test_accuracy: float
+    layers: List[Layer]
