@@ -147,7 +147,7 @@ export default function Community() {
 
       {/* 페이지네이션 */}
       <Pagination
-        totalItems={data!.pageable.pageSize * 12 || 0}
+        totalItems={data!.content.length || 0}
         currentPage={currentPage}
         pageCount={10}
         itemCountPerPage={12}
