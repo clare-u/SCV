@@ -112,16 +112,19 @@ async def search_model(model_version_id: str, layer_id: str):
     results = dict(results[0][0])
 
     id_parse = results["id"].split("_")
-    model_version_id = id_parse[0]
-    layer_id = id_parse[1]
-    test_accuracy = results["entity"]["test_accuracy"]
+    searched_model_version_id = id_parse[0]
+    searched_layer_id = id_parse[1]
+    searched_test_accuracy = results["entity"]["test_accuracy"]
     
     target = model["layers"]
+    target_test_accuracy = model["test_accuracy"]
     searched = results["entity"]["layers"]
 
-    gpt_description = await get_gpt_answer(target, searched)
+    gpt_description = await get_gpt_answer(target, searched, layer_id, searched_layer_id, target_test_accuracy, searched_test_accuracy)
+    
+    searched = deserialize_layers(searched)
 
-    return {"model_version_id": model_version_id, "layer_id": layer_id, "gpt_description": gpt_description, "test_accuracy": test_accuracy}
+    return {"model_version_id": searched_model_version_id, "layer_id": searched_layer_id, "gpt_description": gpt_description, "test_accuracy": searched_test_accuracy, "layers": searched}
 
 @app.exception_handler(InvalidModelId)
 def invalid_model_id_exception_handler(req, exc: InvalidModelId):

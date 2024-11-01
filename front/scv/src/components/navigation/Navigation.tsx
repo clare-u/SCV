@@ -38,7 +38,7 @@ const Navigation = () => {
       {/* 메뉴 영역 */}
       <div className="flex gap-36 p-10">
         <NavigationItem href="/workspace">워크스페이스</NavigationItem>
-        <NavigationItem href="/">커뮤니티</NavigationItem>
+        <NavigationItem href="/community">커뮤니티</NavigationItem>
         <NavigationItem href="/docs">공식문서</NavigationItem>
       </div>
 
