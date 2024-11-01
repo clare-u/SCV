@@ -55,8 +55,8 @@ public class CustomOAuth2UserService extends DefaultOAuth2UserService {
                     .userEmail(oAuth2Response.getUserEmail())
                     .userImageUrl(oAuth2Response.getUserImageUrl())
                     .userNickname(oAuth2Response.getUserNickname())
-                    .userCreatedAt(oAuth2Response.getUserCreatedAt())
-                    .userUpdatedAt(oAuth2Response.getUserUpdatedAt())
+                    .userCreatedAt(oAuth2Response.getUserCreatedAt().toLocalDateTime())
+                    .userUpdatedAt(oAuth2Response.getUserUpdatedAt().toLocalDateTime())
                     .build();
             User savedUser = userRepository.save(user);
 

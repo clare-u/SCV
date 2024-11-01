@@ -3,7 +3,7 @@ package com.scv.domain.oauth2.dto;
 import lombok.Builder;
 import lombok.Getter;
 
-import java.time.ZonedDateTime;
+import java.time.LocalDateTime;
 
 @Builder
 @Getter
@@ -14,7 +14,7 @@ public class OAuth2UserDTO {
     private String userEmail;
     private String userImageUrl;
     private String userNickname;
-    private ZonedDateTime userCreatedAt;
-    private ZonedDateTime userUpdatedAt;
+    private LocalDateTime userCreatedAt;
+    private LocalDateTime userUpdatedAt;
     private boolean userIsDeleted;
 }
