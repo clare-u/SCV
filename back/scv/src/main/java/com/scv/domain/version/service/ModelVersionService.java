@@ -26,14 +26,18 @@ public class ModelVersionService {
     private final ModelRepository modelRepository;
     private final ModelVersionRepository modelVersionRepository;
 
-    // 모델 생성
-    public void createModelVersion(ModelVersionRequest request) {
-        Model model = modelRepository.findById(request.modelId()).orElseThrow(ModelNotFoundException::new);
+    // 모델 버전 생성
+    public void createModelVersion(Long modelId, ModelVersionRequest request, CustomOAuth2User user) throws BadRequestException {
+        Model model = modelRepository.findById(modelId).orElseThrow(ModelNotFoundException::new);
+
+        if (user.getUserId() != model.getUser().getUserId()) {
+            throw new BadRequestException("모델의 제작자만 생성할 수 있습니다.");
+        }
 
         ModelVersion modelVersion = ModelVersion.builder()
                 .model(model)
                 .versionNo(request.versionNo())
-                .layers(request.layers().toString()) 
+                .layers(request.layers().toString())
                 .build();
 
         modelVersionRepository.save(modelVersion);
@@ -43,7 +47,7 @@ public class ModelVersionService {
     // 모델버전 상세 조회
     public ModelVersionDetail getModelVersion(Long versionId) {
         ModelVersion version = modelVersionRepository.findById(versionId).orElseThrow(ModelVersionNotFoundException::new);
-
+        //TODO 결과 만들면 보여주기
         return new ModelVersionDetail(version);
     }
 
@@ -67,7 +71,7 @@ public class ModelVersionService {
 
     // 모델 버전 삭제
     public void deleteModelVersion(Long modelVersionId, CustomOAuth2User user) throws BadRequestException {
-        ModelVersion modelVersion = modelVersionRepository.findByIdAndDeletedFalse(modelVersionId).orElseThrow(ModelVersionNotFoundException::new);
+        ModelVersion modelVersion = modelVersionRepository.findById(modelVersionId).orElseThrow(ModelVersionNotFoundException::new);
         if (user.getUserId() != modelVersion.getModel().getUser().getUserId()) {
             throw new BadRequestException("제작자만 삭제할 수 있습니다.");
         }
@@ -76,6 +80,7 @@ public class ModelVersionService {
         // TODO 최신버전 삭제하면 Model에 최신버전 변경하기
         modelVersionRepository.save(modelVersion);
     }
-
+    
+    //TODO 결과 저장
 
 }

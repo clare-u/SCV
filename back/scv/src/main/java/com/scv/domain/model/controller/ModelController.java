@@ -40,7 +40,7 @@ public class ModelController {
             @ApiResponse(responseCode = "401", description = "인가되지 않은 사용자", content = @Content(schema = @Schema(implementation = ErrorResponse.class))),
             @ApiResponse(responseCode = "404", description = "사용자를 찾을 수 없음", content = @Content(schema = @Schema(implementation = ErrorResponse.class)))
     })
-    ResponseEntity<Void> createModel(ModelCreateRequest request, @AuthUser CustomOAuth2User user) {
+    ResponseEntity<Void> createModel(@RequestBody ModelCreateRequest request, @AuthUser CustomOAuth2User user) {
         modelService.createModel(request, user);
         return ResponseEntity.status(201).build();
     }
@@ -126,7 +126,7 @@ public class ModelController {
         return ResponseEntity.ok(pages);
     }
 
-    @GetMapping("/models")
+    @GetMapping("")
     @Operation(summary = "데이터로 모델 조회", description = "내 데이터로 모델을 조회합니다. orderBy = createdAt or updatedAt, direction = asc or desc. 미입력시 정렬 안함.")
     @ApiResponses(value = {
             @ApiResponse(responseCode = "200", description = "모델 조회 성공"),
