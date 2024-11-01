@@ -3,6 +3,7 @@ package com.scv.global.filter;
 import com.scv.domain.oauth2.CustomOAuth2User;
 import com.scv.domain.oauth2.dto.OAuth2UserDTO;
 import com.scv.domain.user.domain.User;
+import com.scv.domain.user.dto.UserCacheDTO;
 import com.scv.domain.user.exception.UserNotFoundException;
 import com.scv.domain.user.repository.UserRepository;
 import com.scv.global.util.JwtUtil;
@@ -13,6 +14,7 @@ import jakarta.servlet.http.HttpServletRequest;
 import jakarta.servlet.http.HttpServletResponse;
 import lombok.RequiredArgsConstructor;
 import org.springframework.beans.factory.annotation.Value;
+import org.springframework.data.redis.core.RedisTemplate;
 import org.springframework.security.authentication.UsernamePasswordAuthenticationToken;
 import org.springframework.security.core.Authentication;
 import org.springframework.security.core.context.SecurityContextHolder;
@@ -27,6 +29,7 @@ public class JwtFilter extends OncePerRequestFilter {
 
     private final JwtUtil jwtUtil;
     private final UserRepository userRepository;
+    private final RedisTemplate<String, Object> redisTemplate;
 
     @Value("${spring.jwt.token.access.name}")
     private String ACCESS_TOKEN_NAME;
@@ -59,18 +62,40 @@ public class JwtFilter extends OncePerRequestFilter {
         }
 
         String userUuid = jwtUtil.getUserUuid(accessToken);
-        User user = userRepository.findByUserUuid(userUuid).orElseThrow(UserNotFoundException::getInstance);
 
-        OAuth2UserDTO oAuth2UserDTO = OAuth2UserDTO.builder()
-                .userId(user.getUserId())
-                .userUuid(user.getUserUuid())
-                .userEmail(user.getUserEmail())
-                .userImageUrl(user.getUserImageUrl())
-                .userNickname(user.getUserNickname())
-                .userCreatedAt(user.getUserCreatedAt())
-                .userUpdatedAt(user.getUserUpdatedAt())
-                .userIsDeleted(user.isUserIsDeleted())
-                .build();
+        Object cachedUser = redisTemplate.opsForValue().get(userUuid);
+
+        OAuth2UserDTO oAuth2UserDTO = null;
+
+        if (cachedUser == null) {
+            User user = userRepository.findByUserUuid(userUuid).orElseThrow(UserNotFoundException::getInstance);
+
+            oAuth2UserDTO = OAuth2UserDTO.builder()
+                    .userId(user.getUserId())
+                    .userUuid(user.getUserUuid())
+                    .userEmail(user.getUserEmail())
+                    .userImageUrl(user.getUserImageUrl())
+                    .userNickname(user.getUserNickname())
+                    .userCreatedAt(user.getUserCreatedAt())
+                    .userUpdatedAt(user.getUserUpdatedAt())
+                    .userIsDeleted(user.isUserIsDeleted())
+                    .build();
+
+            redisTemplate.opsForValue().set(userUuid, UserCacheDTO.from(user));
+        }
+        else{
+            UserCacheDTO userCacheDTO = (UserCacheDTO) cachedUser;
+
+            oAuth2UserDTO = OAuth2UserDTO.builder()
+                    .userId(userCacheDTO.getUserId())
+                    .userUuid(userCacheDTO.getUserUuid())
+                    .userEmail(userCacheDTO.getUserEmail())
+                    .userNickname(userCacheDTO.getUserNickname())
+                    .userCreatedAt(userCacheDTO.getUserCreatedAt())
+                    .userUpdatedAt(userCacheDTO.getUserUpdatedAt())
+                    .userIsDeleted(userCacheDTO.isUserIsDeleted())
+                    .build();
+        }
 
         CustomOAuth2User customOAuth2User = new CustomOAuth2User(oAuth2UserDTO);
 

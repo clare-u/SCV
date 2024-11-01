@@ -7,7 +7,7 @@ import lombok.Builder;
 import lombok.Getter;
 import lombok.NoArgsConstructor;
 
-import java.time.ZonedDateTime;
+import java.time.LocalDateTime;
 import java.util.List;
 
 @Entity
@@ -36,14 +36,14 @@ public class User {
     private String userNickname;
 
     @Column(name = "user_created_at", nullable = false)
-    private ZonedDateTime userCreatedAt;
+    private LocalDateTime userCreatedAt;
 
     @Column(name = "user_updated_at", nullable = false)
-    private ZonedDateTime userUpdatedAt;
+    private LocalDateTime userUpdatedAt;
 
     @Column(name = "user_is_deleted", nullable = false)
     private boolean userIsDeleted;
-    
+
     // Model과 양방향 매핑
     @OneToMany(mappedBy = "user", fetch = FetchType.LAZY)
     private List<Model> models;
