@@ -25,7 +25,9 @@ export default function RootLayout({
       <body>
         <QueryProvider>
           <NavigationWrapper />
-          {children}
+          <div className="flex flex-col items-center justify-center">
+            {children}
+          </div>
         </QueryProvider>
       </body>
     </html>
