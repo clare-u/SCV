@@ -14,7 +14,7 @@ const FilterDropdown: React.FC<FilterDropdownProps> = ({
   return (
     <div className="relative inline-block text-left">
       <Menu>
-        <MenuButton className="inline-flex h-[40px] w-[95px] items-center justify-between rounded-md border border-gray-300 bg-white px-10 py-4 text-14 font-medium text-gray-700 shadow-sm hover:bg-gray-50">
+        <MenuButton className="inline-flex h-[40px] w-[95px] items-center justify-between rounded-md border border-gray-400 bg-white px-10 py-4 text-14 font-medium text-gray-900 shadow-sm hover:bg-gray-50">
           {selectedFilter}
           <span className="material-symbols-outlined text-gray-400">
             keyboard_arrow_down
@@ -26,7 +26,7 @@ const FilterDropdown: React.FC<FilterDropdownProps> = ({
               {({ active }) => (
                 <button
                   className={`${
-                    active ? "bg-gray-400 text-white" : "text-gray-900"
+                    active ? "bg-gray-200" : "text-gray-900"
                   } group flex w-full items-center rounded-md p-4 text-sm`}
                   onClick={() => onSelectFilter(option)}
                 >
