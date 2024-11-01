@@ -77,7 +77,7 @@ export default function Community() {
         </div>
       </div>
       {/* boardCard */}
-      <div className="grid grid-cols-3 gap-10">
+      <div className="grid grid-cols-3 gap-10 px-10 py-20">
         {cards.map((card) => (
           <BoardCard key={card.modelId} {...card} />
         ))}
