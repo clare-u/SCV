@@ -9,6 +9,7 @@ interface DatasetRadioProps {
 }
 
 const colorMapping: Record<string, ChipsProps["color"]> = {
+  전체: "black",
   MNIST: "indigo",
   Fashion: "amber",
   "CIFAR-10": "green",
