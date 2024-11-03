@@ -1,11 +1,5 @@
-"""
-Pydantic을 사용한 데이터 검증 스키마 정의
-각 레이어 타입별 필수 파라미터와 검증 규칙 정의
-예: Conv2d는 in_channels, out_channels, kernel_size 등이 필수
-ModelConfig, ModelLayerConfig 등 전체 모델 구성 스키마 정의
-"""
 from pydantic import BaseModel, Field, field_validator
-from typing import List, Literal, Union, Optional, Dict, Any
+from typing import List, Literal, Union, Optional
 import json
 
 class Flatten(BaseModel):
@@ -24,7 +18,7 @@ class Conv2d(BaseModel):
     @classmethod
     def validate_positive(cls, v: int, info) -> int:
         if v <= 0:
-            raise ValueError(f'{info.field_name} 는 양수여야 합니다.')
+            raise ValueError(f'{info.field_name} must be positive')
         return v
 
 
@@ -156,40 +150,8 @@ layer_classes = {
 }
 
 
-class ModelLayerConfig(BaseModel):
-    layers: List[Layer]
-
-    def model_dump(self) -> Dict[str, Any]:
-        return {
-            "layers": [layer.model_dump() for layer in self.layers]
-        }
-
 class ModelConfig(BaseModel):
-    modelLayerAt: ModelLayerConfig
-    dataName: str
-    dataTrainCnt: int = Field(gt=0)
-    dataTestCnt: int = Field(gt=0)
-    dataLabelCnt: int = Field(gt=0)
-    dataEpochCnt: int = Field(gt=0)
-    versionNo: Optional[int] = None
-
-    def model_dump(self) -> Dict[str, Any]:
-        return {
-            "modelLayerAt": self.modelLayerAt.model_dump(),
-            "dataName": self.dataName,
-            "dataTrainCnt": self.dataTrainCnt,
-            "dataTestCnt": self.dataTestCnt,
-            "dataLabelCnt": self.dataLabelCnt,
-            "dataEpochCnt": self.dataEpochCnt,
-            "versionNo": self.versionNo
-        }
-
-    @field_validator('dataName')
-    def validate_data_name(cls, v):
-        valid_datasets = ['MNIST', 'FashionMNIST', 'CIFAR10', 'SVHN', 'EMNIST']
-        if v not in valid_datasets:
-            raise ValueError(f'데이터셋은 {valid_datasets}에 존재하는 것 중 선택해야합니다.')
-        return v
+    model: List[Layer]
 
 
 def deserialize_layers(layers_json: str) -> List[Layer]:
@@ -200,15 +162,13 @@ def deserialize_layers(layers_json: str) -> List[Layer]:
         else:
             config = layers_json
 
-        # ModelConfig 검증
-        valid_config = ModelConfig(**config)
-
-        # 검증된 레이어 리스트 반환
-        return valid_config.modelLayerAt.layers
+        # ModelConfig를 사용하여 전체 구조 검증
+        model_config = ModelConfig(model=config["model"])
+        return model_config.model
 
     except json.JSONDecodeError as e:
-        raise ValueError(f"잘못된 JSON 형식: {str(e)}")
+        raise ValueError(f"Invalid JSON format: {str(e)}")
     except KeyError as e:
-        raise ValueError(f"필수 키 누락: {str(e)}")
+        raise ValueError(f"Missing required key: {str(e)}")
     except Exception as e:
-        raise ValueError(f"역직렬화 중 오류: {str(e)}")
+        raise ValueError(f"Error during deserialization: {str(e)}")
