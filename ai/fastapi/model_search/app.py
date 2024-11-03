@@ -8,7 +8,7 @@ from gpt import get_gpt_answer
 from fastapi.responses import JSONResponse
 from openai import AsyncOpenAI
 from dotenv import load_dotenv
-from model_layer_class import Layer, deserialize_layers
+from model_layer_class import Layer, deserialize_layers, serialize_layers
 import json
 import os
 
@@ -41,6 +41,9 @@ def read_model(model_version_id: str, layer_id: str):
         ids=["{}_{}".format(model_version_id, layer_id)]
     )
     
+    if len(res) == 0:
+        raise LayerNotFound()
+
     print(res[0])
     
     res[0]["layers"] = deserialize_layers(res[0]["layers"])
@@ -58,7 +61,7 @@ def insert_model(model_version_id: str, layer_id: str, req: Model_Insert_Request
                 "model_version_layer_id" : model_version_id + "_" + layer_id,
                 "model_version_id" : int(model_version_id),
                 "test_accuracy" : req.test_accuracy,
-                "layers" : json.dumps([layer.json() for layer in req.layers]),
+                "layers" : req.layers,
                 "cka_vec" : req.cka_vec
             }
         ]
@@ -68,7 +71,7 @@ def insert_model(model_version_id: str, layer_id: str, req: Model_Insert_Request
 
     res = dict(res)
 
-    if res["upsert_count"] == 1 :
+    if res["insert_count"] == 1 :
         return {"model_version_layer_id" : model_version_id + "_" + layer_id, "success": True}
 
     return {"model_version_layer_id" : model_version_id + "_" + layer_id, "success": False}
