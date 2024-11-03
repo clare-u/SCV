@@ -70,39 +70,39 @@ while not client.bucket_exists(minio_dataset_bucket):
 
 transform = transforms.Compose([transforms.ToTensor(), transforms.Normalize((0.5,), (0.5,))])
 
-# # MNIST 데이터셋
-# # train_dataset_mnist = MNIST(root='./data', train=True, download=True, transform=transform)
+# MNIST 데이터셋
+train_dataset_mnist = MNIST(root='./data', train=True, download=True, transform=transform)
 test_dataset_mnist = MNIST(root='./data', train=False, download=True, transform=transform)
-# # upload_dataset_to_minio(train_dataset_mnist,  "mnist_train")
-# # upload_dataset_to_minio(test_dataset_mnist, "mnist_test")
+upload_dataset_to_minio(train_dataset_mnist,  "mnist_train")
+upload_dataset_to_minio(test_dataset_mnist, "mnist_test")
 upload_cka_dataset_to_minio(test_dataset_mnist, "mnist")
 
-# # Fashion-MNIST 데이터셋
-# # train_dataset_fashion_mnist = FashionMNIST(root='./data', train=True, download=True, transform=transform)
+# Fashion-MNIST 데이터셋
+train_dataset_fashion_mnist = FashionMNIST(root='./data', train=True, download=True, transform=transform)
 test_dataset_fashion_mnist = FashionMNIST(root='./data', train=False, download=True, transform=transform)
-# # upload_dataset_to_minio(train_dataset_fashion_mnist, "fashion_mnist_train")
-# # upload_dataset_to_minio(test_dataset_fashion_mnist, "fashion_mnist_test")
+upload_dataset_to_minio(train_dataset_fashion_mnist, "fashion_mnist_train")
+upload_dataset_to_minio(test_dataset_fashion_mnist, "fashion_mnist_test")
 upload_cka_dataset_to_minio(test_dataset_fashion_mnist, "fashion_mnist")
 
 # # CIFAR-10 데이터셋
-# # train_dataset_cifar10 = CIFAR10(root='./data', train=True, download=True, transform=transform)
+train_dataset_cifar10 = CIFAR10(root='./data', train=True, download=True, transform=transform)
 test_dataset_cifar10 = CIFAR10(root='./data', train=False, download=True, transform=transform)
-# # upload_dataset_to_minio(train_dataset_cifar10, "cifar10_train")
-# # upload_dataset_to_minio(test_dataset_cifar10, "cifar10_test")
+upload_dataset_to_minio(train_dataset_cifar10, "cifar10_train")
+upload_dataset_to_minio(test_dataset_cifar10, "cifar10_test")
 upload_cka_dataset_to_minio(test_dataset_cifar10, "cifar10")
 
 # # SVHN 데이터셋
-# # train_dataset_svhn = SVHN(root='./data', split='train', download=True, transform=transform)
+train_dataset_svhn = SVHN(root='./data', split='train', download=True, transform=transform)
 test_dataset_svhn = SVHN(root='./data', split='test', download=True, transform=transform)
-# # # upload_dataset_to_minio(train_dataset_svhn, "svhn_train")
-# # upload_dataset_to_minio(test_dataset_svhn, "svhn_test")
+upload_dataset_to_minio(train_dataset_svhn, "svhn_train")
+upload_dataset_to_minio(test_dataset_svhn, "svhn_test")
 upload_cka_dataset_to_minio(test_dataset_svhn, "svhn")
 
 # EMNIST 데이터셋
-# train_dataset_emnist = EMNIST(root='./data', split='letters', train=True, download=True, transform=transform)
+train_dataset_emnist = EMNIST(root='./data', split='letters', train=True, download=True, transform=transform)
 test_dataset_emnist = EMNIST(root='./data', split='letters', train=False, download=True, transform=transform)
-# upload_dataset_to_minio(train_dataset_emnist, "emnist_train")
-# upload_dataset_to_minio(test_dataset_emnist, "emnist_test")
+upload_dataset_to_minio(train_dataset_emnist, "emnist_train")
+upload_dataset_to_minio(test_dataset_emnist, "emnist_test")
 upload_cka_dataset_to_minio(test_dataset_emnist, "emnist")
 
 
