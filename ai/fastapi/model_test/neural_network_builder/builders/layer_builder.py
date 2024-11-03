@@ -1,3 +1,8 @@
+"""
+PyTorch의 각종 레이어(Conv2d, Linear 등)를 실제로 생성하는 빌더 클래스
+각 레이어 타입별로 build 메소드를 제공
+레이어 객체를 받아서 실제 PyTorch 모듈로 변환
+"""
 import torch.nn as nn
 from typing import Dict, Any, Optional
 from ..utils.logger import setup_logger
@@ -8,7 +13,7 @@ logger = setup_logger(__name__)
 
 
 class LayerBuilder:
-    """Neural network layer builder"""
+    """신경망 레이어 빌더"""
 
     def __init__(self):
         self._layer_builders = {
@@ -46,14 +51,18 @@ class LayerBuilder:
     def build(self, layer: Layer) -> nn.Module:
         """Layer 객체 -> PyTorch 레이어 변환"""
         try:
+            if not hasattr(layer, 'name'):
+                raise BuilderError(f"레이어에 name 속성이 없습니다: {layer}")
+
             builder = self._layer_builders.get(layer.name)
             if not builder:
                 raise BuilderError(f"지원하지 않는 레이어 타입입니다.: {layer.name}")
+
             return builder(layer)
 
         except Exception as e:
-            logger.error(f"레이어 생성 중 오류 발생 {layer.name}: {str(e)}")
-            raise BuilderError(f"{layer.name} 레이어 생성 중 실패", layer.model_dump())
+            logger.error(f"레이어 생성 중 오류 발생 {layer.name if hasattr(layer, 'name') else 'Unknown'}: {str(e)}")
+            raise BuilderError(f"레이어 생성 중 실패: {str(e)}")
 
     # Convolution Layers
     def _build_conv2d(self, layer: Layer) -> nn.Conv2d:
@@ -61,8 +70,8 @@ class LayerBuilder:
             in_channels=layer.in_channels,
             out_channels=layer.out_channels,
             kernel_size=layer.kernel_size,
-            stride=getattr(layer, 'stride', 1),
-            padding=getattr(layer, 'padding', 0)
+            # stride=getattr(layer, 'stride', 1),
+            # padding=getattr(layer, 'padding', 0)
         )
 
     def _build_conv_transpose2d(self, layer: Layer) -> nn.ConvTranspose2d:
@@ -70,8 +79,8 @@ class LayerBuilder:
             in_channels=layer.in_channels,
             out_channels=layer.out_channels,
             kernel_size=layer.kernel_size,
-            stride=getattr(layer, 'stride', 1),
-            padding=getattr(layer, 'padding', 0)
+            # stride=getattr(layer, 'stride', 1),
+            # padding=getattr(layer, 'padding', 0)
         )
 
     # Pooling Layers
@@ -79,22 +88,26 @@ class LayerBuilder:
         return nn.MaxPool2d(
             kernel_size=layer.kernel_size,
             stride=layer.stride if hasattr(layer, 'stride') else None,
-            padding=getattr(layer, 'padding', 0)
+            # padding=getattr(layer, 'padding', 0)
         )
 
     def _build_avgpool2d(self, layer: Layer) -> nn.AvgPool2d:
         return nn.AvgPool2d(
             kernel_size=layer.kernel_size,
             stride=layer.stride if hasattr(layer, 'stride') else None,
-            padding=getattr(layer, 'padding', 0)
+            # padding=getattr(layer, 'padding', 0)
         )
 
     # Padding Layers
     def _build_reflection_pad2d(self, layer: Layer) -> nn.ReflectionPad2d:
-        return nn.ReflectionPad2d(padding=layer.padding)
+        return nn.ReflectionPad2d(
+            padding=layer.padding
+        )
 
     def _build_replication_pad2d(self, layer: Layer) -> nn.ReplicationPad2d:
-        return nn.ReplicationPad2d(padding=layer.padding)
+        return nn.ReplicationPad2d(
+            padding=layer.padding
+        )
 
     def _build_zero_pad2d(self, layer: Layer) -> nn.ZeroPad2d:
         return nn.ZeroPad2d(padding=layer.padding)
@@ -109,13 +122,13 @@ class LayerBuilder:
     def _build_leaky_relu(self, layer: Layer) -> nn.LeakyReLU:
         return nn.LeakyReLU(
             negative_slope=layer.negative_slope,
-            inplace=getattr(layer, 'inplace', False)
+            # inplace=getattr(layer, 'inplace', False)
         )
 
     def _build_elu(self, layer: Layer) -> nn.ELU:
         return nn.ELU(
             alpha=layer.alpha,
-            inplace=getattr(layer, 'inplace', False)
+            # inplace=getattr(layer, 'inplace', False)
         )
 
     def _build_prelu(self, layer: Layer) -> nn.PReLU:
@@ -144,7 +157,7 @@ class LayerBuilder:
         return nn.Linear(
             in_features=layer.in_features,
             out_features=layer.out_features,
-            bias=getattr(layer, 'bias', True)
+            # bias=getattr(layer, 'bias', True)
         )
 
     def _build_flatten(self, layer: Layer) -> nn.Flatten:
