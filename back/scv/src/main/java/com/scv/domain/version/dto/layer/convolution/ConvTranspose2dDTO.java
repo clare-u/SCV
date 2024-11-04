@@ -8,8 +8,7 @@ public record ConvTranspose2dDTO(
         int outChannels,
         int kernelSize
 ) implements LayerDTO {
-    @Override
-    public String getName() {
-        return name;
+    public ConvTranspose2dDTO(int inChannels, int outChannels, int kernelSize) {
+        this("ConvTranspose2d", inChannels, outChannels, kernelSize);
     }
 }

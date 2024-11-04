@@ -1,5 +1,7 @@
 package com.scv.domain.version.service;
 
+import com.fasterxml.jackson.core.JsonProcessingException;
+import com.fasterxml.jackson.databind.ObjectMapper;
 import com.scv.domain.model.domain.Model;
 import com.scv.domain.model.exception.ModelNotFoundException;
 import com.scv.domain.model.repository.ModelRepository;
@@ -25,6 +27,12 @@ public class ModelVersionService {
 
     private final ModelRepository modelRepository;
     private final ModelVersionRepository modelVersionRepository;
+    private final ObjectMapper objectMapper = new ObjectMapper();
+
+    public String convertToJson(Object object) throws JsonProcessingException {
+        return objectMapper.writeValueAsString(object); // Java 객체를 JSON 문자열로 변환
+    }
+
 
     // 모델 버전 생성
     public void createModelVersion(Long modelId, ModelVersionRequest request, CustomOAuth2User user) throws BadRequestException {
@@ -34,10 +42,18 @@ public class ModelVersionService {
             throw new BadRequestException("모델의 제작자만 생성할 수 있습니다.");
         }
 
+        // JSON으로 변환
+        String layersJson;
+        try {
+            layersJson = objectMapper.writeValueAsString(request.layers());
+        } catch (JsonProcessingException e) {
+            throw new RuntimeException("JSON 변환 오류", e);
+        }
+
         ModelVersion modelVersion = ModelVersion.builder()
                 .model(model)
                 .versionNo(request.versionNo())
-                .layers(request.layers().toString())
+                .layers(layersJson)
                 .build();
 
         modelVersionRepository.save(modelVersion);
@@ -63,9 +79,16 @@ public class ModelVersionService {
         if (user.getUserId() != modelVersion.getModel().getUser().getUserId()) {
             throw new BadRequestException("제작자만 수정할 수 있습니다.");
         }
-        //TODO Layer JSON 처리 확인하기
-        modelVersion.updateLayers(request.layers().toString());
 
+        // JSON으로 변환
+        String layersJson;
+        try {
+            layersJson = objectMapper.writeValueAsString(request.layers());
+        } catch (JsonProcessingException e) {
+            throw new RuntimeException("JSON 변환 오류", e);
+        }
+
+        modelVersion.updateLayers(layersJson);  // JSON 문자열로 업데이트
         modelVersionRepository.save(modelVersion);
     }
 

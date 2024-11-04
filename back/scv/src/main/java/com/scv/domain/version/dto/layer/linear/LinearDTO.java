@@ -7,8 +7,7 @@ public record LinearDTO(
         int inFeatures,
         int outFeatures
 ) implements LayerDTO {
-    @Override
-    public String getName() {
-        return name;
+    public LinearDTO(int inFeatures, int outFeatures) {
+        this("Linear", inFeatures, outFeatures);
     }
 }

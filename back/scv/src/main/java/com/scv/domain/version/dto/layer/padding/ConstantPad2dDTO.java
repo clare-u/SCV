@@ -7,8 +7,7 @@ public record ConstantPad2dDTO(
         int padding,
         double value
 ) implements LayerDTO {
-    @Override
-    public String getName() {
-        return name;
+    public ConstantPad2dDTO(int padding, double value) {
+        this("ConstantPad2d", padding, value);
     }
 }

@@ -7,8 +7,7 @@ public record LogSoftmaxDTO(
         String name,
         int dim
 ) implements LayerDTO {
-    @Override
-    public String getName() {
-        return name;
+    public LogSoftmaxDTO(int dim) {
+        this("LogSoftmax", dim);
     }
 }

@@ -7,8 +7,7 @@ public record AvgPool2dDTO(
         int kernelSize,
         int stride
 ) implements LayerDTO {
-    @Override
-    public String getName() {
-        return name;
+    public AvgPool2dDTO(int kernelSize, int stride) {
+        this("AvgPool2d", kernelSize, stride);
     }
 }

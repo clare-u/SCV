@@ -6,8 +6,7 @@ public record ReflectionPad2dDTO(
         String name,
         int padding
 ) implements LayerDTO {
-    @Override
-    public String getName() {
-        return name;
+    public ReflectionPad2dDTO(int padding) {
+        this("ReflectionPad2d", padding);
     }
 }

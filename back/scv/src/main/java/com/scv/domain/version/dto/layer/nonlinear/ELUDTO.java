@@ -6,8 +6,7 @@ public record ELUDTO(
         String name,
         double alpha
 ) implements LayerDTO {
-    @Override
-    public String getName() {
-        return name;
+    public ELUDTO(double alpha) {
+        this("ELU", alpha);
     }
 }

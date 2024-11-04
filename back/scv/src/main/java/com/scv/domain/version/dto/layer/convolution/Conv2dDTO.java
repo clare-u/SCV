@@ -8,8 +8,7 @@ public record Conv2dDTO(
         int outChannels,
         int kernelSize
 ) implements LayerDTO {
-    @Override
-    public String getName() {
-        return name;
+    public Conv2dDTO(int inChannels, int outChannels, int kernelSize) {
+        this("Conv2d", inChannels, outChannels, kernelSize);
     }
 }

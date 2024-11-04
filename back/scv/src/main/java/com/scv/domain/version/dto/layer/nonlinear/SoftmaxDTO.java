@@ -6,8 +6,7 @@ public record SoftmaxDTO(
         String name,
         int dim
 ) implements LayerDTO {
-    @Override
-    public String getName() {
-        return name;
+    public SoftmaxDTO(int dim) {
+        this("Softmax", dim);
     }
 }

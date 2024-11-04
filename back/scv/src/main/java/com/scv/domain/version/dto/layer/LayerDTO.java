@@ -16,26 +16,25 @@ import com.scv.domain.version.dto.layer.pooling.MaxPool2dDTO;
 @JsonTypeInfo(
         use = JsonTypeInfo.Id.NAME, // "name" 필드로 구분
         include = JsonTypeInfo.As.PROPERTY,
-        property = "type"
+        property = "name"
 )
 @JsonSubTypes({
-        @JsonSubTypes.Type(value = Conv2dDTO.class, name = "conv2d"),
-        @JsonSubTypes.Type(value = ConvTranspose2dDTO.class, name = "convtranspose2d"),
-        @JsonSubTypes.Type(value = MaxPool2dDTO.class, name = "maxpool2d"),
-        @JsonSubTypes.Type(value = AvgPool2dDTO.class, name = "avgpool2d"),
-        @JsonSubTypes.Type(value = ReflectionPad2dDTO.class, name = "reflectionpad2d"),
-        @JsonSubTypes.Type(value = ReplicationPad2dDTO.class, name = "replicationpad2d"),
-        @JsonSubTypes.Type(value = ZeroPad2dDTO.class, name = "zeropad2d"),
-        @JsonSubTypes.Type(value = ConstantPad2dDTO.class, name = "constantpad2d"),
-        @JsonSubTypes.Type(value = ReLUDTO.class, name = "relu"),
-        @JsonSubTypes.Type(value = LeakyReLUDTO.class, name = "leakyrelu"),
-        @JsonSubTypes.Type(value = ELUDTO.class, name = "elu"),
-        @JsonSubTypes.Type(value = PReLUDTO.class, name = "prelu"),
-        @JsonSubTypes.Type(value = SoftmaxDTO.class, name = "softmax"),
-        @JsonSubTypes.Type(value = LogSoftmaxDTO.class, name = "logsoftmax"),
-        @JsonSubTypes.Type(value = GELUDTO.class, name = "gelu"),
-        @JsonSubTypes.Type(value = LinearDTO.class, name = "linear")
+        @JsonSubTypes.Type(value = Conv2dDTO.class, name = "Conv2d"),
+        @JsonSubTypes.Type(value = ConvTranspose2dDTO.class, name = "ConvTranspose2d"),
+        @JsonSubTypes.Type(value = MaxPool2dDTO.class, name = "MaxPool2d"),
+        @JsonSubTypes.Type(value = AvgPool2dDTO.class, name = "AvgPool2d"),
+        @JsonSubTypes.Type(value = ReflectionPad2dDTO.class, name = "ReflectionPad2d"),
+        @JsonSubTypes.Type(value = ReplicationPad2dDTO.class, name = "ReplicationPad2d"),
+        @JsonSubTypes.Type(value = ZeroPad2dDTO.class, name = "ZeroPad2d"),
+        @JsonSubTypes.Type(value = ConstantPad2dDTO.class, name = "ConstantPad2d"),
+        @JsonSubTypes.Type(value = ReLUDTO.class, name = "ReLU"),
+        @JsonSubTypes.Type(value = LeakyReLUDTO.class, name = "LeakyReLU"),
+        @JsonSubTypes.Type(value = ELUDTO.class, name = "ELU"),
+        @JsonSubTypes.Type(value = PReLUDTO.class, name = "PReLU"),
+        @JsonSubTypes.Type(value = SoftmaxDTO.class, name = "Softmax"),
+        @JsonSubTypes.Type(value = LogSoftmaxDTO.class, name = "LogSoftmax"),
+        @JsonSubTypes.Type(value = GELUDTO.class, name = "GELU"),
+        @JsonSubTypes.Type(value = LinearDTO.class, name = "Linear")
 })
 public interface LayerDTO {
-    String getName();
 }

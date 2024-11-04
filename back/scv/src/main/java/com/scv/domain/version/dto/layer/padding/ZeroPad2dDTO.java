@@ -6,8 +6,7 @@ public record ZeroPad2dDTO(
         String name,
         int padding
 ) implements LayerDTO {
-    @Override
-    public String getName() {
-        return name;
+    public ZeroPad2dDTO(int padding) {
+        this("ZeroPad2d", padding);
     }
 }

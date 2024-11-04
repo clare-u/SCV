@@ -5,8 +5,7 @@ import com.scv.domain.version.dto.layer.LayerDTO;
 public record GELUDTO(
         String name
 ) implements LayerDTO {
-    @Override
-    public String getName() {
-        return name;
+    public GELUDTO() {
+        this("GELU");
     }
 }

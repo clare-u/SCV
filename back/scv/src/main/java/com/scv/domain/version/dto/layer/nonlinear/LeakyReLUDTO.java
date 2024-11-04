@@ -6,8 +6,7 @@ public record LeakyReLUDTO(
         String name,
         double negativeSlope
 ) implements LayerDTO {
-    @Override
-    public String getName() {
-        return name;
+    public LeakyReLUDTO(double negativeSlope) {
+        this("LeakyReLU", negativeSlope);
     }
 }

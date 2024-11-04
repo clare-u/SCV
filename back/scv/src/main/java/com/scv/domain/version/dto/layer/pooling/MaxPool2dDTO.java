@@ -7,8 +7,7 @@ public record MaxPool2dDTO(
         int kernelSize,
         int stride
 ) implements LayerDTO {
-    @Override
-    public String getName() {
-        return name;
+    public MaxPool2dDTO(int kernelSize, int stride) {
+        this("MaxPool2d", kernelSize, stride);
     }
 }

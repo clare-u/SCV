@@ -7,8 +7,7 @@ public record PReLUDTO(
         int numParameters,
         double init
 ) implements LayerDTO {
-    @Override
-    public String getName() {
-        return name;
+    public PReLUDTO(int numParameters, double init) {
+        this("PReLU", numParameters, init);
     }
 }

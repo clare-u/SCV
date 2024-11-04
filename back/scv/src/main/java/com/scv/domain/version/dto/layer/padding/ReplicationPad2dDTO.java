@@ -6,8 +6,7 @@ public record ReplicationPad2dDTO(
         String name,
         int padding
 ) implements LayerDTO {
-    @Override
-    public String getName() {
-        return name;
+    public ReplicationPad2dDTO(int padding) {
+        this("ReplicationPad2d", padding);
     }
 }
