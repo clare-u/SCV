@@ -1,6 +1,7 @@
 package com.scv.domain.user.dto.response;
 
 import com.fasterxml.jackson.annotation.JsonProperty;
+import com.scv.domain.user.domain.User;
 import lombok.AllArgsConstructor;
 import lombok.Builder;
 import lombok.NoArgsConstructor;
@@ -24,4 +25,11 @@ public class UserProfileResponseDTO {
 
     @JsonProperty("userRepo")
     private String userRepo;
+
+    public UserProfileResponseDTO(User user) {
+        this.userEmail = user.getUserEmail();
+        this.userImageUrl = user.getUserImageUrl();
+        this.userNickname = user.getUserNickname();
+    }
+
 }

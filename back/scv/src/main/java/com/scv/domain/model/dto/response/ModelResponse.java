@@ -19,11 +19,7 @@ public record ModelResponse(
     public ModelResponse(User user, Model model) {
         this(
                 user.getUserId(),
-                new UserProfileResponseDTO(
-                        user.getUserEmail(),
-                        user.getUserImageUrl(),
-                        user.getUserNickname()
-                ),
+                new UserProfileResponseDTO(user),
                 model.getId(),
                 model.getName(),
                 model.getData().getName(),
