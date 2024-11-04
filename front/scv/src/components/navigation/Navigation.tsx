@@ -7,6 +7,7 @@ import NavigationItem from "./NavigationItem";
 import NavigationProfile from "./NavigationProfile";
 import { useMemberStore } from "@/store/memberStore";
 import { useFetchMember } from "@/hooks";
+import Loading from "../loading/Loading";
 
 const Navigation = () => {
   const member = useMemberStore((state) => state.member); // zustand에서 현재 member 상태 가져오기
@@ -44,7 +45,10 @@ const Navigation = () => {
 
       {/* 프로필 영역 */}
       <div className="flex gap-36 p-10">
-        {memberData ? (
+        {isLoading ? (
+          // 로딩 중일 때 표시할 로딩 스피너 또는 텍스트
+          <Loading />
+        ) : memberData ? (
           <NavigationProfile
             image={memberData.userImageUrl}
             nickname={memberData.userNickname}

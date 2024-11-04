@@ -60,7 +60,7 @@ function Community() {
     page: currentPage - 1,
     size: 12,
     ...getSortParams(selectedFilter),
-    data: selected !== "전체" ? selected : undefined,
+    dataName: selected !== "전체" ? selected : undefined,
   });
 
   // URL 업데이트 함수

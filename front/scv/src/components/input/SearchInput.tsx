@@ -18,14 +18,12 @@ const SearchInput: React.FC<SearchInputProps> = ({
 
   const handleKeyDown = (event: React.KeyboardEvent<HTMLInputElement>) => {
     if (event.key === "Enter" && value.trim()) {
-      onSubmit(value.trim());
+      onSubmit(value);
     }
   };
 
   const handleSearchClick = () => {
-    if (value.trim()) {
-      onSubmit(value.trim());
-    }
+    onSubmit(value);
   };
 
   return (

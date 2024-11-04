@@ -26,5 +26,6 @@ export interface ModelQueryParams {
   size: number;
   orderBy?: "updatedAt";
   direction?: "asc" | "desc";
-  data?: string;
+  dataName?: string;
+  modelName?: string;
 }
