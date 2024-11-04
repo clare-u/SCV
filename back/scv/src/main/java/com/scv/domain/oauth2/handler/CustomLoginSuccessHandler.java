@@ -18,11 +18,8 @@ public class CustomLoginSuccessHandler extends SimpleUrlAuthenticationSuccessHan
 
     private final JwtUtil jwtUtil;
 
-    @Value("${spring.jwt.token.access.name}")
-    private String ACCESS_TOKEN_NAME;
-
-    @Value("${spring.jwt.token.refresh.name}")
-    private String REFRESH_TOKEN_NAME;
+    private final String ACCESS_TOKEN_NAME = System.getenv("JWT_ACCESS_NAME");
+    private final String REFRESH_TOKEN_NAME = System.getenv("JWT_REFRESH_NAME");
 
     @Value("${spring.jwt.token.access.expiration}")
     private int ACCESS_TOKEN_EXPIRATION;
@@ -46,7 +43,7 @@ public class CustomLoginSuccessHandler extends SimpleUrlAuthenticationSuccessHan
         cookie.setMaxAge(expiration * 60);
 //        cookie.setSecure(true);
         cookie.setPath("/");
-//        cookie.setHttpOnly(true);
+        cookie.setHttpOnly(true);
 
         return cookie;
     }

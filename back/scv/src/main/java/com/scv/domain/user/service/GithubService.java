@@ -96,6 +96,34 @@ public class GithubService {
         updateBranch(token, commitSha, defaultBranch);
     }
 
+    public String getGithubUserEmail(String accessToken) {
+        HttpHeaders headers = new HttpHeaders();
+        headers.set("Authorization", "Bearer " + accessToken);
+
+        HttpEntity<String> entity = new HttpEntity<>(headers);
+
+        RestTemplate restTemplate = new RestTemplate();
+        ResponseEntity<List<Map<String, Object>>> response = restTemplate.exchange(
+                "https://api.github.com/user/emails",
+                HttpMethod.GET,
+                entity,
+                new ParameterizedTypeReference<>() {
+                }
+        );
+
+        List<Map<String, Object>> emails = response.getBody();
+
+        if (emails != null) {
+            for (Map<String, Object> email : emails) {
+                if ((Boolean) email.get("primary")) {
+                    return (String) email.get("email");
+                }
+            }
+        }
+
+        return null;
+    }
+
     ////////////////////////////////////////////////////////////////////////////////////////////////////
     ////////////////////////////////////////////////////////////////////////////////////////////////////
     ////////////////////////////////////////////////////////////////////////////////////////////////////
