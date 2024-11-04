@@ -14,9 +14,6 @@ const Navigation = () => {
   const setMember = useMemberStore((state) => state.setMember); // zustand에서 setMember 가져오기
   const [fetchData, setFetchData] = useState(false); // API 호출 여부를 제어하기 위한 로컬 상태
 
-  // 레포 테스트용
-  const dummyRepo = "https://github.com/clare-u/scv-repo";
-
   useEffect(() => {
     if (!member) {
       setFetchData(true); // member가 없으면 데이터를 받아오도록 설정
@@ -56,7 +53,7 @@ const Navigation = () => {
             image={memberData.userImageUrl}
             nickname={memberData.userNickname}
             email={memberData.userEmail}
-            repo={dummyRepo} // memberData.userRepo
+            repo={memberData.userRepo}
           />
         ) : (
           <NavigationItem href="/login" icon="login">
