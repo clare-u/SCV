@@ -13,6 +13,7 @@ import CloneModal from "@/components/modal/CloneModal";
 import BoardCard from "@/components/card/BoardCard";
 import WorkspaceCard from "@/components/card/WorkspaceCard";
 import Pagination from "@/components/pagination/Pagination";
+import ModalButton from "@/components/button/ModalButton";
 
 function Home() {
   // 검색 인풋
@@ -247,6 +248,11 @@ function Home() {
         pageCount={10}
         itemCountPerPage={50}
       />
+
+      {/* modalButton */}
+      <div className="flex bg-indigo-900 p-20">
+        <ModalButton icon="logout">Button</ModalButton>
+      </div>
     </div>
   );
 }
