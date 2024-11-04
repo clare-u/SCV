@@ -1,0 +1,5 @@
+.idea/
+**/.idea/
+*.iml
+*.egg-info/
+__pycache__/

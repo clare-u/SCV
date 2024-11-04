@@ -1,0 +1,11 @@
+fastapi
+uvicorn
+torch
+torchvision
+minio
+python-multipart  # FastAPI에서 파일 업로드 처리를 위해
+pydantic  # FastAPI의 데이터 검증을 위해
+requests  # HTTP 요청을 위해
+numpy  # 수치 연산을 위해
+pandas  # 데이터 처리를 위해
+python-dotenv  # 환경 변수 관리를 위해
