@@ -76,19 +76,24 @@ public class ModelService {
     public Page<ModelResponse> getMyModels(Pageable pageable, CustomOAuth2User user, String dataName, String modelName) {
         modelName = (modelName == null || modelName.isEmpty()) ? null : modelName;
         dataName = (dataName == null || dataName.isEmpty()) ? null : dataName;
-
         Long userId = user.getUserId();
+        User existingUser = userRepository.findById(userId).orElseThrow(UserNotFoundException::getInstance);
+
         Page<Model> models = modelRepository.searchMyModels(modelName, dataName, userId, pageable);
-        return models.map(ModelResponse::new);
+        return models.map(model -> new ModelResponse(existingUser, model));
     }
 
-    // 전체 모델 조회
     @Transactional(readOnly = true)
     public Page<ModelResponse> getAllModels(Pageable pageable, String dataName, String modelName) {
         modelName = (modelName == null || modelName.isEmpty()) ? null : modelName;
         dataName = (dataName == null || dataName.isEmpty()) ? null : dataName;
+
         Page<Model> models = modelRepository.searchModels(modelName, dataName, pageable);
-        return models.map(ModelResponse::new);
+
+        return models.map(model -> {
+            User user = model.getUser();
+            return new ModelResponse(user, model);
+        });
     }
 
     // 모델 버전 조회
