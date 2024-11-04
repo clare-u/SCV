@@ -11,5 +11,5 @@ import lombok.NoArgsConstructor;
 public class CommonSuccessResponseDTO {
 
     @JsonProperty("message")
-    String message;
+    private String message;
 }

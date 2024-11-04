@@ -409,7 +409,11 @@ $RECYCLE.BIN/
 *.lnk
 
 # ai
+/ai/fastapi/model_search/Milvus/volumes
 /ai/fastapi/model_test/data
 /ai/fastapi/model_train/data
+/ai/fastapi/model_test/MinIO/data
+
+.vscode
 
 # End of https://www.toptal.com/developers/gitignore/api/venv,visualstudiocode,macos,windows,react,dotenv,direnv,intellij,python,jupyternotebooks

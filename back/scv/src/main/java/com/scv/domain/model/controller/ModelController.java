@@ -7,6 +7,7 @@ import com.scv.domain.oauth2.AuthUser;
 import com.scv.domain.oauth2.CustomOAuth2User;
 import com.scv.domain.version.dto.response.ModelVersionResponse;
 import com.scv.global.error.ErrorResponse;
+import com.scv.global.util.PageableUtil;
 import io.swagger.v3.oas.annotations.Operation;
 import io.swagger.v3.oas.annotations.media.Content;
 import io.swagger.v3.oas.annotations.media.Schema;
@@ -16,9 +17,7 @@ import io.swagger.v3.oas.annotations.tags.Tag;
 import lombok.RequiredArgsConstructor;
 import org.apache.coyote.BadRequestException;
 import org.springframework.data.domain.Page;
-import org.springframework.data.domain.PageRequest;
 import org.springframework.data.domain.Pageable;
-import org.springframework.data.domain.Sort;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.*;
 
@@ -31,6 +30,7 @@ import java.util.List;
 public class ModelController {
 
     private final ModelService modelService;
+    private final PageableUtil pageableUtil;
 
     @PostMapping("")
     @Operation(summary = "모델 생성", description = "새로운 모델을 생성합니다.")
@@ -45,32 +45,6 @@ public class ModelController {
         return ResponseEntity.status(201).build();
     }
 
-//    @GetMapping("")
-//    @Operation(summary = "전체 모델 목록 조회", description = "모든 모델을 조회합니다. orderBy = createdAt or updatedAt, direction = asc or desc. 미입력시 정렬 안함.")
-//    @ApiResponses(value = {
-//            @ApiResponse(responseCode = "200", description = "모델 조회 성공"),
-//            @ApiResponse(responseCode = "400", description = "잘못된 요청", content = @Content(schema = @Schema(implementation = ErrorResponse.class))),
-//    })
-//    public ResponseEntity<Page<ModelResponse>> getAllModels(
-//            @RequestParam(defaultValue = "0") int page,
-//            @RequestParam(defaultValue = "12") int size,
-//            @RequestParam(defaultValue = "") String orderBy,
-//            @RequestParam(defaultValue = "") String direction
-//    ) {
-//
-//        Pageable pageable;
-//        if (!orderBy.isEmpty()) {
-//            Sort sort = direction.equalsIgnoreCase("desc") ? Sort.by(orderBy).descending() : Sort.by(orderBy).ascending();
-//            pageable = PageRequest.of(page, size, sort);
-//        } else {
-//            pageable = PageRequest.of(page, size);
-//        }
-//
-//        Page<ModelResponse> pages = modelService.getAllModels(pageable);
-//
-//        return ResponseEntity.status(200).body(pages);
-//    }
-
     @DeleteMapping("/{modelId}")
     @Operation(summary = "모델 삭제", description = "모델 삭제하고, 모든 모델 버전을 삭제합니다.(soft delete)")
     @ApiResponses(value = {
@@ -83,7 +57,6 @@ public class ModelController {
         modelService.deleteModel(modelId, user);
         return ResponseEntity.noContent().build();
     }
-
 
     @PatchMapping("/{modelId}")
     @Operation(summary = "모델 수정", description = "모델 이름을 수정합니다.")
@@ -98,66 +71,6 @@ public class ModelController {
         return ResponseEntity.ok().build();
     }
 
-
-    @GetMapping("/users")
-    @Operation(summary = "내 모델 목록 조회", description = "내 모든 모델을 조회합니다. orderBy = createdAt or updatedAt, direction = asc or desc. 미입력시 정렬 안함.")
-    @ApiResponses(value = {
-            @ApiResponse(responseCode = "200", description = "모델 조회 성공"),
-            @ApiResponse(responseCode = "400", description = "잘못된 요청", content = @Content(schema = @Schema(implementation = ErrorResponse.class))),
-    })
-    public ResponseEntity<Page<ModelResponse>> getdMyModels(
-            @RequestParam(defaultValue = "0") int page,
-            @RequestParam(defaultValue = "12") int size,
-            @RequestParam(defaultValue = "") String orderBy,
-            @RequestParam(defaultValue = "") String direction,
-            @AuthUser CustomOAuth2User user
-    ) {
-
-        Pageable pageable;
-        if (!orderBy.isEmpty()) {
-            Sort sort = direction.equalsIgnoreCase("desc") ? Sort.by(orderBy).descending() : Sort.by(orderBy).ascending();
-            pageable = PageRequest.of(page, size, sort);
-        } else {
-            pageable = PageRequest.of(page, size);
-        }
-
-        Page<ModelResponse> pages = modelService.getMyModels(pageable, user);
-
-        return ResponseEntity.ok(pages);
-    }
-
-    @GetMapping("")
-    @Operation(summary = "데이터로 모델 조회", description = "내 데이터로 모델을 조회합니다. orderBy = createdAt or updatedAt, direction = asc or desc. 미입력시 정렬 안함.")
-    @ApiResponses(value = {
-            @ApiResponse(responseCode = "200", description = "모델 조회 성공"),
-            @ApiResponse(responseCode = "400", description = "잘못된 요청", content = @Content(schema = @Schema(implementation = ErrorResponse.class))),
-    })
-    public ResponseEntity<Page<ModelResponse>> findModelsByData(
-            @RequestParam(defaultValue = "0") int page,
-            @RequestParam(defaultValue = "12") int size,
-            @RequestParam(defaultValue = "") String orderBy,
-            @RequestParam(defaultValue = "") String direction,
-            @RequestParam(defaultValue = "") String data
-    ) {
-        Pageable pageable;
-        if (!orderBy.isEmpty()) {
-            Sort sort = direction.equalsIgnoreCase("desc") ? Sort.by(orderBy).descending() : Sort.by(orderBy).ascending();
-            pageable = PageRequest.of(page, size, sort);
-        } else {
-            pageable = PageRequest.of(page, size);
-        }
-
-        Page<ModelResponse> pages;
-        if (data.isEmpty()) {
-            pages = modelService.getAllModels(pageable);
-        } else {
-            pages = modelService.findModelsByData(pageable, data);
-        }
-
-        return ResponseEntity.ok(pages);
-    }
-
-
     @GetMapping("/{modelId}")
     @Operation(summary = "모델의 버전들 조회", description = "모델 버전들을 조회합니다.")
     @ApiResponses(value = {
@@ -165,10 +78,46 @@ public class ModelController {
             @ApiResponse(responseCode = "400", description = "잘못된 요청", content = @Content(schema = @Schema(implementation = ErrorResponse.class))),
     })
     public ResponseEntity<List<ModelVersionResponse>> getModelVersion(@PathVariable("modelId") Long modelId) {
-
         List<ModelVersionResponse> modelVersions = modelService.getModelVersions(modelId);
-
         return ResponseEntity.ok(modelVersions);
     }
 
+    @GetMapping("/")
+    @Operation(summary = "전체 모델 조회", description = "전체 모델을 조회합니다. orderBy = createdAt or updatedAt, direction = asc or desc. 미입력시 정렬 안함.")
+    @ApiResponses(value = {
+            @ApiResponse(responseCode = "200", description = "모델 조회 성공"),
+            @ApiResponse(responseCode = "400", description = "잘못된 요청", content = @Content(schema = @Schema(implementation = ErrorResponse.class))),
+    })
+    public ResponseEntity<Page<ModelResponse>> getAllModels(
+            @RequestParam(defaultValue = "") String dataName,
+            @RequestParam(defaultValue = "") String modelName,
+            @RequestParam(defaultValue = "0") int page,
+            @RequestParam(defaultValue = "12") int size,
+            @RequestParam(defaultValue = "") String orderBy,
+            @RequestParam(defaultValue = "") String direction
+    ) {
+        Pageable pageable = pageableUtil.createPageable(page, size, orderBy, direction);
+        Page<ModelResponse> pages = modelService.getAllModels(pageable, dataName, modelName);
+        return ResponseEntity.ok(pages);
+    }
+
+    @GetMapping("/users")
+    @Operation(summary = "내 모델 조회", description = "내 모델을 조회합니다. orderBy = createdAt or updatedAt, direction = asc or desc. 미입력시 정렬 안함.")
+    @ApiResponses(value = {
+            @ApiResponse(responseCode = "200", description = "모델 조회 성공"),
+            @ApiResponse(responseCode = "400", description = "잘못된 요청", content = @Content(schema = @Schema(implementation = ErrorResponse.class))),
+    })
+    public ResponseEntity<Page<ModelResponse>> getMyModels(
+            @RequestParam(defaultValue = "") String dataName,
+            @RequestParam(defaultValue = "") String modelName,
+            @RequestParam(defaultValue = "0") int page,
+            @RequestParam(defaultValue = "12") int size,
+            @RequestParam(defaultValue = "") String orderBy,
+            @RequestParam(defaultValue = "") String direction,
+            @AuthUser CustomOAuth2User user
+    ) {
+        Pageable pageable = pageableUtil.createPageable(page, size, orderBy, direction);
+        Page<ModelResponse> pages = modelService.getMyModels(pageable, user, dataName, modelName);
+        return ResponseEntity.ok(pages);
+    }
 }

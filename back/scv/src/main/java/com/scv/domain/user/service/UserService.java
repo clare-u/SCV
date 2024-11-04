@@ -1,6 +1,5 @@
 package com.scv.domain.user.service;
 
-import com.scv.domain.oauth2.CustomOAuth2User;
 import com.scv.domain.user.domain.User;
 import com.scv.domain.user.dto.request.CreateGithubRepositoryRequestDTO;
 import com.scv.domain.user.dto.response.CommonSuccessResponseDTO;
@@ -15,8 +14,8 @@ import org.springframework.transaction.annotation.Transactional;
 import org.springframework.web.client.RestTemplate;
 
 @Service
-@Transactional
 @RequiredArgsConstructor
+@Transactional
 public class UserService {
 
     private final OAuth2AuthorizedClientService oAuth2AuthorizedClientService;
@@ -32,8 +31,8 @@ public class UserService {
                 .build();
     }
 
-    public CommonSuccessResponseDTO createGithubRepository(CustomOAuth2User user, CreateGithubRepositoryRequestDTO requestDTO) {
-        String accessToken = getAccessToken(user.getName());
+    public CommonSuccessResponseDTO createGithubRepository(String userName, CreateGithubRepositoryRequestDTO requestDTO) {
+        String accessToken = getGithubAccessToken(userName);
 
         HttpHeaders headers = new HttpHeaders();
         headers.set("Authorization", "Bearer " + accessToken);
@@ -57,8 +56,8 @@ public class UserService {
                 .build();
     }
 
-    private String getAccessToken(String username){
-        return oAuth2AuthorizedClientService.loadAuthorizedClient("github", username)
+    private String getGithubAccessToken(String userName) {
+        return oAuth2AuthorizedClientService.loadAuthorizedClient("github", userName)
                 .getAccessToken()
                 .getTokenValue();
     }

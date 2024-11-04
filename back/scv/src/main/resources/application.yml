@@ -1,0 +1,40 @@
+spring:
+  datasource:
+    driver-class-name: com.mysql.cj.jdbc.Driver
+    url: ${DB_URL}
+    username: ${DB_USERNAME}
+    password: ${DB_PASSWORD}
+
+  jpa:
+    hibernate:
+      ddl-auto: update
+    show-sql: true
+    properties:
+      hibernate:
+        dialect: org.hibernate.dialect.MySQLDialect
+
+  jwt:
+    token:
+      access:
+        name: ${JWT_ACCESS_NAME}
+        secret-key: ${JWT_ACCESS_KEY}
+        expiration: 10  # (단위: 분)
+      refresh:
+        name: ${JWT_REFRESH_NAME}
+        secret-key: ${JWT_REFRESH_KEY}
+        expiration: 10080  # (단위: 분)
+
+  security:
+    oauth2:
+      client:
+        registration:
+          github:
+            client-id: ${OAUTH_CLIENT_ID}
+            client-secret: ${OAUTH_CLIENT_SECRET}
+            scope: user:email, repo, contents, metadata
+
+  data:
+    redis:
+      host: ${REDIS_HOST}
+      port: ${REDIS_PORT}
+      password: ${REDIS_PASSWORD}
