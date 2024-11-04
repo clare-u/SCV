@@ -14,7 +14,7 @@ import com.scv.domain.version.dto.layer.pooling.AvgPool2dDTO;
 import com.scv.domain.version.dto.layer.pooling.MaxPool2dDTO;
 
 @JsonTypeInfo(
-        use = JsonTypeInfo.Id.NAME, // "name" 필드로 구분
+        use = JsonTypeInfo.Id.NAME,
         include = JsonTypeInfo.As.PROPERTY,
         property = "name"
 )
@@ -34,7 +34,9 @@ import com.scv.domain.version.dto.layer.pooling.MaxPool2dDTO;
         @JsonSubTypes.Type(value = SoftmaxDTO.class, name = "Softmax"),
         @JsonSubTypes.Type(value = LogSoftmaxDTO.class, name = "LogSoftmax"),
         @JsonSubTypes.Type(value = GELUDTO.class, name = "GELU"),
-        @JsonSubTypes.Type(value = LinearDTO.class, name = "Linear")
+        @JsonSubTypes.Type(value = LinearDTO.class, name = "Linear"),
+        @JsonSubTypes.Type(value = SigmoidDTO.class, name = "Sigmoid"),
+        @JsonSubTypes.Type(value = TanhDTO.class, name = "Tanh")
 })
-public interface LayerDTO {
+public abstract class LayerDTO {
 }

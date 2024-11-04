@@ -1,12 +1,17 @@
 package com.scv.domain.version.service;
 
 import com.fasterxml.jackson.core.JsonProcessingException;
+import com.fasterxml.jackson.databind.DeserializationFeature;
 import com.fasterxml.jackson.databind.ObjectMapper;
+import com.fasterxml.jackson.databind.SerializationFeature;
+import com.fasterxml.jackson.databind.jsontype.BasicPolymorphicTypeValidator;
+import com.fasterxml.jackson.databind.jsontype.DefaultBaseTypeLimitingValidator;
 import com.scv.domain.model.domain.Model;
 import com.scv.domain.model.exception.ModelNotFoundException;
 import com.scv.domain.model.repository.ModelRepository;
 import com.scv.domain.oauth2.CustomOAuth2User;
 import com.scv.domain.version.domain.ModelVersion;
+import com.scv.domain.version.dto.layer.LayerDTO;
 import com.scv.domain.version.dto.request.ModelVersionRequest;
 import com.scv.domain.version.dto.response.ModelVersionDetail;
 import com.scv.domain.version.dto.response.ModelVersionResponse;
@@ -27,12 +32,15 @@ public class ModelVersionService {
 
     private final ModelRepository modelRepository;
     private final ModelVersionRepository modelVersionRepository;
-    private final ObjectMapper objectMapper = new ObjectMapper();
+
+    private final ObjectMapper objectMapper = new ObjectMapper()
+            .configure(DeserializationFeature.FAIL_ON_UNKNOWN_PROPERTIES, false)
+            .configure(SerializationFeature.WRITE_ENUMS_USING_TO_STRING, true)
+            .enable(SerializationFeature.INDENT_OUTPUT);
 
     public String convertToJson(Object object) throws JsonProcessingException {
-        return objectMapper.writeValueAsString(object); // Java 객체를 JSON 문자열로 변환
+        return objectMapper.writeValueAsString(object);
     }
-
 
     // 모델 버전 생성
     public void createModelVersion(Long modelId, ModelVersionRequest request, CustomOAuth2User user) throws BadRequestException {

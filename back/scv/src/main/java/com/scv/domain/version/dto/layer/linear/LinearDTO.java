@@ -1,13 +1,26 @@
 package com.scv.domain.version.dto.layer.linear;
 
+import com.fasterxml.jackson.annotation.JsonCreator;
+import com.fasterxml.jackson.annotation.JsonProperty;
+import com.fasterxml.jackson.annotation.JsonTypeName;
 import com.scv.domain.version.dto.layer.LayerDTO;
+import lombok.Getter;
 
-public record LinearDTO(
-        String name,
-        int inFeatures,
-        int outFeatures
-) implements LayerDTO {
-    public LinearDTO(int inFeatures, int outFeatures) {
-        this("Linear", inFeatures, outFeatures);
+@JsonTypeName("Linear")
+@Getter
+public class LinearDTO extends LayerDTO {
+
+    @JsonProperty("name")
+    private final String name = "Linear";
+
+    private final int inFeatures;
+    private final int outFeatures;
+
+    @JsonCreator
+    public LinearDTO(
+            @JsonProperty("inFeatures") int inFeatures,
+            @JsonProperty("outFeatures") int outFeatures) {
+        this.inFeatures = inFeatures;
+        this.outFeatures = outFeatures;
     }
 }
