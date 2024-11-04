@@ -1,5 +1,6 @@
 package com.scv.domain.user.service;
 
+import com.scv.domain.github.service.GithubService;
 import com.scv.domain.oauth2.CustomOAuth2User;
 import com.scv.domain.user.domain.User;
 import com.scv.domain.user.dto.request.CreateGithubRepositoryRequestDTO;
@@ -36,9 +37,9 @@ public class UserService {
             throw DuplicateRepositoryNameException.getInstance();
         }
 
-        boolean responseStatus = githubService.createGithubRepository(user, requestDTO);
+        githubService.createGithubRepository(user, requestDTO);
         return CommonSuccessResponseDTO.builder()
-                .message(responseStatus ? "Success" : "Failed")
+                .message("Success")
                 .build();
     }
 
