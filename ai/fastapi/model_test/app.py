@@ -72,15 +72,13 @@ async def analyze_model(model_version_id: str, dataset: Literal["mnist", "fashio
     test_loss = get_test_loss() # 현재
     train_info = get_train_info() # 현재
     confusion_matrix = get_confusion_matrix() # 현재
-    # example_image = get_example_image(outputs, dataset) # 나
-    example_image = "string"
+    example_image = get_example_image(outputs, dataset) # 나
     total_params = get_total_params() # 현재
     params = get_params() # 현재
     feature_activation = get_feature_activation(maximization_input, activation_map) # 나
     activation_maximization = get_activation_maximization(model) # 나
 
     # Milvus CKA 저장
-
     cka_matrix = defaultdict(list)
     with torch.no_grad():
         for index, (input, label) in enumerate(cka_dataset):
@@ -95,11 +93,8 @@ async def analyze_model(model_version_id: str, dataset: Literal["mnist", "fashio
 
     for i in cka_matrix.keys():
         mat = np.array(cka_matrix[i])
-        print(mat.shape)
         cka = (mat @ mat.T).flatten()
-        print(cka.shape)
         cka_vec = cka / np.linalg.norm(cka)
-        print(cka_vec.shape)
         async with httpx.AsyncClient() as client:
             res = await client.post(f"http://{fast_match_host_name}:{fast_match_port}/fast/v1/model/match/{model_version_id}/{i}",
                         json={
