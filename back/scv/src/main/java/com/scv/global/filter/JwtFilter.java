@@ -1,5 +1,6 @@
 package com.scv.global.filter;
 
+import com.fasterxml.jackson.databind.ObjectMapper;
 import com.scv.domain.oauth2.CustomOAuth2User;
 import com.scv.domain.oauth2.dto.OAuth2UserDTO;
 import com.scv.domain.user.domain.User;
@@ -22,6 +23,7 @@ import org.springframework.stereotype.Component;
 import org.springframework.web.filter.OncePerRequestFilter;
 
 import java.io.IOException;
+import java.util.LinkedHashMap;
 
 @Component
 @RequiredArgsConstructor
@@ -30,6 +32,7 @@ public class JwtFilter extends OncePerRequestFilter {
     private final JwtUtil jwtUtil;
     private final UserRepository userRepository;
     private final RedisTemplate<String, Object> redisTemplate;
+    private final ObjectMapper objectMapper;
 
     @Value("${spring.jwt.token.access.name}")
     private String ACCESS_TOKEN_NAME;
@@ -84,7 +87,12 @@ public class JwtFilter extends OncePerRequestFilter {
             redisTemplate.opsForValue().set(userUuid, UserCacheDTO.from(user));
         }
         else{
-            UserCacheDTO userCacheDTO = (UserCacheDTO) cachedUser;
+            UserCacheDTO userCacheDTO;
+            if (cachedUser instanceof LinkedHashMap) {
+                userCacheDTO = objectMapper.convertValue(cachedUser, UserCacheDTO.class);
+            } else {
+                userCacheDTO = (UserCacheDTO) cachedUser;
+            }
 
             oAuth2UserDTO = OAuth2UserDTO.builder()
                     .userId(userCacheDTO.getUserId())
