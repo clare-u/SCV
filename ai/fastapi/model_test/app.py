@@ -5,9 +5,8 @@ from utils import *
 from exception import *
 from fastapi.responses import JSONResponse
 from dotenv import load_dotenv
-from load_minio import load_model_from_minio
+from load_minio import load_model_from_minio, load_dataset_from_minio
 from model_layer_class import deserialize_layers, serialize_layers
-
 import httpx
 import os
 
@@ -22,18 +21,21 @@ async def analyze_model(model_version_id: str, dataset: Literal["MNIST", "FASHIO
 
     model = load_model_from_minio(model_version_id)
     layers = req.layers
+
+    test_dataset = load_dataset_from_minio(dataset.lower(), "test")
+
     # 결과 분석
 
-    code = get_code()
-    test_accuracy = get_test_accuracy()
-    test_loss = get_test_loss()
-    train_info = get_train_info()
-    confusion_matrix = get_confusion_matrix()
-    example_image = get_example_image()
-    total_params = get_total_params()
-    params = get_params()
-    feature_activation = get_feature_activation()
-    activation_maximization = get_activation_maximization()
+    code = get_code() # 현재
+    test_accuracy = get_test_accuracy() # 현재
+    test_loss = get_test_loss() # 현재
+    train_info = get_train_info() # 현재
+    confusion_matrix = get_confusion_matrix() # 현재
+    example_image = get_example_image() # 나
+    total_params = get_total_params() # 현재
+    params = get_params() # 현재
+    feature_activation = get_feature_activation() # 나
+    activation_maximization = get_activation_maximization() # 나
 
     # Milvus CKA 저장
     # 보내기만 하면 되므로, await 미사용
