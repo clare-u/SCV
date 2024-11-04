@@ -1,4 +1,4 @@
-package com.scv.domain.user.service;
+package com.scv.domain.github.dto.request;
 
 import com.fasterxml.jackson.annotation.JsonProperty;
 import lombok.Builder;
@@ -6,7 +6,7 @@ import lombok.Getter;
 
 @Builder
 @Getter
-public class ExternalCreateGithubRepositoryRequestDTO {
+public class CreateGithubRepositoryApiRequestDTO {
 
     @JsonProperty("name")
     private String name;
