@@ -195,7 +195,7 @@ function Home() {
 
       {/* Input */}
       <div className="flex flex-col gap-10">
-        <SearchInput placeholder="placeholder" onSubmit={handleSearchSubmit} />
+        {/* <SearchInput placeholder="placeholder" onSubmit={handleSearchSubmit} /> */}
         <ModalInput
           placeholder="placeholder"
           value={inputValue}
@@ -227,11 +227,11 @@ function Home() {
       </div>
 
       {/* boardCard */}
-      <div className="grid w-[1100px] grid-cols-3 gap-10">
+      {/* <div className="grid w-[1100px] grid-cols-3 gap-10">
         {cards.map((card) => (
           <BoardCard key={card.modelId} {...card} />
         ))}
-      </div>
+      </div> */}
 
       {/* workspaceCard */}
       <div className="grid w-[1100px] grid-cols-3 gap-10">
