@@ -50,6 +50,10 @@ public class CustomOAuth2User implements OAuth2User {
         return oauth2UserDTO.getUserNickname();
     }
 
+    public String getUserRepo() {
+        return oauth2UserDTO.getUserRepo();
+    }
+
     public LocalDateTime getUserCreatedAt() {
         return oauth2UserDTO.getUserCreatedAt();
     }

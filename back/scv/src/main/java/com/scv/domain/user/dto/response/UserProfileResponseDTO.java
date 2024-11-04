@@ -10,6 +10,9 @@ import lombok.NoArgsConstructor;
 @AllArgsConstructor
 public class UserProfileResponseDTO {
 
+    @JsonProperty("userId")
+    private Long userId;
+
     @JsonProperty("userEmail")
     private String userEmail;
 
@@ -18,4 +21,7 @@ public class UserProfileResponseDTO {
 
     @JsonProperty("userNickname")
     private String userNickname;
+
+    @JsonProperty("userRepo")
+    private String userRepo;
 }

@@ -6,6 +6,6 @@ import lombok.Getter;
 @Getter
 public class CreateGithubRepositoryRequestDTO {
 
-    @JsonProperty("name")
-    private String name;
+    @JsonProperty("repoName")
+    private String repoName;
 }

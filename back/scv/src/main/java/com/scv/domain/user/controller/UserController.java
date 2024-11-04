@@ -34,7 +34,7 @@ public class UserController {
             @ApiResponse(responseCode = "404", description = "사용자를 찾을 수 없음", content = @Content(schema = @Schema(implementation = ErrorResponse.class)))
     })
     public ResponseEntity<UserProfileResponseDTO> getUserProfile(@AuthUser CustomOAuth2User user) {
-        UserProfileResponseDTO responseDTO = userService.getUserProfile(user.getUserId());
+        UserProfileResponseDTO responseDTO = userService.getUserProfile(user, user.getUserId());
         return new ResponseEntity<>(responseDTO, HttpStatus.OK);
     }
 
@@ -46,7 +46,7 @@ public class UserController {
     })
     public ResponseEntity<CommonSuccessResponseDTO> createGithubRepository(@AuthUser CustomOAuth2User user,
                                                                            @RequestBody CreateGithubRepositoryRequestDTO requestDTO) {
-        CommonSuccessResponseDTO responseDTO = userService.createGithubRepository(user.getName(), requestDTO);
+        CommonSuccessResponseDTO responseDTO = userService.createGithubRepository(user, requestDTO);
         return new ResponseEntity<>(responseDTO, HttpStatus.CREATED);
     }
 
