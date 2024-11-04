@@ -1,6 +1,6 @@
 package com.scv.domain.oauth2.user;
 
-import java.time.ZonedDateTime;
+import java.time.LocalDateTime;
 
 public interface OAuth2Response {
 
@@ -10,7 +10,7 @@ public interface OAuth2Response {
 
     String getUserNickname();
 
-    ZonedDateTime getUserCreatedAt();
+    LocalDateTime getUserCreatedAt();
 
-    ZonedDateTime getUserUpdatedAt();
+    LocalDateTime getUserUpdatedAt();
 }
