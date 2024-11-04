@@ -23,6 +23,7 @@ export const fetchModels = async (
   });
 
   // 최종 URL 생성
-  const url = `/models?${queryParams.toString()}`;
+  const url = `/models/?${queryParams.toString()}`;
+  console.log("API 요청 URL:", url);
   return handleApiRequest<Content, "get">(url, "get");
 };

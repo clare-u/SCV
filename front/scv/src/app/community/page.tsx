@@ -14,9 +14,9 @@ import { ModelQueryParams } from "@/types";
 function Community() {
   const router = useRouter();
   const searchParams = useSearchParams();
+
   // 검색 인풋
-  // 검색어 상태 추가
-  const currentKeyword = searchParams.get("keyword") || "";
+  const currentKeyword = searchParams.get("modelName") || "";
   const [searchValue, setSearchValue] = useState(currentKeyword);
 
   const handleSearchChange = (e: React.ChangeEvent<HTMLInputElement>) => {
@@ -27,12 +27,12 @@ function Community() {
   const currentPage = searchParams.get("page")
     ? parseInt(searchParams.get("page")!)
     : 1;
-  const currentDataset = searchParams.get("dataset") || "전체";
+  const currentDataName = searchParams.get("dataName") || "전체";
   const currentOrder = searchParams.get("order") || "추천순";
 
   // 상태 관리
-  const dataset = ["전체", "MNIST", "Fashion", "CIFAR-10", "SVHN", "EMNIST"];
-  const [selected, setSelected] = useState(currentDataset);
+  const dataName = ["전체", "MNIST", "Fashion", "CIFAR-10", "SVHN", "EMNIST"];
+  const [selected, setSelected] = useState(currentDataName);
   const [selectedFilter, setSelectedFilter] = useState(currentOrder);
   const filterOptions = ["추천순", "최신순", "오래된순"];
 
@@ -50,16 +50,20 @@ function Community() {
         return {};
     }
   };
+
   // 모델 데이터 fetch
   const { data, isLoading, error } = useFetchModels({
     page: currentPage - 1,
     size: 12,
     ...getSortParams(selectedFilter),
-    data: selected !== "전체" ? selected : undefined,
+    modelName: currentKeyword || undefined, // 검색어가 없을 때는 undefined
+    dataName: selected !== "전체" ? selected : undefined,
   });
 
   // URL 업데이트 함수
-  const updateURL = (params: { [key: string]: string | number }) => {
+  const updateURL = (params: {
+    [key: string]: string | number | undefined;
+  }) => {
     const current = new URLSearchParams(Array.from(searchParams.entries()));
 
     Object.entries(params).forEach(([key, value]) => {
@@ -70,6 +74,11 @@ function Community() {
       }
     });
 
+    // 검색어가 빈 문자열이면 keyword 파라미터 삭제
+    if (params.modelName === "") {
+      current.delete("modelName");
+    }
+
     router.push(`/community?${current.toString()}`);
   };
 
@@ -79,13 +88,17 @@ function Community() {
     updateURL({ order: filter, page: 1 });
   };
 
-  const handleDatasetChange = (dataset: string) => {
-    setSelected(dataset);
-    updateURL({ dataset, page: 1 });
+  const handleDataNameChange = (dataName: string) => {
+    setSelected(dataName);
+    updateURL({ dataName, page: 1 });
   };
 
   const handleSearchSubmit = (value: string) => {
-    updateURL({ keyword: value, page: 1 });
+    // 검색어가 빈 문자열이면 keyword 파라미터 삭제
+    updateURL({
+      modelName: value || undefined,
+      page: 1,
+    });
   };
 
   useEffect(() => {
@@ -110,14 +123,14 @@ function Community() {
           filterOptions={filterOptions}
         />
         <DatasetRadio
-          options={dataset}
+          options={dataName}
           selected={selected}
-          onChange={handleDatasetChange}
+          onChange={handleDataNameChange}
         />
         <div className="w-[400px]">
           <SearchInput
             placeholder="모델명을 검색하세요."
-            value={currentKeyword}
+            value={searchValue}
             onChange={handleSearchChange}
             onSubmit={handleSearchSubmit}
           />
