@@ -1,5 +1,3 @@
-# prompt: Mnist 를 학습하는 분류 cnn 모델을 pytorch.sequantial 모듈을 이용해서 만들어줘. 학습과정과 추론까지 포함해서
-
 import torch
 import io
 

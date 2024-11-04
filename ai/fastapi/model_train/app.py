@@ -11,7 +11,7 @@ sys.path.append(root_dir)
 
 from model_test.neural_network_builder.parsers.validators import ModelConfig, ModelLayerConfig, layer_classes
 from .model_train import ModelTrainer
-from .save_model import save_model_to_minio
+from save_minio import save_model_to_minio
 app = FastAPI()
 logger = logging.getLogger(__name__)
 

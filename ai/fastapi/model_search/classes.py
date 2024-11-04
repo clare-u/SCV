@@ -12,7 +12,7 @@ class Model_Read_Response(BaseModel):
 
 class Model_Insert_Request(BaseModel):
     test_accuracy: float
-    layers: List[Layer]
+    layers: str
     cka_vec: List[float]
 
 class Model_Insert_Response(BaseModel):
