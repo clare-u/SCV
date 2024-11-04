@@ -16,7 +16,7 @@ const ModalInput: React.FC<ModalInputProps> = ({
 }) => {
   return (
     <Input
-      className={`h-40 w-full rounded-12 border border-gray-400 p-10 placeholder-gray-400 outline-none data-[focus]:border-2 data-[focus]:border-gray-400 data-[hover]:shadow ${
+      className={`h-[42px] w-full rounded-12 border border-gray-400 p-10 placeholder-gray-400 outline-none data-[focus]:border-2 data-[focus]:border-gray-400 data-[hover]:shadow ${
         color === "dark" ? "bg-indigo-900 text-white" : ""
       }`}
       placeholder={placeholder}

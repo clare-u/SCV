@@ -1,21 +1,65 @@
+"use client";
+
+import { useState } from "react";
 import Image from "next/image";
+import ModalInput from "../input/ModalInput";
+import ModalButton from "../button/ModalButton";
+import ListboxComponent from "../input/ListBoxComponent";
 import { useLogOut } from "@/hooks";
-import { useMutation } from "@tanstack/react-query";
+import Loading from "../loading/Loading";
 
 interface MemberModalProps {
   image: string;
   nickname: string;
   email: string;
+  repo?: string;
 }
 
 const MemberModal: React.FC<MemberModalProps> = ({
   image,
   nickname,
   email,
+  repo,
 }) => {
-  // TODO: 이미지, 닉네임, 이메일 주스탠드로 관리하는 로직
-
+  // 로그아웃
   const { mutate: handleLogout, isPending } = useLogOut();
+
+  const [isFormOpen, setIsFormOpen] = useState(false); // 폼 열림 여부 상태
+
+  // 폼 열기/닫기 토글 함수
+  const toggleForm = () => {
+    setIsFormOpen((prev) => !prev);
+  };
+
+  // 리스트박스
+  const option = [
+    { id: 1, name: "새 레포지토리와 연동" },
+    { id: 2, name: "기존 레포지토리와 연동" },
+  ];
+
+  const [selectedOption, setSelectedOption] = useState(option[0]);
+
+  // 모달 인풋
+  const [inputValue, setInputValue] = useState("");
+
+  const handleInputChange = (e: React.ChangeEvent<HTMLInputElement>) => {
+    setInputValue(e.target.value);
+  };
+
+  // 연동하기
+  const handleRepoSubmit = () => {
+    if (!inputValue.trim()) {
+      alert("레포지토리 이름을 입력해주세요.");
+      return;
+    }
+
+    // 여기에 실제 연동 로직을 추가하세요
+    alert(`레포지토리 "${inputValue}"와 연동되었습니다.`);
+  };
+
+  // repo URL의 마지막 부분만 추출
+  const formattedRepo = repo ? repo.replace("https://github.com/", "") : "";
+
   return (
     <div className="absolute right-0 z-50 mt-2 flex flex-col items-center justify-center gap-10 rounded-10 border border-gray-400 bg-indigo-800 p-20 text-white shadow-lg">
       <div className="flex flex-col items-center justify-center gap-10 p-10">
@@ -31,15 +75,71 @@ const MemberModal: React.FC<MemberModalProps> = ({
       </div>
       {/* 구분선 */}
       <div className="h-1 self-stretch border border-gray-400"></div>
+      {/* repo가 존재할 경우 링크 표시, 없을 경우 "연동하기" 버튼 */}
+      {repo ? (
+        <a
+          href={repo}
+          target="_blank"
+          rel="noopener noreferrer"
+          className="flex gap-[5px] whitespace-nowrap text-white underline"
+        >
+          <Image
+            src="/github-mark-white.png"
+            alt="github-mark-white"
+            width={24}
+            height={24}
+          ></Image>
+          {formattedRepo} {/* 추출된 repo 경로만 표시 */}
+        </a>
+      ) : (
+        <>
+          <div className="flex flex-col gap-10 p-10">
+            <button
+              onClick={toggleForm}
+              className="inline-flex min-w-[200px] shrink-0 items-center justify-center gap-[5px] whitespace-nowrap py-10 text-16 font-medium text-white hover:cursor-pointer hover:font-bold"
+            >
+              <Image
+                src="/github-mark-white.png"
+                alt="github-mark-white"
+                width={24}
+                height={24}
+              ></Image>
+              레포지토리 연동
+            </button>
+
+            {/* 폼이 열려 있을 때만 표시 */}
+            {isFormOpen && (
+              <>
+                <ListboxComponent
+                  value={selectedOption}
+                  onChange={setSelectedOption}
+                  options={option}
+                  color="dark"
+                />
+                <ModalInput
+                  placeholder="Repository Name"
+                  value={inputValue}
+                  onChange={handleInputChange}
+                  color="dark"
+                />
+                <ModalButton icon="add_link" onClick={handleRepoSubmit}>
+                  연동하기
+                </ModalButton>
+              </>
+            )}
+          </div>
+        </>
+      )}
       {/* 구분선 */}
       <div className="h-1 self-stretch border border-gray-400"></div>
-      <button
-        onClick={() => handleLogout()}
-        className="rounded bg-red-500 px-4 py-2 text-white transition hover:bg-red-600 disabled:bg-gray-400"
-        disabled={isPending}
-      >
-        {isPending ? "Logging out..." : "Logout"}
-      </button>
+
+      {isPending ? (
+        <Loading />
+      ) : (
+        <ModalButton icon="logout" onClick={handleLogout}>
+          로그아웃
+        </ModalButton>
+      )}
     </div>
   );
 };

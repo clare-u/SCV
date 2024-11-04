@@ -8,12 +8,14 @@ interface NavigationProfileProps {
   image: string;
   nickname: string;
   email: string;
+  repo?: string;
 }
 
 const NavigationProfile: React.FC<NavigationProfileProps> = ({
   image,
   nickname,
   email,
+  repo,
 }) => {
   const [isOpen, setIsOpen] = useState(false);
   const handleConfirm = () => {
@@ -45,7 +47,12 @@ const NavigationProfile: React.FC<NavigationProfileProps> = ({
         {/* 버튼 바로 아래에 모달 표시 */}
         {/* TODO: 모달 완성 필요(모달버튼, 모달인풋 제작 필요) */}
         {isOpen && (
-          <MemberModal image={image} nickname={nickname} email={email} />
+          <MemberModal
+            image={image}
+            nickname={nickname}
+            email={email}
+            repo={repo}
+          />
         )}
       </div>
     </>

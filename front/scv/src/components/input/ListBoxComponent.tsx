@@ -26,7 +26,7 @@ const ListboxComponent: React.FC<ListboxComponentProps> = ({
   return (
     <Listbox value={value} onChange={onChange}>
       <ListboxButton
-        className={`flex w-full items-center justify-between rounded-12 border border-gray-400 p-10 outline-none data-[focus]:border-2 data-[focus]:border-gray-400 data-[hover]:shadow ${
+        className={`flex w-full items-center justify-between whitespace-nowrap rounded-12 border border-gray-400 p-10 outline-none data-[focus]:border-2 data-[focus]:border-gray-400 data-[hover]:shadow ${
           color === "dark" ? "bg-indigo-900 text-white" : ""
         }`}
       >
@@ -40,7 +40,7 @@ const ListboxComponent: React.FC<ListboxComponentProps> = ({
       <ListboxOptions
         anchor="bottom"
         transition
-        className={`flex w-[var(--button-width)] flex-col gap-10 rounded-12 border border-gray-400 p-10 transition duration-100 ease-in [--anchor-gap:var(--spacing-1)] focus:outline-none data-[leave]:data-[closed]:opacity-0 ${
+        className={`z-50 flex w-[var(--button-width)] flex-col gap-10 rounded-12 border border-gray-400 p-10 transition duration-100 ease-in [--anchor-gap:var(--spacing-1)] focus:outline-none data-[leave]:data-[closed]:opacity-0 ${
           color === "dark"
             ? "bg-indigo-900 text-white"
             : "bg-white text-gray-900"
