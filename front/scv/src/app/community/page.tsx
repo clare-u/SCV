@@ -1,6 +1,6 @@
 "use client";
 
-import { useState, useEffect } from "react";
+import { Suspense, useState, useEffect } from "react";
 import { useRouter, useSearchParams } from "next/navigation";
 import FilterDropdown from "@/components/input/FilterDropdown";
 import BoardCard from "@/components/card/BoardCard";
@@ -10,7 +10,7 @@ import SearchInput from "@/components/input/SearchInput";
 import { useFetchModels } from "@/hooks/models";
 import { ModelQueryParams } from "@/types";
 
-export default function Community() {
+function Community() {
   const router = useRouter();
   const searchParams = useSearchParams();
   // 검색 인풋
@@ -153,5 +153,13 @@ export default function Community() {
         itemCountPerPage={12}
       />
     </div>
+  );
+}
+
+export default function Page() {
+  return (
+    <Suspense fallback={<div>Loading...</div>}>
+      <Community />
+    </Suspense>
   );
 }
