@@ -25,7 +25,7 @@ class Model_Analyze_Response(BaseModel):
     test_loss: float
     train_info: Train_Info
     confusion_matrix: str
-    example_image: List[List[str]]
+    example_image: str
     total_params: int
     params: List[int]
     feature_activation : List[feature_activation]
