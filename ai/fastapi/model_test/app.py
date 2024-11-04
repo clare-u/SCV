@@ -10,6 +10,7 @@ from model_layer_class import deserialize_layers, serialize_layers
 import httpx
 import os
 import torch
+import numpy as np
 
 app = FastAPI(root_path="/fast/v1/model/test")
 
@@ -25,6 +26,7 @@ async def analyze_model(model_version_id: str, dataset: Literal["mnist", "fashio
     layers = req.layers
     # 데이터 셋 가져오기
     test_dataset = load_dataset_from_minio(dataset, "test")
+    cka_dataset = load_dataset_from_minio(dataset, "cka")
 
 
     # convolution layer의 index 보관
@@ -33,7 +35,7 @@ async def analyze_model(model_version_id: str, dataset: Literal["mnist", "fashio
     for i in range(0, len(model)):
         if isinstance(model[i], torch.nn.Conv2d):
             conv_idx.append(i)
-    print(conv_idx)
+    print(f"convolution layer의 index: {conv_idx}")
 
     # feature activation map 을 위한 변수 선언
     norm = [0, 0, 0]
@@ -78,19 +80,34 @@ async def analyze_model(model_version_id: str, dataset: Literal["mnist", "fashio
     activation_maximization = get_activation_maximization(model) # 나
 
     # Milvus CKA 저장
-    # 보내기만 하면 되므로, await 미사용
 
-    layer_id=3
-    async with httpx.AsyncClient() as client:
-        res = await client.post(f"http://{fast_match_host_name}:{fast_match_port}/fast/v1/model/match/{model_version_id}/{layer_id}",
-                    json={
-                        "test_accuracy": test_accuracy,
-                        "layers" : layers,
-                        "cka_vec": [
-                            0.0,1.0,2.0
-                        ]
-                    })
-        print(res)
+    cka_matrix = defaultdict(list)
+    with torch.no_grad():
+        for index, (input, label) in enumerate(cka_dataset):
+
+            x = input
+            
+            for i in range(0, len(model)):
+                x = model[i](x)
+                if i in conv_idx:
+                    cka_matrix[i].append(torch.flatten(x).cpu().numpy())
+                    
+
+    for i in cka_matrix.keys():
+        mat = np.array(cka_matrix[i])
+        print(mat.shape)
+        cka = (mat @ mat.T).flatten()
+        print(cka.shape)
+        cka_vec = cka / np.linalg.norm(cka)
+        print(cka_vec.shape)
+        async with httpx.AsyncClient() as client:
+            res = await client.post(f"http://{fast_match_host_name}:{fast_match_port}/fast/v1/model/match/{model_version_id}/{i}",
+                        json={
+                            "test_accuracy": test_accuracy,
+                            "layers" : layers,
+                            "cka_vec": cka_vec.tolist()
+                        })
+            print(res)
 
     return {
         "model_version_id": model_version_id,
