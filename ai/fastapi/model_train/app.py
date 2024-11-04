@@ -10,8 +10,13 @@ root_dir = os.path.dirname(current_dir)
 sys.path.append(root_dir)
 
 from model_test.neural_network_builder.parsers.validators import ModelConfig, ModelLayerConfig, layer_classes
-from .model_train import ModelTrainer
-from save_minio import save_model_to_minio
+try:
+    from .model_train import ModelTrainer  # 상대 경로 import
+    from .save_minio import save_model_to_minio  # save_model 파일명이 save_minio로 변경
+except ImportError:
+    # 상대 경로 import가 실패하면 절대 경로로 시도
+    from model_train import ModelTrainer
+    from save_minio import save_model_to_minio
 app = FastAPI()
 logger = logging.getLogger(__name__)
 

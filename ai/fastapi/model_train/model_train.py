@@ -12,7 +12,7 @@ sys.path.append(root_dir)
 
 from model_test.neural_network_builder.builders.model_builder import ModelBuilder
 from model_test.neural_network_builder.parsers.validators import ModelConfig
-from .save_model import save_model_to_minio, minio_host_name, minio_user_name, minio_user_password, minio_model_bucket
+from save_minio import save_model_to_minio, minio_host_name, minio_user_name, minio_user_password, minio_model_bucket
 
 
 class ModelTrainer:
@@ -91,7 +91,7 @@ class ModelTrainer:
 
         # 데이터 로드
         print("Loading MNIST dataset...")
-        train_loader, test_loader = self.load_mnist_data(batch_size)
+        train_loader, test_loader = self.load_data(batch_size)
 
         # 모델 생성
         print("Creating model...")
