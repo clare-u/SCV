@@ -34,6 +34,9 @@ function Community() {
   const dataset = ["전체", "MNIST", "Fashion", "CIFAR-10", "SVHN", "EMNIST"];
   const [selected, setSelected] = useState(currentDataset);
   const [selectedFilter, setSelectedFilter] = useState(currentOrder);
+  const [viewMode, setViewMode] = useState("완료목록"); // "완료목록" 또는 "임시저장"
+
+  // TODO: 필터 옵션 변경
   const filterOptions = ["추천순", "최신순", "오래된순"];
 
   // Query 파라미터 변환 함수
@@ -50,6 +53,8 @@ function Community() {
         return {};
     }
   };
+
+  // TODO: api 내 모델로 변경
   // 모델 데이터 fetch
   const { data, isLoading, error } = useFetchModels({
     page: currentPage - 1,
@@ -70,7 +75,7 @@ function Community() {
       }
     });
 
-    router.push(`/community?${current.toString()}`);
+    router.push(`/workspace?${current.toString()}`);
   };
 
   // 이벤트 핸들러
@@ -124,35 +129,56 @@ function Community() {
         </div>
       </div>
 
-      {/* boardCard */}
-      <div className="grid grid-cols-3 gap-10 px-10 py-20">
-        {data?.content.length === 0 ? (
-          <div>모델이 없습니다.</div> // 데이터가 없을 경우 메시지 출력
-        ) : (
-          data?.content.map((model) => (
-            <BoardCard
-              key={model.modelId}
-              modelId={model.modelId}
-              versionId={`${model.latestNumber}`}
-              title={model.modelName}
-              version={`v${model.latestNumber}`} // version 값 수정
-              dataset={model.dataName}
-              // profileImg={model.profileImage || "/profile.png"}
-              nickname={model.modelName}
-              // accuracy={model.accuracy || "N/A"} // 기본값 설정
-              updatedAt={model.updatedAt}
-            />
-          ))
-        )}
-      </div>
+      {/* TODO: WorkspaceCard로 교체하고 상태관리로 완료목록, 임시저장 나누기 */}
+      <div className="flex flex-col items-center justify-center px-10">
+        <div className="flex w-full gap-10">
+          <button
+            onClick={() => setViewMode("완료목록")}
+            className="flex rounded-t-10 bg-blue-50 px-40 py-20"
+          >
+            완료목록
+          </button>
+          <button
+            onClick={() => setViewMode("임시저장")}
+            className="flex rounded-t-10 bg-yellow-50 px-40 py-20"
+          >
+            임시저장
+          </button>
+        </div>
+        {/* boardCard */}
+        <div
+          className={`grid w-full grid-cols-3 gap-10 rounded-b-10 px-10 py-20 ${
+            viewMode === "완료목록" ? "bg-blue-50" : "bg-yellow-50"
+          }`}
+        >
+          {data?.content.length === 0 ? (
+            <div>모델이 없습니다.</div> // 데이터가 없을 경우 메시지 출력
+          ) : (
+            data?.content.map((model) => (
+              <BoardCard
+                key={model.modelId}
+                modelId={model.modelId}
+                versionId={`${model.latestNumber}`}
+                title={model.modelName}
+                version={`v${model.latestNumber}`} // version 값 수정
+                dataset={model.dataName}
+                // profileImg={model.profileImage || "/profile.png"}
+                nickname={model.modelName}
+                // accuracy={model.accuracy || "N/A"} // 기본값 설정
+                updatedAt={model.updatedAt}
+              />
+            ))
+          )}
+        </div>
 
-      {/* 페이지네이션 */}
-      <Pagination
-        totalItems={data!.content.length || 0}
-        currentPage={currentPage}
-        pageCount={10}
-        itemCountPerPage={12}
-      />
+        {/* 페이지네이션 */}
+        <Pagination
+          totalItems={data!.content.length || 0}
+          currentPage={currentPage}
+          pageCount={10}
+          itemCountPerPage={12}
+        />
+      </div>
     </div>
   );
 }
