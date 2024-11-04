@@ -27,19 +27,15 @@ public class Result {
     @Column(name = "test_accuracy", nullable = false)
     private double testAccuracy;
 
-    @Lob
-    @Column(name = "train_result", nullable = false)
+    @Column(name = "train_result", columnDefinition = "JSON")
     private String trainResult;
 
-    @Lob
-    @Column(name = "layer_result", nullable = false)
+    @Column(name = "layer_result", columnDefinition = "JSON")
     private String layerResult;
 
-    @Lob
-    @Column(name = "confusion_matrix", nullable = false)
+    @Column(name = "confusion_matrix", columnDefinition = "JSON")
     private String confusionMatrix;
 
-    @Lob
-    @Column(name = "incorrect_img", nullable = false)
+    @Column(name = "incorrect_img", columnDefinition = "JSON")
     private String incorrectImages;
 }

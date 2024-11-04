@@ -7,30 +7,32 @@ import com.scv.domain.version.dto.response.ModelVersionDetail;
 import com.scv.domain.version.dto.response.ModelVersionResponse;
 import com.scv.domain.version.service.ModelVersionService;
 import com.scv.global.error.ErrorResponse;
+import com.scv.global.util.PageableUtil;
 import io.swagger.v3.oas.annotations.Operation;
 import io.swagger.v3.oas.annotations.media.Content;
 import io.swagger.v3.oas.annotations.media.Schema;
 import io.swagger.v3.oas.annotations.responses.ApiResponse;
 import io.swagger.v3.oas.annotations.responses.ApiResponses;
+import io.swagger.v3.oas.annotations.tags.Tag;
 import lombok.RequiredArgsConstructor;
 import org.apache.coyote.BadRequestException;
 import org.springframework.data.domain.Page;
-import org.springframework.data.domain.PageRequest;
 import org.springframework.data.domain.Pageable;
-import org.springframework.data.domain.Sort;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.*;
 
 @RestController
 @RequestMapping("/api/v1/models/versions")
+@Tag(name = "모델 버전 컨트롤러", description = "모델 버전 관련 API")
 @RequiredArgsConstructor
 public class ModelVersionController {
 
     private final ModelVersionService modelVersionService;
+    private final PageableUtil pageableUtil;
 
     // 모델 버전 생성
     @PostMapping("/{modelId}")
-    @Operation(summary = "모델버전 상세조회", description = "모델 버전을 조회합니다.")
+    @Operation(summary = "모델버전 생성", description = "모델 버전을 생성합니다.")
     @ApiResponses(value = {
             @ApiResponse(responseCode = "201", description = "모델버전 생성 성공"),
             @ApiResponse(responseCode = "400", description = "잘못된 요청", content = @Content(schema = @Schema(implementation = ErrorResponse.class))),
@@ -94,13 +96,7 @@ public class ModelVersionController {
                                                                                 @RequestParam(defaultValue = "") String direction,
                                                                                 @AuthUser CustomOAuth2User user) {
 
-        Pageable pageable;
-        if (!orderBy.isEmpty()) {
-            Sort sort = direction.equalsIgnoreCase("desc") ? Sort.by(orderBy).descending() : Sort.by(orderBy).ascending();
-            pageable = PageRequest.of(page, size, sort);
-        } else {
-            pageable = PageRequest.of(page, size);
-        }
+        Pageable pageable = pageableUtil.createPageable(page, size, orderBy, direction);
 
         Page<ModelVersionResponse> modelVersions = modelVersionService.getModelVersionsOnWorking(user, pageable);
 

@@ -1,13 +1,22 @@
 package com.scv.domain.version.dto.layer.nonlinear;
 
+import com.fasterxml.jackson.annotation.JsonCreator;
+import com.fasterxml.jackson.annotation.JsonProperty;
+import com.fasterxml.jackson.annotation.JsonTypeName;
 import com.scv.domain.version.dto.layer.LayerDTO;
+import lombok.Getter;
 
-public record LeakyReLUDTO(
-        String name,
-        double negativeSlope
-) implements LayerDTO {
-    @Override
-    public String getName() {
-        return name;
+@JsonTypeName("LeakyReLU")
+@Getter
+public class LeakyReLUDTO extends LayerDTO {
+
+    @JsonProperty("name")
+    private final String name = "LeakyReLU";
+
+    private final double negativeSlope;
+
+    @JsonCreator
+    public LeakyReLUDTO(@JsonProperty("negativeSlope") double negativeSlope) {
+        this.negativeSlope = negativeSlope;
     }
 }
