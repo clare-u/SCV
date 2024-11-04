@@ -25,16 +25,44 @@ async def analyze_model(model_version_id: str, dataset: Literal["mnist", "fashio
     layers = req.layers
     # 데이터 셋 가져오기
     test_dataset = load_dataset_from_minio(dataset, "test")
-    outputs = []
 
+
+    # convolution layer의 index 보관
+    conv_idx = []
+
+    for i in range(0, len(model)):
+        if isinstance(model[i], torch.nn.Conv2d):
+            conv_idx.append(i)
+    print(conv_idx)
+
+    # feature activation map 을 위한 변수 선언
+    norm = [0, 0, 0]
+    maximization_input = [None, None, None]
+    activation_map = [None, None, None]
+
+    outputs = []
     # 테스트
     model.eval()
     with torch.no_grad():
-        for input, label in test_dataset:
+        for index, (input, label) in enumerate(test_dataset):
+
+            x = input
+
+            for i in range(0, len(model)):
+                x = model[i](x)
+                if i == conv_idx[-1]:
+                    for j in range(0,3):
+                        # print(torch.norm(x[0][j]))
+                        curr_norm = torch.norm(x[0][j])
+                        if curr_norm > norm[j] :
+                            norm[j] = curr_norm
+                            activation_map[j] = x[0][j]
+                            maximization_input[j] = input
+
             outputs.append({
                 "input" : input,
                 "label": label,
-                "output": model(input)
+                "output": x
             })
 
     code = get_code() # 현재
@@ -42,11 +70,12 @@ async def analyze_model(model_version_id: str, dataset: Literal["mnist", "fashio
     test_loss = get_test_loss() # 현재
     train_info = get_train_info() # 현재
     confusion_matrix = get_confusion_matrix() # 현재
-    example_image = get_example_image(outputs, dataset) # 나
+    # example_image = get_example_image(outputs, dataset) # 나
+    example_image = "string"
     total_params = get_total_params() # 현재
     params = get_params() # 현재
-    feature_activation = get_feature_activation() # 나
-    activation_maximization = get_activation_maximization() # 나
+    feature_activation = get_feature_activation(maximization_input, activation_map) # 나
+    activation_maximization = get_activation_maximization(model) # 나
 
     # Milvus CKA 저장
     # 보내기만 하면 되므로, await 미사용
