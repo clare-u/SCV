@@ -251,7 +251,9 @@ function Home() {
 
       {/* modalButton */}
       <div className="flex bg-indigo-900 p-20">
-        <ModalButton icon="logout">Button</ModalButton>
+        <ModalButton icon="logout" disabled>
+          Button
+        </ModalButton>
       </div>
     </div>
   );
