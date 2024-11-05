@@ -32,10 +32,10 @@ public class User {
     @Column(name = "user_image_url", nullable = false, length = 100)
     private String userImageUrl;
 
-    @Column(name = "user_nickname", nullable = false, length = 30)
+    @Column(name = "user_nickname", nullable = false, length = 50)
     private String userNickname;
 
-    @Column(name = "user_repo", length = 100)
+    @Column(name = "user_repo", length = 50)
     private String userRepo;
 
     @Column(name = "user_created_at", nullable = false)
