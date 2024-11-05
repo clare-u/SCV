@@ -34,14 +34,15 @@ def load_model_from_minio(model_version_id : str):
         # 바이트 데이터를 메모리 파일로 변환
         model_bytes = io.BytesIO(obj.read())
         # PyTorch 모델 로드
-        model = torch.jit.load(model_bytes, map_location='cpu')
+        model = torch.load(model_bytes)
+        # model = torch.jit.load(model_bytes, map_location='cpu')
     except:
         raise ModelNotFound(model_version_id)
     finally:
         obj.close()
         obj.release_conn()
-
-        return model
+    print(model)
+    return model
 
 def load_dataset_from_minio(dataset : Literal["mnist, fashion_mnist, svhn, cifar10, emnist"], kind: Literal["train", "test", "cka"]):
     try:

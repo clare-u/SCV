@@ -12,7 +12,7 @@ from collections import defaultdict
 from time import sleep
 
 from torch.utils.data import Subset 
-
+from torch.utils.data import DataLoader
 
 
 load_dotenv(verbose=True)
@@ -54,9 +54,12 @@ def upload_cka_dataset_to_minio(test_data, dataset_name):
 
     if all(len(indices) == 10 for indices in indices_per_label.values()):
         selected_indices = [idx for indices in indices_per_label.values() for idx in indices]
-        upload_dataset_to_minio(Subset(test_data, selected_indices), f"{dataset_name}_cka")
-        print(f"{dataset_name}의 cka 데이터 셋을 업로드 했습니다.")
+        # Subset에 대한 DataLoader 생성
+        subset_loader = DataLoader(Subset(test_data, selected_indices), batch_size=1, shuffle=False)
 
+        # Upload the subset
+        upload_dataset_to_minio(subset_loader, f"{dataset_name}_cka")
+        print(f"{dataset_name}의 cka 데이터 셋을 업로드 했습니다.")
 
 
 
@@ -73,41 +76,65 @@ while not client.bucket_exists(minio_dataset_bucket):
 transform = transforms.Compose([transforms.ToTensor(), transforms.Normalize((0.5,), (0.5,))])
 
 # MNIST 데이터셋
+# MNIST 데이터셋
 train_dataset_mnist = MNIST(root='./data', train=True, download=True, transform=transform)
 test_dataset_mnist = MNIST(root='./data', train=False, download=True, transform=transform)
-upload_dataset_to_minio(train_dataset_mnist,  "mnist_train")
-upload_dataset_to_minio(test_dataset_mnist, "mnist_test")
+
+# DataLoader 설정
+train_loader_mnist = DataLoader(train_dataset_mnist, batch_size=64, shuffle=True)  # 배치 크기 64
+test_loader_mnist = DataLoader(test_dataset_mnist, batch_size=1, shuffle=False)    # 배치 크기 1
+
+upload_dataset_to_minio(train_loader_mnist, "mnist_train")
+upload_dataset_to_minio(test_loader_mnist, "mnist_test")
 upload_cka_dataset_to_minio(test_dataset_mnist, "mnist")
 
 # Fashion-MNIST 데이터셋
 train_dataset_fashion_mnist = FashionMNIST(root='./data', train=True, download=True, transform=transform)
 test_dataset_fashion_mnist = FashionMNIST(root='./data', train=False, download=True, transform=transform)
-upload_dataset_to_minio(train_dataset_fashion_mnist, "fashion_mnist_train")
-upload_dataset_to_minio(test_dataset_fashion_mnist, "fashion_mnist_test")
+
+# DataLoader 설정
+train_loader_fashion_mnist = DataLoader(train_dataset_fashion_mnist, batch_size=64, shuffle=True)  # 배치 크기 64
+test_loader_fashion_mnist = DataLoader(test_dataset_fashion_mnist, batch_size=1, shuffle=False)    # 배치 크기 1
+
+upload_dataset_to_minio(train_loader_fashion_mnist, "fashion_mnist_train")
+upload_dataset_to_minio(test_loader_fashion_mnist, "fashion_mnist_test")
 upload_cka_dataset_to_minio(test_dataset_fashion_mnist, "fashion_mnist")
 
-# # CIFAR-10 데이터셋
+# CIFAR-10 데이터셋
 train_dataset_cifar10 = CIFAR10(root='./data', train=True, download=True, transform=transform)
 test_dataset_cifar10 = CIFAR10(root='./data', train=False, download=True, transform=transform)
-upload_dataset_to_minio(train_dataset_cifar10, "cifar10_train")
-upload_dataset_to_minio(test_dataset_cifar10, "cifar10_test")
+
+# DataLoader 설정
+train_loader_cifar10 = DataLoader(train_dataset_cifar10, batch_size=64, shuffle=True)  # 배치 크기 64
+test_loader_cifar10 = DataLoader(test_dataset_cifar10, batch_size=1, shuffle=False)    # 배치 크기 1
+
+upload_dataset_to_minio(train_loader_cifar10, "cifar10_train")
+upload_dataset_to_minio(test_loader_cifar10, "cifar10_test")
 upload_cka_dataset_to_minio(test_dataset_cifar10, "cifar10")
 
-# # SVHN 데이터셋
+# SVHN 데이터셋
 train_dataset_svhn = SVHN(root='./data', split='train', download=True, transform=transform)
 test_dataset_svhn = SVHN(root='./data', split='test', download=True, transform=transform)
-upload_dataset_to_minio(train_dataset_svhn, "svhn_train")
-upload_dataset_to_minio(test_dataset_svhn, "svhn_test")
+
+# DataLoader 설정
+train_loader_svhn = DataLoader(train_dataset_svhn, batch_size=64, shuffle=True)  # 배치 크기 64
+test_loader_svhn = DataLoader(test_dataset_svhn, batch_size=1, shuffle=False)    # 배치 크기 1
+
+upload_dataset_to_minio(train_loader_svhn, "svhn_train")
+upload_dataset_to_minio(test_loader_svhn, "svhn_test")
 upload_cka_dataset_to_minio(test_dataset_svhn, "svhn")
 
 # EMNIST 데이터셋
 train_dataset_emnist = EMNIST(root='./data', split='letters', train=True, download=True, transform=transform)
 test_dataset_emnist = EMNIST(root='./data', split='letters', train=False, download=True, transform=transform)
-upload_dataset_to_minio(train_dataset_emnist, "emnist_train")
-upload_dataset_to_minio(test_dataset_emnist, "emnist_test")
+
+# DataLoader 설정
+train_loader_emnist = DataLoader(train_dataset_emnist, batch_size=64, shuffle=True)  # 배치 크기 64
+test_loader_emnist = DataLoader(test_dataset_emnist, batch_size=1, shuffle=False)    # 배치 크기 1
+
+upload_dataset_to_minio(train_loader_emnist, "emnist_train")
+upload_dataset_to_minio(test_loader_emnist, "emnist_test")
 upload_cka_dataset_to_minio(test_dataset_emnist, "emnist")
-
-
 
 
 

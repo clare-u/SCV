@@ -36,8 +36,8 @@ def save_model_to_minio(model, file_name: str):
     try:
         # 모델 저장
         buffer = io.BytesIO()
-        torch.jit.script(model, buffer)
-        # torch.save(model, buffer)
+        # torch.jit.save(model, buffer)
+        torch.save(model, buffer)
         buffer.seek(0)
 
         # MinIO에 업로드

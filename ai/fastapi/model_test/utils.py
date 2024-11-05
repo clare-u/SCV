@@ -2,6 +2,7 @@ from collections import defaultdict
 from classes import Train_Info, feature_activation, activation_maximization
 import json
 import torch
+from torch.optim import Adam
 
 dataset_labels = {
     "mnist": [0,1,2,3,4,5,6,7,8,9]
@@ -42,7 +43,8 @@ def get_example_image(outputs, dataset) -> str:
         input = outputs[i]["input"]
         label = outputs[i]["label"]
         output = outputs[i]["output"]
-        # print(output)
+        label = label.item()
+
         conf, preds = torch.max(torch.softmax(output, dim=1),dim=1)
         conf = conf.item()
         preds = preds.item()
@@ -60,20 +62,48 @@ def get_total_params() -> int:
 def get_params() -> list[int]:
     return [0, 1]
 
-def get_feature_activation() -> list[feature_activation]:
-    return [
-        {
-            "origin": "string",
-            "visualize": "string"
-        }
-    ]
+# 특정 activation map의 maximum activating patch
+def get_feature_activation(origin, activation) -> list[feature_activation]:
 
-def get_activation_maximization() -> list[activation_maximization]:
-    return [
-        {
-            "label": "string",
-            "image": "string"
-        }
-    ]
+    resp = [{"origin": json.dumps(torch.squeeze(ori).tolist()), "visualize": json.dumps(activ.tolist())} for ori, activ in zip(origin, activation)]
+
+    return resp
+
+# 가장 라벨 스러운 이미지를 출력
+def get_activation_maximization(model) -> list[activation_maximization]:
+
+    resp = []
+    for label in dataset_labels["mnist"]:
+        resp.append({
+            "label": str(label),
+            "image": json.dumps(maximize_class_image(model, label))
+        })
+    return resp
 
 
+
+def maximize_class_image(model, target_class, num_steps=100, lr=0.1):
+    # 랜덤한 노이즈 이미지 생성 (MNIST: 1x28x28)
+    optimized_image = torch.randn((1, 1, 28, 28), requires_grad=True)
+
+    # Adam 옵티마이저 설정
+    optimizer = Adam([optimized_image], lr=lr)
+
+    for step in range(num_steps):
+        optimizer.zero_grad()
+
+        # 모델의 예측 값 계산
+        output = model(optimized_image)
+        
+        # target class에 대한 점수를 최대화하는 방향으로 손실 계산
+        loss = -output[0, target_class]  # 음수를 취하여 최대화 방향으로 최적화
+
+        # 역전파 및 최적화
+        loss.backward()
+        optimizer.step()
+
+        # 이미지 값 범위 조정 (-1, 1 사이로 클리핑)
+        with torch.no_grad():
+            optimized_image.clamp_(-1, 1)
+
+    return optimized_image.detach().cpu().squeeze().tolist()
