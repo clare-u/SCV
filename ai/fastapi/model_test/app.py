@@ -7,14 +7,13 @@ from fastapi.responses import JSONResponse
 from dotenv import load_dotenv
 from load_minio import load_model_from_minio, load_dataset_from_minio
 from model_layer_class import deserialize_layers, serialize_layers
-import httpx
 import os
 import torch
+from save_milvus import save_cka_to_milvus
+
+load_dotenv(verbose=True)
 
 app = FastAPI(root_path="/fast/v1/model/test")
-
-fast_match_host_name = os.getenv("FAST_MATCH_HOST_NAME")
-fast_match_port = os.getenv("FAST_MATCH_PORT")
 
 # 모델이 확정되어 결과 분석, CKA 저장 하는 함수
 @app.post("/analyze/{model_version_id}/{dataset}", response_model=Model_Analyze_Response)
@@ -25,16 +24,44 @@ async def analyze_model(model_version_id: str, dataset: Literal["mnist", "fashio
     layers = req.layers
     # 데이터 셋 가져오기
     test_dataset = load_dataset_from_minio(dataset, "test")
-    outputs = []
 
+
+    # convolution layer의 index 보관
+    conv_idx = []
+
+    for i in range(0, len(model)):
+        if isinstance(model[i], torch.nn.Conv2d):
+            conv_idx.append(i)
+    print(f"convolution layer의 index: {conv_idx}")
+
+    # feature activation map 을 위한 변수 선언
+    norm = [0, 0, 0]
+    maximization_input = [None, None, None]
+    activation_map = [None, None, None]
+
+    outputs = []
     # 테스트
     model.eval()
     with torch.no_grad():
-        for input, label in test_dataset:
+        for index, (input, label) in enumerate(test_dataset):
+
+            x = input
+
+            for i in range(0, len(model)):
+                x = model[i](x)
+                if i == conv_idx[-1]:
+                    for j in range(0,3):
+                        # print(torch.norm(x[0][j]))
+                        curr_norm = torch.norm(x[0][j])
+                        if curr_norm > norm[j] :
+                            norm[j] = curr_norm
+                            activation_map[j] = x[0][j]
+                            maximization_input[j] = input
+
             outputs.append({
                 "input" : input,
                 "label": label,
-                "output": model(input)
+                "output": x
             })
 
     code = get_code() # 현재
@@ -45,23 +72,10 @@ async def analyze_model(model_version_id: str, dataset: Literal["mnist", "fashio
     example_image = get_example_image(outputs, dataset) # 나
     total_params = get_total_params() # 현재
     params = get_params() # 현재
-    feature_activation = get_feature_activation() # 나
-    activation_maximization = get_activation_maximization() # 나
+    feature_activation = get_feature_activation(maximization_input, activation_map) # 나
+    activation_maximization = get_activation_maximization(model) # 나
 
-    # Milvus CKA 저장
-    # 보내기만 하면 되므로, await 미사용
-
-    layer_id=3
-    async with httpx.AsyncClient() as client:
-        res = await client.post(f"http://{fast_match_host_name}:{fast_match_port}/fast/v1/model/match/{model_version_id}/{layer_id}",
-                    json={
-                        "test_accuracy": test_accuracy,
-                        "layers" : layers,
-                        "cka_vec": [
-                            0.0,1.0,2.0
-                        ]
-                    })
-        print(res)
+    _ = await save_cka_to_milvus(model, dataset, model_version_id, conv_idx, test_accuracy, layers)
 
     return {
         "model_version_id": model_version_id,

@@ -48,7 +48,7 @@ layer_field = FieldSchema(
 vector_field = FieldSchema(
     name="cka_vec",
     dtype=DataType.FLOAT_VECTOR,
-    dim=3,
+    dim=10000,
     description="cka 행렬 X 의 XX^T 를 취한 후에 Frobenius Norm으로 나눈 값")
 
 

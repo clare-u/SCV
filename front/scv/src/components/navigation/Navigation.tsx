@@ -53,6 +53,7 @@ const Navigation = () => {
             image={memberData.userImageUrl}
             nickname={memberData.userNickname}
             email={memberData.userEmail}
+            repo={memberData.userRepo}
           />
         ) : (
           <NavigationItem href="/login" icon="login">

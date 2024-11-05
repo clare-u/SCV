@@ -14,6 +14,7 @@ public class OAuth2UserDTO {
     private String userEmail;
     private String userImageUrl;
     private String userNickname;
+    private String userRepo;
     private LocalDateTime userCreatedAt;
     private LocalDateTime userUpdatedAt;
     private boolean userIsDeleted;

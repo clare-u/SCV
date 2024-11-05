@@ -31,8 +31,7 @@ public class ModelVersion extends BaseEntity {
     @Column(name = "version_no", nullable = false)
     private int versionNo;
 
-    @Lob
-    @Column(name = "version_layer_at", nullable = false)
+    @Column(name = "version_layer_at", columnDefinition = "JSON")
     private String layers;
 
     @Builder.Default
@@ -42,6 +41,7 @@ public class ModelVersion extends BaseEntity {
 
     /**
      * 레이어 수정
+     *
      * @param layers
      */
     public void updateLayers(String layers) {

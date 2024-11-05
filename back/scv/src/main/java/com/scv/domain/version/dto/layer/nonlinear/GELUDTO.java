@@ -1,12 +1,19 @@
 package com.scv.domain.version.dto.layer.nonlinear;
 
+import com.fasterxml.jackson.annotation.JsonCreator;
+import com.fasterxml.jackson.annotation.JsonProperty;
+import com.fasterxml.jackson.annotation.JsonTypeName;
 import com.scv.domain.version.dto.layer.LayerDTO;
+import lombok.Getter;
 
-public record GELUDTO(
-        String name
-) implements LayerDTO {
-    @Override
-    public String getName() {
-        return name;
+@JsonTypeName("GELU")
+@Getter
+public class GELUDTO extends LayerDTO {
+
+    @JsonProperty("name")
+    private final String name = "GELU";
+
+    @JsonCreator
+    public GELUDTO() {
     }
 }

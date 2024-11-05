@@ -35,10 +35,11 @@ public class ModelService {
     private final ModelVersionRepository modelVersionRepository;
     private final DataRepository dataRepository;
     private final UserRepository userRepository;
-    
+
     // TODO ModelResponse에 정확도 추가하기
-    
+
     // 모델 생성
+    @Transactional
     public void createModel(ModelCreateRequest request, CustomOAuth2User user) {
         Data data = dataRepository.findByName(request.dataName()).orElseThrow(DataNotFoundException::new);
         User existingUser = userRepository.findById(user.getUserId()).orElseThrow(UserNotFoundException::getInstance);
@@ -69,6 +70,58 @@ public class ModelService {
         modelVersionRepository.save(firstVersion);
     }
 
+
+    // 내 모델 조회
+    @Transactional(readOnly = true)
+    public Page<ModelResponse> getMyModels(Pageable pageable, CustomOAuth2User user, String dataName, String modelName) {
+        modelName = (modelName == null || modelName.isEmpty()) ? null : modelName;
+        dataName = (dataName == null || dataName.isEmpty()) ? null : dataName;
+        Long userId = user.getUserId();
+        User existingUser = userRepository.findById(userId).orElseThrow(UserNotFoundException::getInstance);
+
+        Page<Model> models = modelRepository.searchMyModels(modelName, dataName, userId, pageable);
+        return models.map(model -> new ModelResponse(existingUser, model));
+    }
+
+    @Transactional(readOnly = true)
+    public Page<ModelResponse> getAllModels(Pageable pageable, String dataName, String modelName) {
+        modelName = (modelName == null || modelName.isEmpty()) ? null : modelName;
+        dataName = (dataName == null || dataName.isEmpty()) ? null : dataName;
+
+        Page<Model> models = modelRepository.searchModels(modelName, dataName, pageable);
+
+        return models.map(model -> {
+            User user = model.getUser();
+            return new ModelResponse(user, model);
+        });
+    }
+
+    // 모델 버전 조회
+    @Transactional(readOnly = true)
+    public List<ModelVersionResponse> getModelVersions(Long modelId) {
+        List<ModelVersion> modelVersions = modelVersionRepository.findAllByModel_IdAndDeletedFalse(modelId);
+
+        return modelVersions.stream()
+                .map(ModelVersionResponse::new)
+                .collect(Collectors.toList());
+    }
+
+
+    // 이름 수정
+    @Transactional
+    public void updateModelName(Long modelId, String name, CustomOAuth2User user) throws BadRequestException {
+        Model model = modelRepository.findById(modelId).orElseThrow(ModelNotFoundException::new);
+
+        if (user.getUserId() != model.getUser().getUserId()) {
+            throw new BadRequestException("자신의 모델만 수정할 수 있습니다.");
+        }
+
+        model.updateName(name);
+
+        modelRepository.save(model);
+    }
+
+
     // 모델 삭제
     @Transactional
     public void deleteModel(Long modelId, CustomOAuth2User user) throws BadRequestException {
@@ -88,43 +141,5 @@ public class ModelService {
         modelRepository.save(model);
     }
 
-    // 이름 수정
-    public void updateModelName(Long modelId, String name, CustomOAuth2User user) throws BadRequestException {
-        Model model = modelRepository.findById(modelId).orElseThrow(ModelNotFoundException::new);
 
-        if (user.getUserId() != model.getUser().getUserId()) {
-            throw new BadRequestException("자신의 모델만 수정할 수 있습니다.");
-        }
-
-        model.updateName(name);
-
-        modelRepository.save(model);
-    }
-
-    // 모델 버전 조회
-    public List<ModelVersionResponse> getModelVersions(Long modelId) {
-        List<ModelVersion> modelVersions = modelVersionRepository.findAllByModel_IdAndDeletedFalse(modelId);
-
-        return modelVersions.stream()
-                .map(ModelVersionResponse::new)
-                .collect(Collectors.toList());
-    }
-
-    // 내 모델 조회
-    public Page<ModelResponse> getMyModels(Pageable pageable, CustomOAuth2User user, String dataName, String modelName) {
-        modelName = (modelName == null || modelName.isEmpty()) ? null : modelName;
-        dataName = (dataName == null || dataName.isEmpty()) ? null : dataName;
-
-        Long userId = user.getUserId();
-        Page<Model> models = modelRepository.searchMyModels(modelName, dataName, userId, pageable);
-        return models.map(ModelResponse::new);
-    }
-    
-    // 전체 모델 조회
-    public Page<ModelResponse> getAllModels(Pageable pageable, String dataName, String modelName) {
-        modelName = (modelName == null || modelName.isEmpty()) ? null : modelName;
-        dataName = (dataName == null || dataName.isEmpty()) ? null : dataName;
-        Page<Model> models = modelRepository.searchModels(modelName, dataName, pageable);
-        return models.map(ModelResponse::new);
-    }
 }

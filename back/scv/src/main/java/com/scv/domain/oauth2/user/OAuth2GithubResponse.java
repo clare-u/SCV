@@ -2,6 +2,7 @@ package com.scv.domain.oauth2.user;
 
 import lombok.RequiredArgsConstructor;
 
+import java.time.LocalDateTime;
 import java.time.ZonedDateTime;
 import java.time.format.DateTimeFormatter;
 import java.util.Map;
@@ -28,12 +29,13 @@ public class OAuth2GithubResponse implements OAuth2Response {
     }
 
     @Override
-    public ZonedDateTime getUserCreatedAt() {
-        return ZonedDateTime.parse(String.valueOf(attributes.get("created_at")), DateTimeFormatter.ISO_OFFSET_DATE_TIME);
+    public LocalDateTime getUserCreatedAt() {
+        return ZonedDateTime.parse(String.valueOf(attributes.get("created_at")), DateTimeFormatter.ISO_OFFSET_DATE_TIME).toLocalDateTime();
     }
 
     @Override
-    public ZonedDateTime getUserUpdatedAt() {
-        return ZonedDateTime.parse(String.valueOf(attributes.get("updated_at")), DateTimeFormatter.ISO_OFFSET_DATE_TIME);
+    public LocalDateTime getUserUpdatedAt() {
+        return ZonedDateTime.parse(String.valueOf(attributes.get("updated_at")), DateTimeFormatter.ISO_OFFSET_DATE_TIME).toLocalDateTime();
     }
 }
+

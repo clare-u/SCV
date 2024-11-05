@@ -35,6 +35,9 @@ public class User {
     @Column(name = "user_nickname", nullable = false, length = 30)
     private String userNickname;
 
+    @Column(name = "user_repo", length = 100)
+    private String userRepo;
+
     @Column(name = "user_created_at", nullable = false)
     private LocalDateTime userCreatedAt;
 
