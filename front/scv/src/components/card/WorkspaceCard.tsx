@@ -50,7 +50,7 @@ export default function WorkspaceCard({
   // Link URL을 조건에 따라 설정
   const href =
     dataset === "Editing"
-      ? `/workspace/edit/${modelId}/${versionId}`
+      ? `/edit/${modelId}/${versionId}`
       : `/workspace/${modelId}/${versionId}`;
 
   const handleCardClick = (e: React.MouseEvent) => {
