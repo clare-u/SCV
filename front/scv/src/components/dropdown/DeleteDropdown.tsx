@@ -1,16 +1,22 @@
 "use client";
 import { useState } from "react";
+import { useDeleteModel } from "@/hooks/models";
 
 interface DeleteDropdownProps {
+  modelId: number;
   onClick?: (event: React.MouseEvent) => void;
 }
 
-const DeleteDropdown: React.FC<DeleteDropdownProps> = ({ onClick }) => {
-  const [isDropboxOpen, setIsDropboxOpen] = useState(false); // Dropbox 열림 상태 관리
+const DeleteDropdown: React.FC<DeleteDropdownProps> = ({
+  modelId,
+  onClick,
+}) => {
+  const [isDropboxOpen, setIsDropboxOpen] = useState(false);
+  const { mutate: deleteModelMutation, isPending } = useDeleteModel();
 
   const toggleDropbox = (event: React.MouseEvent) => {
     event.stopPropagation();
-    setIsDropboxOpen(!isDropboxOpen); // 토글 기능 구현
+    setIsDropboxOpen(!isDropboxOpen);
   };
 
   const handleDeleteClick = (event: React.MouseEvent) => {
@@ -19,8 +25,16 @@ const DeleteDropdown: React.FC<DeleteDropdownProps> = ({ onClick }) => {
       "해당 모델과 하위 버전 전체를 삭제하시겠습니까?",
     );
     if (confirmDelete) {
-      // 삭제 로직을 여기에 추가
-      console.log("삭제가 진행되었습니다.");
+      deleteModelMutation(modelId, {
+        onSuccess: () => {
+          alert("모델이 성공적으로 삭제되었습니다.");
+          setIsDropboxOpen(false);
+        },
+        onError: (error) => {
+          console.log("모델 삭제 중 오류가 발생했습니다.");
+          console.error("Delete error:", error);
+        },
+      });
     }
   };
 
@@ -37,7 +51,9 @@ const DeleteDropdown: React.FC<DeleteDropdownProps> = ({ onClick }) => {
           <div className="inline-flex flex-col gap-4 rounded-4 bg-white p-6 shadow-s">
             <div
               onClick={handleDeleteClick}
-              className="flex cursor-pointer items-center gap-10 whitespace-nowrap rounded-4 bg-white px-16 py-10 text-14 hover:bg-gray-100"
+              className={`flex cursor-pointer items-center gap-10 whitespace-nowrap rounded-4 bg-white px-16 py-10 text-14 hover:bg-gray-100 ${
+                isPending ? "opacity-50" : ""
+              }`}
             >
               삭제하기
             </div>

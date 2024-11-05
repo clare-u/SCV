@@ -49,3 +49,9 @@ export const fetchMyModels = async (
   console.log("API 요청 URL:", url);
   return handleApiRequest<Content, "get">(url, "get");
 };
+
+// 모델 삭제하는 함수
+export const deleteModel = async (modelId: number) => {
+  const url = `/models/${modelId}`;
+  return handleApiRequest<void, "delete">(url, "delete");
+};
