@@ -1,6 +1,6 @@
 "use client";
 import { useState } from "react";
-import { useDeleteModel } from "@/hooks/models";
+import { useDeleteModel } from "@/hooks";
 import { toast } from "sonner";
 
 interface DeleteDropdownProps {
@@ -45,7 +45,7 @@ const DeleteDropdown: React.FC<DeleteDropdownProps> = ({
         className="material-symbols-outlined cursor-pointer"
         onClick={toggleDropbox}
       >
-        more_horiz
+        more_vert
       </span>
       {isDropboxOpen && (
         <div className="absolute right-0 top-full z-20">

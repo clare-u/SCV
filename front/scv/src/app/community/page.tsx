@@ -8,7 +8,7 @@ import Pagination from "@/components/pagination/Pagination";
 import DatasetRadio from "@/components/input/DatasetRadio";
 import SearchInput from "@/components/input/SearchInput";
 import Loading from "@/components/loading/Loading";
-import { useFetchModels } from "@/hooks/models";
+import { useFetchModels } from "@/hooks";
 import { ModelQueryParams } from "@/types";
 
 function Community() {
