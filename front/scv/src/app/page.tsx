@@ -235,11 +235,11 @@ function Home() {
       </div> */}
 
       {/* workspaceCard */}
-      <div className="grid w-[1100px] grid-cols-3 gap-10">
+      {/* <div className="grid w-[1100px] grid-cols-3 gap-10">
         {workspaceCards.map((card) => (
           <WorkspaceCard key={card.modelId} {...card} />
         ))}
-      </div>
+      </div> */}
 
       {/* 페이지네이션 */}
       <Pagination

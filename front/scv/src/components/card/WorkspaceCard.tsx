@@ -1,6 +1,5 @@
 "use client";
 
-import Link from "next/link";
 import { useRouter } from "next/navigation";
 import Chips from "../chips/Chips";
 import { ChipsProps } from "../chips/Chips";
@@ -9,12 +8,12 @@ import { BadgeProps } from "../badge/Badge";
 import DeleteDropdown from "../dropdown/DeleteDropdown";
 
 interface WorkspaceCardProps {
-  modelId: string;
+  modelId: number;
   versionId: string;
   title: string;
   version: string;
   dataset: string;
-  accuracy: number;
+  accuracy?: number;
   createdAt: string;
   updatedAt: string;
 }
@@ -55,7 +54,7 @@ export default function WorkspaceCard({
       : `/workspace/${modelId}/${versionId}`;
 
   const handleCardClick = (e: React.MouseEvent) => {
-    // DeleteDropdown이 클릭된 경우 네비게이션을 막습니다
+    // DeleteDropdown이 클릭된 경우 네비게이션을 막음
     if (!(e.target as HTMLElement).closest(".delete-dropdown")) {
       router.push(href);
     }
@@ -87,7 +86,7 @@ export default function WorkspaceCard({
             </p>
           </div>
           {/* dataset이 Editing이 아닐 때만 accuracy를 렌더링 */}
-          {dataset !== "Editing" && (
+          {dataset !== "Editing" && accuracy && (
             <div className="flex flex-col items-end justify-center">
               <p className="text-12 font-semibold">{accuracy.toFixed(2)}%</p>
             </div>
