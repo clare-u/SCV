@@ -71,7 +71,10 @@ export default function WorkspaceCard({
               {dataset}
             </Chips>
           </div>
-          <DeleteDropdown onClick={(e) => e.stopPropagation()} />
+          <DeleteDropdown
+            onClick={(e) => e.stopPropagation()}
+            modelId={modelId}
+          />
         </div>
 
         <div className="flex items-center justify-between">
