@@ -61,7 +61,23 @@ const BlockList: React.FC = () => {
     // 드롭이 유효한 위치에서 일어나지 않은 경우
     if (!destination) return;
 
-    // 왼쪽에서 오른쪽으로 드래그 시 추가를 가장 먼저 체크
+    // 휴지통에 드래그 시 삭제
+    if (destination.droppableId === "trash") {
+      // start나 end 블록은 삭제하지 않음
+      if (
+        droppedBlocks[source.index].name === "start" ||
+        droppedBlocks[source.index].name === "end"
+      ) {
+        return;
+      }
+
+      setDroppedBlocks((blocks) =>
+        blocks.filter((_, index) => index !== source.index),
+      );
+      return;
+    }
+
+    // 왼쪽에서 오른쪽으로 드래그 시 추가
     if (
       source.droppableId.startsWith("left") &&
       destination.droppableId === "right"
@@ -113,14 +129,6 @@ const BlockList: React.FC = () => {
     ) {
       setDroppedBlocks((prevBlocks) =>
         prevBlocks.filter((_, index) => index !== source.index),
-      );
-      return;
-    }
-
-    // 휴지통에 드래그 시 삭제
-    if (destination.droppableId === "trash") {
-      setDroppedBlocks((blocks) =>
-        blocks.filter((_, index) => index !== source.index),
       );
       return;
     }
