@@ -1,6 +1,7 @@
 "use client";
 import { useState } from "react";
 import { useDeleteModel } from "@/hooks/models";
+import { toast } from "sonner";
 
 interface DeleteDropdownProps {
   modelId: number;
@@ -27,11 +28,11 @@ const DeleteDropdown: React.FC<DeleteDropdownProps> = ({
     if (confirmDelete) {
       deleteModelMutation(modelId, {
         onSuccess: () => {
-          alert("모델이 성공적으로 삭제되었습니다.");
+          toast.success("모델이 성공적으로 삭제되었습니다.");
           setIsDropboxOpen(false);
         },
         onError: (error) => {
-          console.log("모델 삭제 중 오류가 발생했습니다.");
+          toast.error("모델 삭제 중 오류가 발생했습니다.");
           console.error("Delete error:", error);
         },
       });

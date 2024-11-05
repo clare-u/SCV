@@ -1,4 +1,3 @@
-import Button from "@/components/button/Button";
 import NewModal from "@/components/modal/NewModal";
 
 type LayoutProps = {
