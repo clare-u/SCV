@@ -65,7 +65,7 @@ export default function Edit() {
   };
 
   return (
-    <div className="flex h-screen flex-1 flex-col">
+    <div className="flex h-screen w-full flex-1 flex-col">
       <div className="flex h-[8vh] w-full items-center justify-between border-b border-gray-500 px-10">
         <div className="flex items-center justify-between">
           <div className="flex items-center justify-center gap-10">
