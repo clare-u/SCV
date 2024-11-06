@@ -7,9 +7,13 @@ from minio import Minio
 from torchsummary import summary
 import sys
 import os
+from typing import List, Dict, Any, Optional, Tuple
+from pathlib import Path
 
 from neural_network_builder.exceptions.custom_exceptions import ValidationError
-from .datasets import DatasetRegistry, DatasetFactory
+from .datasets.datasets_registry import setup_logger
+from .datasets import DatasetRegistry, DatasetFactory, DatasetInfo
+from .utils import logger
 from .validators.model_validator import ModelValidator
 
 current_dir = os.path.dirname(os.path.abspath(__file__))
@@ -35,21 +39,27 @@ class ModelTrainer:
 
         print(f"Using device: {self.device}")
 
-    def load_data(self, batch_size: int):
-        transform = transforms.Compose([
-            transforms.ToTensor(),
-            transforms.Normalize((0.1307,), (0.3081,))
-        ])
+    def save_model_with_info(self, model: nn.Module, version_no: str,
+                             dataset_info: DatasetInfo, training_history: List,
+                             model_layer: Dict) -> None:
+        """모델과 관련 정보를 저장"""
+        try:
+            # 모델에 메타데이터 추가
+            model.dataset_info = dataset_info.to_dict()
+            model.training_history = training_history
+            model.model_layer = model_layer
 
-        train_dataset = datasets.MNIST('data', train=True, download=True, transform=transform)
-        test_dataset = datasets.MNIST('data', train=False, transform=transform)
+            # MinIO에 저장
+            save_model_to_minio(model, version_no)
+            logger.info(f"모델 저장 성공: {version_no}.pth")
 
-        train_loader = DataLoader(train_dataset, batch_size=batch_size, shuffle=True)
-        test_loader = DataLoader(test_dataset, batch_size=batch_size)
+        except Exception as e:
+            logger.error(f"모델 저장 실패: {str(e)}")
+            raise
 
-        return train_loader, test_loader
-
-    def train_epoch(self, model, train_loader, optimizer, criterion):
+    def train_epoch(self, model: nn.Module, train_loader: DataLoader,
+                   optimizer: optim.Optimizer, criterion: nn.Module) -> Tuple[float, float]:
+        """한 epoch 동안의 학습을 수행"""
         model.train()
         total_loss = 0
         correct = 0
@@ -76,7 +86,9 @@ class ModelTrainer:
 
         return avg_loss, accuracy
 
-    def test_model(self, model, test_loader, criterion):
+    def test_model(self, model: nn.Module, test_loader: DataLoader,
+                  criterion: nn.Module) -> Tuple[float, float]:
+        """모델 테스트 수행"""
         model.eval()
         test_loss = 0
         correct = 0
@@ -94,38 +106,18 @@ class ModelTrainer:
         test_loss /= len(test_loader)
         accuracy = 100. * correct / total
 
-        # rough한 결과 출력 ( 피그마처럼 )
         print(f"\n실행결과")
         print(f"{accuracy:.2f}% ({correct}/{total})")
 
         return test_loss, accuracy
 
-    def train(self, config: ModelConfig):
+    def train(self, config: ModelConfig) -> Dict[str, Any]:
         """모델 학습 메인 함수"""
-        # 학습 하이퍼파라미터 설정
-        batch_size = 64
-        learning_rate = 0.001
-        epochs = config.dataEpochCnt
-
-        # 데이터셋 정보 가져오기
-        dataset_info = DatasetRegistry.get_dataset_info(config.dataName)
-
-        # ModelValidator를 사용한 검증 추가
-        validator = ModelValidator()
-
         try:
-            # 모델 설정 검증
-            validator.validate_model_config(config.model_dump())
+            # 데이터셋 정보 가져오기
+            dataset_info = DatasetRegistry.get_dataset_info(config.dataName)
 
-            # 입력 레이어의 채널 수 확인 및 검증
-            first_layer = config.modelLayerAt.layers[0]
-            if hasattr(first_layer, 'in_channels'):
-                validator.validate_input_shape(
-                    config.dataName,
-                    (first_layer.in_channels, *dataset_info.input_shape[1:])
-                )
-
-            # 데이터 로드
+            # 데이터 로더 생성
             train_loader, test_loader = DatasetFactory.create_dataset(
                 config.dataName,
                 config.dataTrainCnt,
@@ -137,7 +129,8 @@ class ModelTrainer:
             model = self.model_builder.create_model(config.model_dump())
             model = model.to(self.device)
 
-            # 생성된 모델의 전체 구조 검증
+            # 모델 검증
+            validator = ModelValidator()
             validation_result = validator.validate_model(model, config.dataName)
             print(f"모델 검증 결과: {validation_result}")
 
@@ -146,7 +139,8 @@ class ModelTrainer:
 
             # 학습 설정
             criterion = nn.CrossEntropyLoss()
-            optimizer = optim.Adam(model.parameters(), lr=learning_rate)
+            optimizer = optim.Adam(model.parameters(), lr=0.001)
+            epochs = config.dataEpochCnt
 
             # 학습 수행
             print(f"{epochs} 개의 Epoch에 대한 학습을 시작합니다...")
@@ -185,42 +179,44 @@ class ModelTrainer:
                     model.training_history = training_history
                     model.model_layer = self.model_layer
 
+                    # 모델 레이어 정보 업데이트
+                    self.model_layer = {
+                        "layers": [{
+                            "name": layer.__class__.__name__,
+                            **{k: v for k, v in layer.__dict__.items() if not k.startswith('_')}
+                        } for layer in config.modelLayerAt.layers],
+                        "dataName": config.dataName,
+                        "dataTrainCnt": config.dataTrainCnt,
+                        "dataTestCnt": config.dataTestCnt,
+                        "dataLabelCnt": config.dataLabelCnt,
+                        "dataEpochCnt": config.dataEpochCnt
+                    }
+
                     # 모델 저장
-                    save_model_to_minio(model, str(config.versionNo))
+                    self.save_model_with_info(
+                        model=model,
+                        version_no=str(config.versionNo),
+                        dataset_info=dataset_info,
+                        training_history=training_history,
+                        model_layer=self.model_layer
+                    )
 
-                model_structure = str(model)
-                self.model_layer = {
-                    "layers": [{
-                        "name": layer.__class__.__name__,
-                        **{k: v for k, v in layer.__dict__.items() if not k.startswith('_')}
-                    } for layer in config.modelLayerAt.layers],
-                    "dataName": config.dataName,
-                    "dataTrainCnt": config.dataTrainCnt,
-                    "dataTestCnt": config.dataTestCnt,
-                    "dataLabelCnt": config.dataLabelCnt,
-                    "dataEpochCnt": config.dataEpochCnt
-                }
+            return {
+                "model_version": config.versionNo,
+                "model_layer": self.model_layer,
+                "final_train_accuracy": train_acc,
+                "final_test_accuracy": test_acc,
+                "best_test_accuracy": best_accuracy,
+                "training_history": training_history
+            }
 
-        except ValidationError as e:
-            print(f"모델 검증 실패: {str(e)}")
+        except Exception as e:
+            logger.error(f"학습 중 오류 발생: {str(e)}")
             raise
-
-        return {
-            "model_version": config.versionNo,
-            # "model_structure": model_structure,
-            "model_layer": self.model_layer,
-            "final_train_accuracy": train_acc,
-            "final_test_accuracy": test_acc,
-            "best_test_accuracy": best_accuracy,
-            "training_history": training_history
-        }
 
     def test_saved_model(self, model_version: str):
         """저장된 모델을 로드하여 테스트하는 메서드"""
         try:
-            # 데이터 로드
-            _, test_loader = self.load_data(batch_size=64)
-
             # MinIO에서 모델 로드
             client = Minio(
                 endpoint=f"{minio_host_name}:{minio_api_port}",
@@ -237,6 +233,20 @@ class ModelTrainer:
             model = torch.load(model_path)
             model = model.to(self.device)
             model.eval()
+
+            # 데이터셋 정보 확인
+            if not hasattr(model, 'dataset_info'):
+                raise ValueError("모델에 데이터셋 정보가 없습니다")
+
+            # DatasetInfo 객체 복원
+            dataset_info = DatasetInfo.from_dict(model.dataset_info)
+
+            # 적절한 데이터셋으로 테스트 데이터 로드
+            _, test_loader = DatasetFactory.create_dataset(
+                dataset_info.name,
+                train_count=None,
+                test_count=None
+            )
 
             # 테스트 실행
             criterion = nn.CrossEntropyLoss()

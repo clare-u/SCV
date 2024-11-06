@@ -51,6 +51,10 @@ class DatasetFactory:
             # SVHN은 split 파라미터 사용
             train_dataset = datasets.SVHN('data', split='train', download=True, transform=train_transform)
             test_dataset = datasets.SVHN('data', split='test', download=True, transform=test_transform)
+        elif dataset_name == "CIFAR10":
+            dataset_class = datasets.CIFAR10
+            train_dataset = dataset_class('data', train=True, download=True, transform=train_transform)
+            test_dataset = dataset_class('data', train=False, download=True, transform=test_transform)
         elif dataset_name == "EMNIST":
             # EMNIST는 split 파라미터를 사용하여 letters 데이터를 가져옵니다.
             train_dataset = datasets.EMNIST('data', split='letters', train=True, download=True,

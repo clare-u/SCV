@@ -41,6 +41,28 @@ class DatasetInfo:
     augmentation: bool = False
     resize_dims: Optional[Tuple[int, int]] = None
 
+    def to_dict(self) -> Dict:
+        return {
+            "name": self.name,
+            "input_shape": self.input_shape,
+            "num_classes": self.num_classes,
+            "mean": self.mean,
+            "std": self.std,
+            "augmentation": self.augmentation,
+            "resize_dims": self.resize_dims
+        }
+
+    @classmethod
+    def from_dict(cls, data: Dict) -> 'DatasetInfo':
+         return cls(
+            name=data["name"],
+            input_shape=tuple(data["input_shape"]),
+            num_classes=data["num_classes"],
+            mean=tuple(data["mean"]),
+            std=tuple(data["std"]),
+            augmentation=data.get("augmentation", False),
+            resize_dims=tuple(data["resize_dims"]) if data.get("resize_dims") else None
+        )
 
 class DatasetRegistry:
     _registry: Dict[str, DatasetInfo] = {}

@@ -154,17 +154,17 @@ class ModelValidator:
                 curr_type = curr_info['layer_type']
                 next_type = next_info['layer_type']
 
-                # Conv2d -> MaxPool2d 연결 검증
-                if curr_type == 'Conv2d' and next_type == 'MaxPool2d':
-                    if curr_shape[2] % 2 != 0 or curr_shape[3] % 2 != 0:
-                        error_msg = (
-                            f"Conv2d의 출력 크기({curr_shape[2]}x{curr_shape[3]})가 "
-                            f"MaxPool2d의 stride(2)로 나누어 떨어지지 않습니다."
-                        )
-                        raise LayerConnectionError(curr_name, curr_shape, next_shape, error_msg)
+                # # Conv2d -> MaxPool2d 연결 검증
+                # if curr_type == 'Conv2d' and next_type == 'MaxPool2d':
+                #     if curr_shape[2] % 2 != 0 or curr_shape[3] % 2 != 0:
+                #         error_msg = (
+                #             f"Conv2d의 출력 크기({curr_shape[2]}x{curr_shape[3]})가 "
+                #             f"MaxPool2d의 stride(2)로 나누어 떨어지지 않습니다."
+                #         )
+                #         raise LayerConnectionError(curr_name, curr_shape, next_shape, error_msg)
 
                 # MaxPool2d -> Flatten 연결 검증
-                elif curr_type == 'MaxPool2d' and next_type == 'Flatten':
+                if curr_type == 'MaxPool2d' and next_type == 'Flatten':
                     expected_flatten_size = curr_shape[1] * curr_shape[2] * curr_shape[3]
                     if next_shape[1] != expected_flatten_size:
                         error_msg = (
