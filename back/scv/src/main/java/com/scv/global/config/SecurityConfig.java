@@ -78,6 +78,7 @@ public class SecurityConfig {
 
         // 경로별 인가 작업
         http.authorizeHttpRequests(auth -> auth
+                .requestMatchers("/actuator/**").permitAll()  // actuator 엔드포인트 명시적 허용
                 .anyRequest().permitAll());
 
         // 세션 설정 : STATELESS
