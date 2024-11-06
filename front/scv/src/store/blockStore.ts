@@ -4,7 +4,7 @@ import { BlockDefinition } from "@/types";
 import { toast } from "sonner";
 
 // 데이터셋별 레이블 개수 매핑
-const datasetLabels: Record<Dataset, number> = {
+export const datasetLabels: Record<Dataset, number> = {
   MNIST: 10,
   Fashion: 10,
   "CIFAR-10": 10,
@@ -13,7 +13,7 @@ const datasetLabels: Record<Dataset, number> = {
 };
 
 // 데이터셋별 채널 매핑
-const datasetChannels: Record<Dataset, number> = {
+export const datasetChannels: Record<Dataset, number> = {
   MNIST: 1,
   Fashion: 1,
   "CIFAR-10": 3,
@@ -22,7 +22,7 @@ const datasetChannels: Record<Dataset, number> = {
 };
 
 // 데이터셋별 size 매핑
-const datasetSizes: Record<Dataset, number> = {
+export const datasetSizes: Record<Dataset, number> = {
   MNIST: 28,
   Fashion: 28,
   "CIFAR-10": 32,
@@ -47,9 +47,18 @@ const validateBlock = (
   block: BlockDefinition,
 ) => {
   if (input === undefined) return;
-
-  var out_channels = input.channels;
-
+  var out_channels: number = input.channels;
+  let flag = false;
+  block.params.some((param, index) => {
+    if (param.value === undefined) {
+      toast.error(
+        `${block.name} 블록의 ${param.name} 파라미터에 빈칸이 있습니다.`,
+      );
+      flag = true;
+      return true;
+    }
+  });
+  if (flag) return;
   if (block.name === "nn.Conv2d") {
     const in_channels = block.params[0].value;
 
@@ -60,8 +69,12 @@ const validateBlock = (
       return;
     }
 
-    out_channels = block.params[1].value;
+    if (block.params[1].value) {
+      out_channels = block.params[1].value;
+    }
     const kernel_size = block.params[2].value;
+
+    if (kernel_size === undefined) return;
 
     if (kernel_size >= input.width || kernel_size >= input.height) {
       toast.error(
@@ -85,9 +98,12 @@ const validateBlock = (
       );
       return;
     }
-
-    out_channels = block.params[1].value;
+    if (block.params[1].value) {
+      out_channels = block.params[1].value;
+    }
     const kernel_size = block.params[2].value;
+
+    if (kernel_size === undefined) return;
 
     if (kernel_size >= input.width || kernel_size >= input.height) {
       toast.error(
@@ -107,12 +123,16 @@ const validateBlock = (
     const stride = block.params[1].value;
     const constant = block.name === "MaxPool2d" ? 1 : 0;
 
+    if (kernel_size === undefined) return;
+
     if (kernel_size >= input.width || kernel_size >= input.height) {
       toast.error(
         `${block.name}의 kernel_size : ${kernel_size}이 input data size : ${input.width} * ${input.height} 보다 큽니다.`,
       );
       return;
     }
+
+    if (stride === undefined) return;
 
     if (stride >= input.width || stride >= input.height) {
       toast.error(
@@ -139,6 +159,8 @@ const validateBlock = (
     ].includes(block.name)
   ) {
     const padding = block.params[0].value;
+    if (padding === undefined) return;
+
     return {
       channels: out_channels,
       height: input.height + padding + padding,
@@ -154,8 +176,9 @@ const validateBlock = (
       );
       return;
     }
-
-    out_channels = block.params[1].value;
+    if (block.params[1].value) {
+      out_channels = block.params[1].value;
+    }
     return {
       channels: out_channels,
       height: 1,
@@ -175,7 +198,7 @@ export const useBlockStore = create<BlockState>((set, get) => ({
         .filter((param) => param.name && param.type) // name과 type이 있는 항목만 필터링
         .map((param) => ({
           ...param,
-          value: param.value !== undefined ? param.value : 0, // value가 없으면 기본값 0 설정
+          value: param.value,
         })),
     }));
 
@@ -191,12 +214,14 @@ export const useBlockStore = create<BlockState>((set, get) => ({
       height: datasetSizes[dataset],
     };
     blockList?.map((block) => {
-      console.log(dataShape);
       if (!dataShape) return;
-      dataShape = validateBlock(dataShape, block);
+      if (block.name === "start" || block.name === "end") {
+        dataShape = dataShape;
+      } else {
+        dataShape = validateBlock(dataShape, block);
+      }
     });
 
-    console.log(dataShape);
     if (dataShape && dataShape.channels !== datasetLabels[dataset]) {
       toast.error(
         `마지막 출력은 ${datasetLabels[dataset]} 개의 channel로 이루어져 있어야 합니다.`,
