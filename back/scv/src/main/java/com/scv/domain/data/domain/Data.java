@@ -1,6 +1,6 @@
 package com.scv.domain.data.domain;
 
-import com.scv.domain.data.enums.Dataset;
+import com.scv.domain.data.enums.DataSet;
 import com.scv.domain.model.domain.Model;
 import jakarta.persistence.*;
 import lombok.*;
@@ -22,7 +22,7 @@ public class Data {
 
     @Enumerated(EnumType.STRING)
     @Column(name = "data_name")
-    private Dataset name;
+    private DataSet name;
 
     @Column(name = "data_train_cnt")
     private int trainCnt;
