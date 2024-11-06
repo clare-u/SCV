@@ -1,5 +1,6 @@
 package com.scv.domain.model.controller;
 
+import com.scv.domain.data.enums.DataSet;
 import com.scv.domain.model.dto.request.ModelCreateRequest;
 import com.scv.domain.model.dto.response.ModelResponse;
 import com.scv.domain.model.service.ModelService;
@@ -89,7 +90,7 @@ public class ModelController {
             @ApiResponse(responseCode = "400", description = "잘못된 요청", content = @Content(schema = @Schema(implementation = ErrorResponse.class))),
     })
     public ResponseEntity<Page<ModelResponse>> getAllModels(
-            @RequestParam(defaultValue = "") String dataName,
+            @RequestParam(defaultValue = "") DataSet dataName,
             @RequestParam(defaultValue = "") String modelName,
             @RequestParam(defaultValue = "0") int page,
             @RequestParam(defaultValue = "12") int size,
@@ -108,7 +109,7 @@ public class ModelController {
             @ApiResponse(responseCode = "400", description = "잘못된 요청", content = @Content(schema = @Schema(implementation = ErrorResponse.class))),
     })
     public ResponseEntity<Page<ModelResponse>> getMyModels(
-            @RequestParam(defaultValue = "") String dataName,
+            @RequestParam(defaultValue = "") DataSet dataName,
             @RequestParam(defaultValue = "") String modelName,
             @RequestParam(defaultValue = "0") int page,
             @RequestParam(defaultValue = "12") int size,

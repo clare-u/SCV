@@ -7,6 +7,7 @@ import ModalButton from "../button/ModalButton";
 import ListboxComponent from "../input/ListBoxComponent";
 import { useLogOut } from "@/hooks";
 import Loading from "../loading/Loading";
+import { toast } from "sonner";
 
 interface MemberModalProps {
   image: string;
@@ -49,7 +50,7 @@ const MemberModal: React.FC<MemberModalProps> = ({
   // 연동하기
   const handleRepoSubmit = () => {
     if (!inputValue.trim()) {
-      alert("레포지토리 이름을 입력해주세요.");
+      toast.error("레포지토리 이름을 입력해주세요.");
       return;
     }
 

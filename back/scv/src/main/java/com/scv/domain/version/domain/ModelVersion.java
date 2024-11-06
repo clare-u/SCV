@@ -6,8 +6,6 @@ import com.scv.global.shared.BaseEntity;
 import jakarta.persistence.*;
 import lombok.*;
 
-import java.time.LocalDateTime;
-
 @Table(name = "model_version")
 @Entity
 @Getter
@@ -38,6 +36,13 @@ public class ModelVersion extends BaseEntity {
     @Column(name = "is_working_on", nullable = false, columnDefinition = "TINYINT(1)")
     private boolean isWorkingOn = true;
 
+
+    /**
+     *
+     */
+    public void updateVersionNo(int versionNo) {
+        this.versionNo = ++versionNo;
+    }
 
     /**
      * 레이어 수정

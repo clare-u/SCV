@@ -4520,6 +4520,7 @@ __metadata:
     react-dom: "npm:^18"
     react-dropzone: "npm:^14.2.10"
     react-syntax-highlighter: "npm:^15.6.1"
+    sonner: "npm:^1.7.0"
     stylelint: "npm:^16.10.0"
     stylelint-config-standard: "npm:^36.0.1"
     stylelint-order: "npm:^6.0.4"
@@ -4651,6 +4652,16 @@ __metadata:
     ip-address: "npm:^9.0.5"
     smart-buffer: "npm:^4.2.0"
   checksum: 10c0/d54a52bf9325165770b674a67241143a3d8b4e4c8884560c4e0e078aace2a728dffc7f70150660f51b85797c4e1a3b82f9b7aa25e0a0ceae1a243365da5c51a7
+  languageName: node
+  linkType: hard
+
+"sonner@npm:^1.7.0":
+  version: 1.7.0
+  resolution: "sonner@npm:1.7.0"
+  peerDependencies:
+    react: ^18.0.0 || ^19.0.0 || ^19.0.0-rc
+    react-dom: ^18.0.0 || ^19.0.0 || ^19.0.0-rc
+  checksum: 10c0/02b16249b0c6e3a62c50dbcb643bb089aecd82c4f0ae988d00903e427d5485933d6cb59047fe5da338b548b6a3311643e511f63ed60a938458295015f7a3fdfd
   languageName: node
   linkType: hard
 

@@ -1,4 +1,5 @@
 import type { Metadata } from "next";
+import { Toaster } from "sonner";
 import { NavigationWrapper } from "@/components/navigation/NavigationWrapper";
 import QueryProvider from "@/components/QueryProvider";
 
@@ -25,9 +26,10 @@ export default function RootLayout({
       <body>
         <QueryProvider>
           <NavigationWrapper />
-          <div className="flex flex-col items-center justify-center">
+          <div className="flex h-full flex-col items-center justify-center">
             {children}
           </div>
+          <Toaster richColors position="top-right" />
         </QueryProvider>
       </body>
     </html>

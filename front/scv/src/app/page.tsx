@@ -14,6 +14,7 @@ import BoardCard from "@/components/card/BoardCard";
 import WorkspaceCard from "@/components/card/WorkspaceCard";
 import Pagination from "@/components/pagination/Pagination";
 import ModalButton from "@/components/button/ModalButton";
+import Dropdown from "@/components/dropdown/Dropdown";
 
 function Home() {
   // 검색 인풋
@@ -255,6 +256,13 @@ function Home() {
           Button
         </ModalButton>
       </div>
+
+      {/* Dropdown */}
+      <div className="mb-80 flex w-full items-end justify-end p-20">
+        <Dropdown modelId={1} versionId={1} />
+      </div>
+
+      <div></div>
     </div>
   );
 }

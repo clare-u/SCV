@@ -1,3 +1,5 @@
+import { MemberResponse } from "../member";
+
 // 단일 모델 객체에 대한 타입 정의
 export interface Model {
   modelId: number;
@@ -6,6 +8,7 @@ export interface Model {
   latestNumber: number;
   createdAt: string;
   updatedAt: string;
+  userProfileResponseDTO: MemberResponse;
 }
 
 // Content의 루트 객체에 대한 타입 정의
@@ -24,7 +27,7 @@ export interface Pageable {
 export interface ModelQueryParams {
   page: number;
   size: number;
-  orderBy?: "updatedAt";
+  orderBy?: "updatedAt" | "createdAt";
   direction?: "asc" | "desc";
   dataName?: string;
   modelName?: string;

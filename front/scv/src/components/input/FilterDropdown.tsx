@@ -14,13 +14,13 @@ const FilterDropdown: React.FC<FilterDropdownProps> = ({
   return (
     <div className="relative inline-block text-left">
       <Menu>
-        <MenuButton className="inline-flex h-[40px] w-[95px] items-center justify-between rounded-md border border-gray-400 bg-white px-10 py-4 text-14 font-medium text-gray-900 shadow-sm hover:bg-gray-50">
+        <MenuButton className="inline-flex h-[40px] w-[135px] items-center justify-between rounded-md border border-gray-400 bg-white px-10 py-4 text-14 font-medium text-gray-900 shadow-sm hover:bg-gray-50">
           {selectedFilter}
           <span className="material-symbols-outlined text-gray-400">
             keyboard_arrow_down
           </span>
         </MenuButton>
-        <MenuItems className="absolute right-0 mt-2 w-[95px] origin-top-right rounded-md border border-gray-200 bg-white p-10 shadow-lg outline-none">
+        <MenuItems className="absolute right-0 mt-2 w-[135px] origin-top-right rounded-md border border-gray-200 bg-white p-10 shadow-lg outline-none">
           {filterOptions.map((option) => (
             <MenuItem key={option}>
               {({ active }) => (

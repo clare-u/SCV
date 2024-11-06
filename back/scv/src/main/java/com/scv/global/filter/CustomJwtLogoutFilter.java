@@ -1,78 +1,29 @@
 package com.scv.global.filter;
 
+import com.scv.global.util.CookieUtil;
 import jakarta.servlet.FilterChain;
 import jakarta.servlet.ServletException;
-import jakarta.servlet.ServletRequest;
-import jakarta.servlet.ServletResponse;
-import jakarta.servlet.http.Cookie;
 import jakarta.servlet.http.HttpServletRequest;
 import jakarta.servlet.http.HttpServletResponse;
-import org.springframework.beans.factory.annotation.Value;
 import org.springframework.stereotype.Component;
-import org.springframework.web.filter.GenericFilterBean;
+import org.springframework.web.filter.OncePerRequestFilter;
 
 import java.io.IOException;
 
+import static com.scv.global.util.JwtUtil.ACCESS_TOKEN_NAME;
+import static com.scv.global.util.JwtUtil.REFRESH_TOKEN_NAME;
+
 @Component
-public class CustomJwtLogoutFilter extends GenericFilterBean {
-
-    @Value("${spring.jwt.token.access.name}")
-    private String ACCESS_TOKEN_NAME;
-
-    @Value("${spring.jwt.token.refresh.name}")
-    private String REFRESH_TOKEN_NAME;
+public class CustomJwtLogoutFilter extends OncePerRequestFilter {
 
     @Override
-    public void doFilter(ServletRequest request, ServletResponse response, FilterChain filterChain) throws IOException, ServletException {
-
-        doFilter((HttpServletRequest) request, (HttpServletResponse) response, filterChain);
-    }
-
-    private void doFilter(HttpServletRequest request, HttpServletResponse response, FilterChain filterChain) throws IOException, ServletException {
-
-        String requestURI = request.getRequestURI();
-        if (!requestURI.matches("^/api/v1/logout$")) {
-            filterChain.doFilter(request, response);
+    protected void doFilterInternal(HttpServletRequest request, HttpServletResponse response, FilterChain filterChain) throws ServletException, IOException {
+        if(request.getRequestURI().equals("/api/v1/logout") && request.getMethod().equalsIgnoreCase("POST")) {
+            CookieUtil.deleteCookie(response, ACCESS_TOKEN_NAME);
+            CookieUtil.deleteCookie(response, REFRESH_TOKEN_NAME);
             return;
         }
 
-        String requestMethod = request.getMethod();
-        if (!requestMethod.equals("GET")) {
-            filterChain.doFilter(request, response);
-            return;
-        }
-
-        String accessToken = null;
-        String refreshToken = null;
-
-        Cookie[] cookies = request.getCookies();
-
-        if (cookies == null) {
-            filterChain.doFilter(request, response);
-            return;
-        }
-
-        for (Cookie cookie : cookies) {
-            if (cookie.getName().equals(ACCESS_TOKEN_NAME)) {
-                accessToken = cookie.getValue();
-            } else if (cookie.getName().equals(REFRESH_TOKEN_NAME)) {
-                refreshToken = cookie.getValue();
-            }
-        }
-
-        response.addCookie(createCookie(ACCESS_TOKEN_NAME, accessToken));
-        response.addCookie(createCookie(REFRESH_TOKEN_NAME, refreshToken));
-
-//        response.sendRedirect("http://localhost:3000/");
-    }
-
-    private Cookie createCookie(String key, String value) {
-        Cookie cookie = new Cookie(key, value);
-        cookie.setMaxAge(0);
-//        cookie.setSecure(true);
-        cookie.setPath("/");
-//        cookie.setHttpOnly(true);
-
-        return cookie;
+        filterChain.doFilter(request, response);
     }
 }

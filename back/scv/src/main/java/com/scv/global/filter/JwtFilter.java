@@ -1,109 +1,92 @@
 package com.scv.global.filter;
 
-import com.fasterxml.jackson.databind.ObjectMapper;
 import com.scv.domain.oauth2.CustomOAuth2User;
 import com.scv.domain.oauth2.dto.OAuth2UserDTO;
-import com.scv.domain.user.domain.User;
-import com.scv.domain.user.dto.UserCacheDTO;
-import com.scv.domain.user.exception.UserNotFoundException;
-import com.scv.domain.user.repository.UserRepository;
+import com.scv.global.util.CookieUtil;
 import com.scv.global.util.JwtUtil;
+import io.jsonwebtoken.Claims;
 import jakarta.servlet.FilterChain;
 import jakarta.servlet.ServletException;
 import jakarta.servlet.http.Cookie;
 import jakarta.servlet.http.HttpServletRequest;
 import jakarta.servlet.http.HttpServletResponse;
 import lombok.RequiredArgsConstructor;
-import org.springframework.beans.factory.annotation.Value;
-import org.springframework.data.redis.core.RedisTemplate;
 import org.springframework.security.authentication.UsernamePasswordAuthenticationToken;
 import org.springframework.security.core.Authentication;
 import org.springframework.security.core.context.SecurityContextHolder;
 import org.springframework.stereotype.Component;
+import org.springframework.util.AntPathMatcher;
 import org.springframework.web.filter.OncePerRequestFilter;
 
 import java.io.IOException;
-import java.util.LinkedHashMap;
+
+import static com.scv.global.util.JwtUtil.*;
 
 @Component
 @RequiredArgsConstructor
 public class JwtFilter extends OncePerRequestFilter {
 
-    private final JwtUtil jwtUtil;
-    private final UserRepository userRepository;
-    private final RedisTemplate<String, Object> redisTemplate;
-    private final ObjectMapper objectMapper;
+    private static final AntPathMatcher pathMatcher = new AntPathMatcher();
 
-    @Value("${spring.jwt.token.access.name}")
-    private String ACCESS_TOKEN_NAME;
-
-    @Value("${spring.jwt.token.refresh.name}")
-    private String REFRESH_TOKEN_NAME;
+    @Override
+    protected boolean shouldNotFilter(HttpServletRequest request) throws ServletException {
+        String requestURI = request.getRequestURI();
+        return pathMatcher.match("/", requestURI)
+                || pathMatcher.match("/login", requestURI)
+                || pathMatcher.match("/actuator/**", requestURI);
+    }
 
     @Override
     protected void doFilterInternal(HttpServletRequest request, HttpServletResponse response, FilterChain filterChain) throws ServletException, IOException {
-        String accessToken = null;
-        String refreshToken = null;
+        Cookie accessTokenCookie = CookieUtil.getCookie(request, ACCESS_TOKEN_NAME);
+        Cookie refreshTokenCookie = CookieUtil.getCookie(request, REFRESH_TOKEN_NAME);
 
-        Cookie[] cookies = request.getCookies();
-
-        if (cookies == null) {
-            filterChain.doFilter(request, response);
+        if (accessTokenCookie == null && request.getRequestURI().equals("/api/v1/users")) {
+            response.setStatus(HttpServletResponse.SC_OK);
             return;
         }
 
-        for (Cookie cookie : cookies) {
-            if (cookie.getName().equals(ACCESS_TOKEN_NAME)) {
-                accessToken = cookie.getValue();
-            } else if (cookie.getName().equals(REFRESH_TOKEN_NAME)) {
-                refreshToken = cookie.getValue();
-            }
-        }
-
-        if (accessToken == null) {
+        // 엑세스 토큰이 없으면 로그인
+        if (accessTokenCookie == null) {
+            response.sendError(HttpServletResponse.SC_UNAUTHORIZED);
             return;
         }
 
-        String userUuid = jwtUtil.getUserUuid(accessToken);
-
-        Object cachedUser = redisTemplate.opsForValue().get(userUuid);
-
-        OAuth2UserDTO oAuth2UserDTO = null;
-
-        if (cachedUser == null) {
-            User user = userRepository.findByUserUuid(userUuid).orElseThrow(UserNotFoundException::getInstance);
-
-            oAuth2UserDTO = OAuth2UserDTO.builder()
-                    .userId(user.getUserId())
-                    .userUuid(user.getUserUuid())
-                    .userEmail(user.getUserEmail())
-                    .userImageUrl(user.getUserImageUrl())
-                    .userNickname(user.getUserNickname())
-                    .userCreatedAt(user.getUserCreatedAt())
-                    .userUpdatedAt(user.getUserUpdatedAt())
-                    .userIsDeleted(user.isUserIsDeleted())
-                    .build();
-
-            redisTemplate.opsForValue().set(userUuid, UserCacheDTO.from(user));
+        // 엑세스 토큰이 위조됐으면 로그인
+        if (JwtUtil.isAccessTokenTampered(accessTokenCookie.getValue())) {
+            CookieUtil.deleteCookie(response, accessTokenCookie);
+            response.sendError(HttpServletResponse.SC_UNAUTHORIZED);
+            return;
         }
-        else{
-            UserCacheDTO userCacheDTO;
-            if (cachedUser instanceof LinkedHashMap) {
-                userCacheDTO = objectMapper.convertValue(cachedUser, UserCacheDTO.class);
-            } else {
-                userCacheDTO = (UserCacheDTO) cachedUser;
-            }
 
-            oAuth2UserDTO = OAuth2UserDTO.builder()
-                    .userId(userCacheDTO.getUserId())
-                    .userUuid(userCacheDTO.getUserUuid())
-                    .userEmail(userCacheDTO.getUserEmail())
-                    .userNickname(userCacheDTO.getUserNickname())
-                    .userCreatedAt(userCacheDTO.getUserCreatedAt())
-                    .userUpdatedAt(userCacheDTO.getUserUpdatedAt())
-                    .userIsDeleted(userCacheDTO.isUserIsDeleted())
-                    .build();
+        // 리프레시 토큰이 없으면 로그인
+        if (refreshTokenCookie == null) {
+            response.sendError(HttpServletResponse.SC_UNAUTHORIZED);
+            return;
         }
+
+        // 리프레시 토큰이 위조됐으면 로그인
+        if (JwtUtil.isRefreshTokenTampered(refreshTokenCookie.getValue())) {
+            CookieUtil.deleteCookie(response, refreshTokenCookie);
+            response.sendError(HttpServletResponse.SC_UNAUTHORIZED);
+            return;
+        }
+
+        // 엑세스 토큰이 만료됐을 때, 리프레시 토큰이 만료되지 않았으면 엑세스 토큰 유효시간 연장
+        if(JwtUtil.isAccessTokenExpired(accessTokenCookie.getValue())) {
+            String newAccessToken = JwtUtil.reIssueAccessToken(accessTokenCookie.getValue());
+            accessTokenCookie = CookieUtil.createCookie(ACCESS_TOKEN_NAME, newAccessToken, ACCESS_TOKEN_EXPIRATION);
+            response.addCookie(accessTokenCookie);
+        }
+
+        Claims accessTokenClaims = JwtUtil.parseAccessTokenClaims(accessTokenCookie.getValue());
+
+        OAuth2UserDTO oAuth2UserDTO = OAuth2UserDTO.builder()
+                .userId(Long.valueOf(accessTokenClaims.getSubject()))
+                .userUuid(accessTokenClaims.get("userUuid", String.class))
+                .userNickname(accessTokenClaims.get("userNickname", String.class))
+                .userRepo(accessTokenClaims.get("userRepo", String.class))
+                .build();
 
         CustomOAuth2User customOAuth2User = new CustomOAuth2User(oAuth2UserDTO);
 
@@ -113,4 +96,5 @@ public class JwtFilter extends OncePerRequestFilter {
 
         filterChain.doFilter(request, response);
     }
+
 }

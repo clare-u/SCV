@@ -4,7 +4,7 @@ import Navigation from "./Navigation";
 
 export const NavigationWrapper = () => {
   const pathname = usePathname();
-  const hideNavigation = pathname?.startsWith("/workspace/edit");
+  const hideNavigation = pathname?.startsWith("/edit");
 
   if (hideNavigation) {
     return null;

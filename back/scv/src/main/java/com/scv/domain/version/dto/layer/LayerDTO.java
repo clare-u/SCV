@@ -36,7 +36,8 @@ import com.scv.domain.version.dto.layer.pooling.MaxPool2dDTO;
         @JsonSubTypes.Type(value = GELUDTO.class, name = "GELU"),
         @JsonSubTypes.Type(value = LinearDTO.class, name = "Linear"),
         @JsonSubTypes.Type(value = SigmoidDTO.class, name = "Sigmoid"),
-        @JsonSubTypes.Type(value = TanhDTO.class, name = "Tanh")
+        @JsonSubTypes.Type(value = TanhDTO.class, name = "Tanh"),
+        @JsonSubTypes.Type(value = FlattenDTO.class, name = "Flatten")
 })
 public abstract class LayerDTO {
 }

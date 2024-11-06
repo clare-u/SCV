@@ -1,3 +1,5 @@
+"use client";
+
 import {
   Description,
   Dialog,
@@ -9,6 +11,7 @@ import { useState } from "react";
 import Button from "../button/Button";
 import ModalInput from "../input/ModalInput";
 import DatasetRadio from "../input/DatasetRadio";
+import { toast } from "sonner";
 
 const CloneModal = () => {
   const [isOpen, setIsOpen] = useState(false);
@@ -27,7 +30,7 @@ const CloneModal = () => {
   // 새로 만들기
   const handleCreate = () => {
     if (!inputValue.trim()) {
-      alert("모델명을 입력해주세요.");
+      toast.error("모델명을 입력해주세요.");
     } else {
       alert(`모델명: ${inputValue}\n데이터셋: ${selected}`);
     }

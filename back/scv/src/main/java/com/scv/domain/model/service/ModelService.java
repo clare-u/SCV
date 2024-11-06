@@ -1,6 +1,7 @@
 package com.scv.domain.model.service;
 
 import com.scv.domain.data.domain.Data;
+import com.scv.domain.data.enums.DataSet;
 import com.scv.domain.data.exception.DataNotFoundException;
 import com.scv.domain.data.repository.DataRepository;
 import com.scv.domain.model.domain.Model;
@@ -73,9 +74,8 @@ public class ModelService {
 
     // 내 모델 조회
     @Transactional(readOnly = true)
-    public Page<ModelResponse> getMyModels(Pageable pageable, CustomOAuth2User user, String dataName, String modelName) {
+    public Page<ModelResponse> getMyModels(Pageable pageable, CustomOAuth2User user, DataSet dataName, String modelName) {
         modelName = (modelName == null || modelName.isEmpty()) ? null : modelName;
-        dataName = (dataName == null || dataName.isEmpty()) ? null : dataName;
         Long userId = user.getUserId();
         User existingUser = userRepository.findById(userId).orElseThrow(UserNotFoundException::getInstance);
 
@@ -84,9 +84,8 @@ public class ModelService {
     }
 
     @Transactional(readOnly = true)
-    public Page<ModelResponse> getAllModels(Pageable pageable, String dataName, String modelName) {
+    public Page<ModelResponse> getAllModels(Pageable pageable, DataSet dataName, String modelName) {
         modelName = (modelName == null || modelName.isEmpty()) ? null : modelName;
-        dataName = (dataName == null || dataName.isEmpty()) ? null : dataName;
 
         Page<Model> models = modelRepository.searchModels(modelName, dataName, pageable);
 
@@ -100,7 +99,6 @@ public class ModelService {
     @Transactional(readOnly = true)
     public List<ModelVersionResponse> getModelVersions(Long modelId) {
         List<ModelVersion> modelVersions = modelVersionRepository.findAllByModel_IdAndDeletedFalse(modelId);
-
         return modelVersions.stream()
                 .map(ModelVersionResponse::new)
                 .collect(Collectors.toList());

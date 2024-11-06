@@ -9,16 +9,20 @@ import Badge from "@/components/badge/Badge";
 import { BadgeProps } from "@/components/badge/Badge";
 import { useCallback } from "react";
 import { useDropzone } from "react-dropzone";
+import { useBlockStore } from "@/store/blockStore";
+import { Dataset } from "@/types";
 
 export default function Edit() {
   // 더미 데이터 정의
   const [title, setTitle] = useState("Model Title");
   const [version] = useState("v1");
-  const [dataset] = useState("MNIST");
+  const [dataset] = useState<Dataset>("MNIST");
 
   const [isEditing, setIsEditing] = useState(false);
   const [isHovered, setIsHovered] = useState(false);
   const [editedTitle, setEditedTitle] = useState(title);
+
+  const { blockListValidation } = useBlockStore();
 
   const datasetColors: Record<string, ChipsProps["color"]> = {
     Editing: "gray",
@@ -65,7 +69,7 @@ export default function Edit() {
   };
 
   return (
-    <div className="flex h-screen flex-1 flex-col">
+    <div className="flex h-screen w-full flex-1 flex-col">
       <div className="flex h-[8vh] w-full items-center justify-between border-b border-gray-500 px-10">
         <div className="flex items-center justify-between">
           <div className="flex items-center justify-center gap-10">
@@ -128,19 +132,22 @@ export default function Edit() {
           </div>
         </div>
         <div className="flex items-center gap-10 px-10">
-          <Button size="m" design="outline" color="indigo" icon="save_alt">
-            새로운 버전으로 저장
-          </Button>
           <Button size="m" design="fill" color="indigo" icon="save">
             저장
           </Button>
-          <Button size="m" design="fill" color="green" icon="play_arrow">
+          <Button
+            size="m"
+            design="fill"
+            color="green"
+            icon="play_arrow"
+            onClick={() => blockListValidation(dataset)}
+          >
             실행
           </Button>
         </div>
       </div>
-      <div className="flex flex-1">
-        <BlockList />
+      <div className="flex h-[92vh]">
+        <BlockList dataset={dataset}/>
         <div className="flex w-[600px] flex-col border-l border-gray-500">
           <div className="flex max-h-[450px] w-full flex-1 overflow-y-auto overflow-x-hidden border-b border-gray-500">
             <CodeViewer></CodeViewer>

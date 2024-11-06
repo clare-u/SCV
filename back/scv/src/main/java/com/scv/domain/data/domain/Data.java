@@ -1,5 +1,6 @@
 package com.scv.domain.data.domain;
 
+import com.scv.domain.data.enums.DataSet;
 import com.scv.domain.model.domain.Model;
 import jakarta.persistence.*;
 import lombok.*;
@@ -19,8 +20,9 @@ public class Data {
     @Column(name = "data_id", nullable = false)
     private int id;
 
+    @Enumerated(EnumType.STRING)
     @Column(name = "data_name")
-    private String name;
+    private DataSet name;
 
     @Column(name = "data_train_cnt")
     private int trainCnt;
@@ -31,7 +33,7 @@ public class Data {
     @Column(name = "data_label_cnt")
     private int labelCnt;
 
-    @Column(name = "data_epock_cnt")
+    @Column(name = "data_epoch_cnt")
     private int epochCnt;
 
     @OneToMany(mappedBy = "data", fetch = FetchType.LAZY)

@@ -8,7 +8,7 @@ import Pagination from "@/components/pagination/Pagination";
 import DatasetRadio from "@/components/input/DatasetRadio";
 import SearchInput from "@/components/input/SearchInput";
 import Loading from "@/components/loading/Loading";
-import { useFetchModels } from "@/hooks/models";
+import { useFetchModels } from "@/hooks";
 import { ModelQueryParams } from "@/types";
 
 function Community() {
@@ -150,8 +150,10 @@ function Community() {
               title={model.modelName}
               version={`v${model.latestNumber}`} // version 값 수정
               dataset={model.dataName}
-              // profileImg={model.profileImage || "/profile.png"}
-              nickname={model.modelName}
+              profileImg={
+                model.userProfileResponseDTO.userImageUrl || "/profile.png"
+              }
+              nickname={model.userProfileResponseDTO.userNickname}
               // accuracy={model.accuracy || "N/A"} // 기본값 설정
               updatedAt={model.updatedAt}
             />

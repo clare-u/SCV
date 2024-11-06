@@ -1,10 +1,15 @@
 "use client";
-import { useState } from "react";
+import { useState, useEffect } from "react";
 import { Tab, TabPanel, TabGroup, TabList, TabPanels } from "@headlessui/react";
 import { DragDropContext, Draggable, Droppable } from "@hello-pangea/dnd";
 import { CustomBlockList } from "./CustomBlockList";
-import { BlockDefinition, BlockCategory } from "@/types";
+import { BlockDefinition, BlockCategory, Dataset } from "@/types";
 import BlockItem from "./BlockItem";
+import {
+  datasetChannels,
+  datasetSizes,
+  useBlockStore,
+} from "@/store/blockStore";
 
 // 카테고리 표시 이름 매핑
 const categoryDisplayNames: Record<BlockCategory, string> = {
@@ -31,7 +36,11 @@ interface DroppedBlock extends BlockDefinition {
   category: BlockCategory;
 }
 
-const BlockList: React.FC = () => {
+interface BlockListProps {
+  dataset: Dataset;
+}
+
+const BlockList: React.FC<BlockListProps> = (props) => {
   const categories = Object.entries(CustomBlockList).filter(
     ([category]) => category !== "Basic",
   ) as [BlockCategory, BlockDefinition[]][];
@@ -42,13 +51,29 @@ const BlockList: React.FC = () => {
       id: "start",
       name: "start",
       category: "Basic",
-      params: [{ name: "start", type: "int" }],
+      params: [
+        {
+          name: "input_channels",
+          type: "int",
+          value: datasetChannels[props.dataset],
+        },
+        {
+          name: "input_width",
+          type: "int",
+          value: datasetSizes[props.dataset],
+        },
+        {
+          name: "input_height",
+          type: "int",
+          value: datasetSizes[props.dataset],
+        },
+      ] as { name: string; type: "int" | "float"; value: 0 }[],
     },
     {
       id: "end",
       name: "end",
       category: "Basic",
-      params: [] as { name: string; type: "int" | "float" }[],
+      params: [] as { name: string; type: "int" | "float"; value: 0 }[],
     },
   ];
 
@@ -61,7 +86,23 @@ const BlockList: React.FC = () => {
     // 드롭이 유효한 위치에서 일어나지 않은 경우
     if (!destination) return;
 
-    // 왼쪽에서 오른쪽으로 드래그 시 추가를 가장 먼저 체크
+    // 휴지통에 드래그 시 삭제
+    if (destination.droppableId === "trash") {
+      // start나 end 블록은 삭제하지 않음
+      if (
+        droppedBlocks[source.index].name === "start" ||
+        droppedBlocks[source.index].name === "end"
+      ) {
+        return;
+      }
+
+      setDroppedBlocks((blocks) =>
+        blocks.filter((_, index) => index !== source.index),
+      );
+      return;
+    }
+
+    // 왼쪽에서 오른쪽으로 드래그 시 추가
     if (
       source.droppableId.startsWith("left") &&
       destination.droppableId === "right"
@@ -117,14 +158,6 @@ const BlockList: React.FC = () => {
       return;
     }
 
-    // 휴지통에 드래그 시 삭제
-    if (destination.droppableId === "trash") {
-      setDroppedBlocks((blocks) =>
-        blocks.filter((_, index) => index !== source.index),
-      );
-      return;
-    }
-
     // 오른쪽 내에서 순서 변경
     if (source.droppableId === "right" && destination.droppableId === "right") {
       const reorderedBlocks = Array.from(droppedBlocks);
@@ -136,6 +169,27 @@ const BlockList: React.FC = () => {
     }
   };
 
+  const { setBlockList } = useBlockStore();
+  useEffect(() => {
+    setBlockList(droppedBlocks);
+  }, [droppedBlocks]);
+  const handleBlur = (
+    blockIndex: number,
+    paramIndex: number,
+    value: number,
+  ) => {
+    setDroppedBlocks((blocks) => {
+      const updatedBlocks = [...blocks];
+      const updatedBlock = { ...updatedBlocks[blockIndex] };
+      updatedBlock.params = [...updatedBlock.params];
+      updatedBlock.params[paramIndex] = {
+        ...updatedBlock.params[paramIndex],
+        value,
+      };
+      updatedBlocks[blockIndex] = updatedBlock;
+      return updatedBlocks;
+    });
+  };
   return (
     <DragDropContext onDragEnd={handleDragEnd}>
       <div className="flex flex-1">
@@ -226,7 +280,13 @@ const BlockList: React.FC = () => {
                       {...provided.draggableProps}
                       {...provided.dragHandleProps}
                     >
-                      <BlockItem block={block} category={block.category} />
+                      <BlockItem
+                        block={block}
+                        category={block.category}
+                        onBlurParam={(paramIndex, value) =>
+                          handleBlur(index, paramIndex, value)
+                        }
+                      />
                     </div>
                   )}
                 </Draggable>

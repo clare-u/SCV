@@ -1,5 +1,7 @@
 package com.scv.global.config;
 
+import com.scv.domain.oauth2.handler.CustomAccessDeniedHandler;
+import com.scv.domain.oauth2.handler.CustomAuthenticationEntryPoint;
 import com.scv.domain.oauth2.handler.CustomLoginFailureHandler;
 import com.scv.domain.oauth2.handler.CustomLoginSuccessHandler;
 import com.scv.domain.oauth2.service.CustomOAuth2UserService;
@@ -26,43 +28,40 @@ public class SecurityConfig {
 
     private final JwtFilter jwtFilter;
     private final CustomJwtLogoutFilter customJwtLogoutFilter;
+
     private final CustomOAuth2UserService customOAuth2UserService;
     private final CustomLoginSuccessHandler customLoginSuccessHandler;
     private final CustomLoginFailureHandler customLoginFailureHandler;
+
+    private final CustomAuthenticationEntryPoint customAuthenticationEntryPoint;
+    private final CustomAccessDeniedHandler customAccessDeniedHandler;
 
     @Bean
     public SecurityFilterChain securityFilterChain(HttpSecurity http) throws Exception {
 
         // cors 설정
-        http.cors(corsCustomizer -> corsCustomizer.configurationSource(request -> {
-
+        http.cors(cors -> cors.configurationSource(request -> {
             CorsConfiguration configuration = new CorsConfiguration();
 
             configuration.setAllowedOrigins(Collections.singletonList("http://localhost:3000"));
+            configuration.setAllowedHeaders(Collections.singletonList("*"));
             configuration.setAllowedMethods(Collections.singletonList("*"));
             configuration.setAllowCredentials(true);
-            configuration.setAllowedHeaders(Collections.singletonList("*"));
             configuration.setMaxAge(3600L);
-
-            configuration.setExposedHeaders(Collections.singletonList("Set-Cookie"));
-            configuration.setExposedHeaders(Collections.singletonList("Authorization"));
 
             return configuration;
         }));
 
         // csrf disable
-        http.csrf(AbstractHttpConfigurer::disable);
-
         // From 로그인 방식 disable
-        http.formLogin(AbstractHttpConfigurer::disable);
-
         // HTTP Basic 인증 방식 disable
+        http.csrf(AbstractHttpConfigurer::disable);
+        http.formLogin(AbstractHttpConfigurer::disable);
         http.httpBasic(AbstractHttpConfigurer::disable);
 
         // JwtFilter 추가
-        http.addFilterBefore(jwtFilter, UsernamePasswordAuthenticationFilter.class);
-
         // 로그아웃 필터 추가
+        http.addFilterBefore(jwtFilter, UsernamePasswordAuthenticationFilter.class);
         http.addFilterBefore(customJwtLogoutFilter, LogoutFilter.class);
 
         // oauth2
@@ -72,10 +71,14 @@ public class SecurityConfig {
                 .successHandler(customLoginSuccessHandler)
                 .failureHandler(customLoginFailureHandler));
 
+        // 미인증 미인가 예외처리
+        http.exceptionHandling(exception -> exception
+                .authenticationEntryPoint(customAuthenticationEntryPoint)
+                .accessDeniedHandler(customAccessDeniedHandler));
+
         // 경로별 인가 작업
         http.authorizeHttpRequests(auth -> auth
-                .requestMatchers("/").permitAll()
-                .anyRequest().authenticated());
+                .anyRequest().permitAll());
 
         // 세션 설정 : STATELESS
         http.sessionManagement(session -> session.

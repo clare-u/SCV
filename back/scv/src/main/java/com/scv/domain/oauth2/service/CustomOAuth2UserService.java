@@ -7,7 +7,7 @@ import com.scv.domain.oauth2.user.OAuth2GithubResponse;
 import com.scv.domain.oauth2.user.OAuth2Response;
 import com.scv.domain.user.domain.User;
 import com.scv.domain.user.repository.UserRepository;
-import com.scv.domain.user.service.GithubService;
+import com.scv.domain.github.service.GithubService;
 import lombok.RequiredArgsConstructor;
 import org.springframework.security.oauth2.client.userinfo.DefaultOAuth2UserService;
 import org.springframework.security.oauth2.client.userinfo.OAuth2UserRequest;
@@ -34,7 +34,7 @@ public class CustomOAuth2UserService extends DefaultOAuth2UserService {
 
         switch (oAuth2Provider) {
             case GITHUB -> {
-                String userEmail = githubService.getGithubUserEmail(userRequest.getAccessToken().getTokenValue());
+                String userEmail = githubService.getGithubPrimaryEmail(userRequest.getAccessToken().getTokenValue());
                 oAuth2Response = new OAuth2GithubResponse(oAuth2User.getAttributes(), userEmail);
             }
             default -> {
@@ -44,6 +44,7 @@ public class CustomOAuth2UserService extends DefaultOAuth2UserService {
 
         User existUser = userRepository.findByUserEmail(oAuth2Response.getUserEmail()).orElse(null);
 
+        // 신규 회원
         if (existUser == null) {
             User user = User.builder()
                     .userUuid(UUID.randomUUID().toString())
@@ -58,26 +59,18 @@ public class CustomOAuth2UserService extends DefaultOAuth2UserService {
             OAuth2UserDTO oAuth2UserDTO = OAuth2UserDTO.builder()
                     .userId(savedUser.getUserId())
                     .userUuid(savedUser.getUserUuid())
-                    .userEmail(savedUser.getUserEmail())
-                    .userImageUrl(savedUser.getUserImageUrl())
                     .userNickname(savedUser.getUserNickname())
                     .userRepo(savedUser.getUserRepo())
-                    .userCreatedAt(savedUser.getUserCreatedAt())
-                    .userUpdatedAt(savedUser.getUserUpdatedAt())
-                    .userIsDeleted(savedUser.isUserIsDeleted())
                     .build();
             return new CustomOAuth2User(oAuth2UserDTO);
-        } else {
+        }
+        // 기존 회원
+        else {
             OAuth2UserDTO oAuth2UserDTO = OAuth2UserDTO.builder()
                     .userId(existUser.getUserId())
                     .userUuid(existUser.getUserUuid())
-                    .userEmail(existUser.getUserEmail())
-                    .userImageUrl(existUser.getUserImageUrl())
                     .userNickname(existUser.getUserNickname())
                     .userRepo(existUser.getUserRepo())
-                    .userCreatedAt(existUser.getUserCreatedAt())
-                    .userUpdatedAt(existUser.getUserUpdatedAt())
-                    .userIsDeleted(existUser.isUserIsDeleted())
                     .build();
             return new CustomOAuth2User(oAuth2UserDTO);
         }

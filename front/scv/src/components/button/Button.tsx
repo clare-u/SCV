@@ -1,5 +1,7 @@
 "use client";
 
+import { Dataset } from "@/types";
+
 interface ButtonProps {
   size: "l" | "m" | "s";
   design: "fill" | "outline";
@@ -22,7 +24,7 @@ interface ButtonProps {
     | "pink"
     | "rose";
   disabled?: boolean;
-  onClick?: () => void;
+  onClick?: () => void | ((dataset: Dataset) => void);
   icon?: string;
   children?: React.ReactNode;
 }

@@ -18,8 +18,8 @@ public class LinearDTO extends LayerDTO {
 
     @JsonCreator
     public LinearDTO(
-            @JsonProperty("inFeatures") int inFeatures,
-            @JsonProperty("outFeatures") int outFeatures) {
+            @JsonProperty("in_features") int inFeatures,
+            @JsonProperty("out_features") int outFeatures) {
         this.inFeatures = inFeatures;
         this.outFeatures = outFeatures;
     }
