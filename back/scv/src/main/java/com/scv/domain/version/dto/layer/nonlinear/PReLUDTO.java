@@ -18,7 +18,7 @@ public class PReLUDTO extends LayerDTO {
 
     @JsonCreator
     public PReLUDTO(
-            @JsonProperty("numParameters") int numParameters,
+            @JsonProperty("num_parameters") int numParameters,
             @JsonProperty("init") double init) {
         this.numParameters = numParameters;
         this.init = init;

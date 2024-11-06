@@ -18,7 +18,7 @@ public class MaxPool2dDTO extends LayerDTO {
 
     @JsonCreator
     public MaxPool2dDTO(
-            @JsonProperty("kernelSize") int kernelSize,
+            @JsonProperty("kernel_size") int kernelSize,
             @JsonProperty("stride") int stride) {
         this.kernelSize = kernelSize;
         this.stride = stride;

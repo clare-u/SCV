@@ -16,7 +16,7 @@ public class LeakyReLUDTO extends LayerDTO {
     private final double negativeSlope;
 
     @JsonCreator
-    public LeakyReLUDTO(@JsonProperty("negativeSlope") double negativeSlope) {
+    public LeakyReLUDTO(@JsonProperty("negative_slope") double negativeSlope) {
         this.negativeSlope = negativeSlope;
     }
 }

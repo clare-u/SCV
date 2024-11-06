@@ -33,7 +33,7 @@ public class Data {
     @Column(name = "data_label_cnt")
     private int labelCnt;
 
-    @Column(name = "data_epock_cnt")
+    @Column(name = "data_epoch_cnt")
     private int epochCnt;
 
     @OneToMany(mappedBy = "data", fetch = FetchType.LAZY)
