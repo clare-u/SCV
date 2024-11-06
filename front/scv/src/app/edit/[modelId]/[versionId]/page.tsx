@@ -9,16 +9,20 @@ import Badge from "@/components/badge/Badge";
 import { BadgeProps } from "@/components/badge/Badge";
 import { useCallback } from "react";
 import { useDropzone } from "react-dropzone";
+import { useBlockStore } from "@/store/blockStore";
+import { Dataset } from "@/types";
 
 export default function Edit() {
   // 더미 데이터 정의
   const [title, setTitle] = useState("Model Title");
   const [version] = useState("v1");
-  const [dataset] = useState("MNIST");
+  const [dataset] = useState<Dataset>("MNIST");
 
   const [isEditing, setIsEditing] = useState(false);
   const [isHovered, setIsHovered] = useState(false);
   const [editedTitle, setEditedTitle] = useState(title);
+
+  const { blockListValidation } = useBlockStore();
 
   const datasetColors: Record<string, ChipsProps["color"]> = {
     Editing: "gray",
@@ -134,7 +138,13 @@ export default function Edit() {
           <Button size="m" design="fill" color="indigo" icon="save">
             저장
           </Button>
-          <Button size="m" design="fill" color="green" icon="play_arrow">
+          <Button
+            size="m"
+            design="fill"
+            color="green"
+            icon="play_arrow"
+            onClick={() => blockListValidation(dataset)}
+          >
             실행
           </Button>
         </div>
