@@ -7,17 +7,19 @@ from minio import Minio
 from torchsummary import summary
 import sys
 import os
+
+from neural_network_builder.exceptions.custom_exceptions import ValidationError
 from .datasets import DatasetRegistry, DatasetFactory
+from .validators.model_validator import ModelValidator
 
 current_dir = os.path.dirname(os.path.abspath(__file__))
 root_dir = os.path.dirname(current_dir)
 sys.path.append(root_dir)
 
-from model_test.neural_network_builder.builders.model_builder import ModelBuilder
+from model_test.neural_network_builder.builders import ModelBuilder, ModelCodeGenerator
 from model_test.neural_network_builder.parsers.validators import ModelConfig
 from .save_minio import save_model_to_minio, minio_host_name, minio_user_name, minio_user_password, minio_model_bucket, \
     minio_api_port
-
 
 class ModelTrainer:
     def __init__(self):
@@ -25,6 +27,7 @@ class ModelTrainer:
         self.model_builder = ModelBuilder()
         self.training_history = []
         self.model_layer = None
+        self.code_generator = ModelCodeGenerator()
 
         # 데이터셋 구성 로드
         config_path = os.path.join(current_dir, 'datasets', 'configs', 'datasets.yaml')
@@ -107,114 +110,110 @@ class ModelTrainer:
         # 데이터셋 정보 가져오기
         dataset_info = DatasetRegistry.get_dataset_info(config.dataName)
 
-        # 입력 레이어의 채널 수 확인
-        first_layer = config.modelLayerAt.layers[0]
-        if hasattr(first_layer, 'in_channels') and first_layer.in_channels != dataset_info.input_shape[0]:
-            raise ValueError(
-                f"Model input channels ({first_layer.in_channels}) "
-                f"does not match dataset channels ({dataset_info.input_shape[0]})"
+        # ModelValidator를 사용한 검증 추가
+        validator = ModelValidator()
+
+        try:
+            # 모델 설정 검증
+            validator.validate_model_config(config.model_dump())
+
+            # 입력 레이어의 채널 수 확인 및 검증
+            first_layer = config.modelLayerAt.layers[0]
+            if hasattr(first_layer, 'in_channels'):
+                validator.validate_input_shape(
+                    config.dataName,
+                    (first_layer.in_channels, *dataset_info.input_shape[1:])
+                )
+
+            # 데이터 로드
+            train_loader, test_loader = DatasetFactory.create_dataset(
+                config.dataName,
+                config.dataTrainCnt,
+                config.dataTestCnt
             )
 
-        # 데이터 로드
-        train_loader, test_loader = DatasetFactory.create_dataset(
-            config.dataName,
-            config.dataTrainCnt,
-            config.dataTestCnt
-        )
+            # 모델 생성
+            print("모델을 생성중입니다...")
+            model = self.model_builder.create_model(config.model_dump())
+            model = model.to(self.device)
 
-        # 모델 생성
-        print("Creating model...")
-        model = self.model_builder.create_model(config.model_dump())
-        model = model.to(self.device)
+            # 생성된 모델의 전체 구조 검증
+            validation_result = validator.validate_model(model, config.dataName)
+            print(f"모델 검증 결과: {validation_result}")
 
-        # 학습 설정
-        criterion = nn.CrossEntropyLoss()
-        optimizer = optim.Adam(model.parameters(), lr=learning_rate)
+            # 레이어 간 연결 검증
+            validator.check_layer_connections(model, config.dataName)
 
-        # 학습 수행
-        print(f"Starting training for {epochs} epochs...")
-        best_accuracy = 0
-        training_history = []
+            # 학습 설정
+            criterion = nn.CrossEntropyLoss()
+            optimizer = optim.Adam(model.parameters(), lr=learning_rate)
 
-        for epoch in range(epochs):
-            print(f"\nEpoch {epoch + 1}/{epochs}")
+            # 학습 수행
+            print(f"{epochs} 개의 Epoch에 대한 학습을 시작합니다...")
+            best_accuracy = 0
+            training_history = []
 
-            # 학습
-            train_loss, train_acc = self.train_epoch(model, train_loader, optimizer, criterion)
+            for epoch in range(epochs):
+                print(f"\nEpoch {epoch + 1}/{epochs}")
 
-            # 테스트
-            test_loss, test_acc = self.test_model(model, test_loader, criterion)
+                # 학습
+                train_loss, train_acc = self.train_epoch(model, train_loader, optimizer, criterion)
 
-            # 결과 기록
-            epoch_results = {
-                'epoch': epoch + 1,
-                'train_loss': train_loss,
-                'train_accuracy': train_acc,
-                'test_loss': test_loss,
-                'test_accuracy': test_acc
-            }
-            training_history.append(epoch_results)
+                # 테스트
+                test_loss, test_acc = self.test_model(model, test_loader, criterion)
 
-            print(f'Training - Loss: {train_loss:.4f}, Accuracy: {train_acc:.2f}%')
-            print(f'Testing  - Loss: {test_loss:.4f}, Accuracy: {test_acc:.2f}%')
+                # 결과 기록
+                epoch_results = {
+                    'epoch': epoch + 1,
+                    'train_loss': train_loss,
+                    'train_accuracy': train_acc,
+                    'test_loss': test_loss,
+                    'test_accuracy': test_acc
+                }
+                training_history.append(epoch_results)
 
-            # 최고 성능 모델 저장
-            if test_acc > best_accuracy:
-                best_accuracy = test_acc
-                print(f"New best model with accuracy: {best_accuracy:.2f}%")
-                # 모델에 학습 히스토리 추가
-                model.training_history = training_history
-                save_model_to_minio(model, str(config.versionNo))
+                print(f'Training - Loss: {train_loss:.4f}, Accuracy: {train_acc:.2f}%')
+                print(f'Testing  - Loss: {test_loss:.4f}, Accuracy: {test_acc:.2f}%')
 
-            model_structure = str(model)
-            model_layer = {
-                "layers": [{
-                    "name": layer.__class__.__name__,
-                    **{k: v for k, v in layer.__dict__.items() if not k.startswith('_')}
-                } for layer in config.modelLayerAt.layers],
-                "dataName": config.dataName,
-                "dataTrainCnt": config.dataTrainCnt,
-                "dataTestCnt": config.dataTestCnt,
-                "dataLabelCnt": config.dataLabelCnt,
-                "dataEpochCnt": config.dataEpochCnt
-            }
+            #TODO 고쳐야함
+
+                # 최고 성능 모델 저장
+                if test_acc > best_accuracy:
+                    best_accuracy = test_acc
+                    print(f"\nNew best model with accuracy: {best_accuracy:.2f}%")
+                    # 모델에 학습 히스토리 추가
+                    model.training_history = training_history
+                    model.model_layer = self.model_layer
+
+                    # 모델 저장
+                    save_model_to_minio(model, str(config.versionNo))
+
+                model_structure = str(model)
+                self.model_layer = {
+                    "layers": [{
+                        "name": layer.__class__.__name__,
+                        **{k: v for k, v in layer.__dict__.items() if not k.startswith('_')}
+                    } for layer in config.modelLayerAt.layers],
+                    "dataName": config.dataName,
+                    "dataTrainCnt": config.dataTrainCnt,
+                    "dataTestCnt": config.dataTestCnt,
+                    "dataLabelCnt": config.dataLabelCnt,
+                    "dataEpochCnt": config.dataEpochCnt
+                }
+
+        except ValidationError as e:
+            print(f"모델 검증 실패: {str(e)}")
+            raise
 
         return {
             "model_version": config.versionNo,
-            "model_structure": model_structure,
-            "model_layer": model_layer,
+            # "model_structure": model_structure,
+            "model_layer": self.model_layer,
             "final_train_accuracy": train_acc,
             "final_test_accuracy": test_acc,
             "best_test_accuracy": best_accuracy,
             "training_history": training_history
         }
-
-    def generate_model_code(self, model):
-        """모델을 Python 코드로 변환하는 헬퍼 함수"""
-        code_lines = []
-        code_lines.append("import torch.nn as nn\n")
-        code_lines.append("class Model(nn.Module):")
-        code_lines.append("    def __init__(self):")
-        code_lines.append("        super(Model, self).__init__()")
-
-        # 레이어 정의 추가
-        for i, layer in enumerate(model.children()):
-            layer_str = f"        self.layer{i} = {layer.__class__.__name__}("
-            # 레이어 파라미터 추가
-            params = []
-            for name, param in layer.__dict__.items():
-                if not name.startswith('_'):
-                    params.append(f"{name}={param}")
-            layer_str += ", ".join(params) + ")"
-            code_lines.append(layer_str)
-
-        # forward 함수 추가
-        code_lines.append("\n    def forward(self, x):")
-        for i in range(len(list(model.children()))):
-            code_lines.append(f"        x = self.layer{i}(x)")
-        code_lines.append("        return x")
-
-        return "\n".join(code_lines)
 
     def test_saved_model(self, model_version: str):
         """저장된 모델을 로드하여 테스트하는 메서드"""
@@ -243,11 +242,15 @@ class ModelTrainer:
             criterion = nn.CrossEntropyLoss()
             test_loss, test_accuracy = self.test_model(model, test_loader, criterion)
 
-            # 모델구조
-            from torchsummary import summary
-            model_structure = str(model)
-            # 모델코드 (Python코드로 변환)
-            model_code = self.generate_model_code(model)
+            # model_layer 정보 가져오기
+            model_layer = getattr(model, 'model_layer', self.model_layer)
+
+            # 모델 파이썬 코드로 생성
+            model_code = self.code_generator.generate_model_code(
+                model=model,
+                version_no=model_version,
+                dataset_info=model_layer
+            )
 
             # 각 레이어의 파라미터 수 추출
             layer_parameters = []
@@ -282,9 +285,9 @@ class ModelTrainer:
             os.remove(model_path)
 
             return {
-                "model_version": model_version,
-                "model_structure": model_structure,
-                "model_layer": self.model_layer if hasattr(self, 'model_layer') else None,
+                # "model_version": model_version,
+                # "model_structure": model_structure,
+                "model_layer": model_layer,
                 "model_code": model_code,
                 "final_test_accuracy": test_accuracy,
                 "final_test_loss": test_loss,

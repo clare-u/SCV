@@ -43,16 +43,22 @@ class DatasetFactory:
             "FASHION_MNIST": datasets.FashionMNIST,
             "CIFAR10": datasets.CIFAR10,
             "CIFAR100": datasets.CIFAR100,
-            "EMNIST": lambda *args, **kwargs: datasets.EMNIST(*args, **kwargs, split='balanced'),
-            "SVHN": datasets.SVHN
+            "EMNIST": lambda *args, **kwargs: datasets.EMNIST(*args, **kwargs, split='letters'),
+            "SVHN": lambda *args, **kwargs: datasets.SVHN(*args, **kwargs, split='train' if kwargs.pop('train', True) else 'test')
         }
 
-        dataset_class = dataset_mapping.get(dataset_name)
-        if dataset_class is None:
-            raise ValueError(f"Dataset {dataset_name} is not implemented")
+        if dataset_name == "SVHN":
+            # SVHN은 split 파라미터 사용
+            train_dataset = datasets.SVHN('data', split='train', download=True, transform=train_transform)
+            test_dataset = datasets.SVHN('data', split='test', transform=test_transform)
+        else:
+            # 다른 데이터셋들은 train 파라미터 사용
+            dataset_class = dataset_mapping.get(dataset_name)
+            if dataset_class is None:
+                raise ValueError(f"Dataset {dataset_name} is not implemented")
 
-        train_dataset = dataset_class('data', train=True, download=True, transform=train_transform)
-        test_dataset = dataset_class('data', train=False, transform=test_transform)
+            train_dataset = dataset_class('data', train=True, download=True, transform=train_transform)
+            test_dataset = dataset_class('data', train=False, transform=test_transform)
 
         if train_count and train_count < len(train_dataset):
             train_dataset = Subset(train_dataset, random.sample(range(len(train_dataset)), train_count))

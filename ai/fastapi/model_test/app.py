@@ -65,13 +65,13 @@ async def analyze_model(model_version_id: str, dataset: Literal["mnist", "fashio
             })
 
     code = get_code() # 현재
-    test_accuracy = get_test_accuracy() # 현재
-    test_loss = get_test_loss() # 현재
-    train_info = get_train_info() # 현재
+    # test_accuracy = get_test_accuracy() # 현재
+    # test_loss = get_test_loss() # 현재
+    # train_info = get_train_info() # 현재
     confusion_matrix = get_confusion_matrix() # 현재
     example_image = get_example_image(outputs, dataset) # 나
-    total_params = get_total_params() # 현재
-    params = get_params() # 현재
+    # total_params = get_total_params() # 현재
+    # params = get_params() # 현재
     feature_activation = get_feature_activation(maximization_input, activation_map) # 나
     activation_maximization = get_activation_maximization(model) # 나
 

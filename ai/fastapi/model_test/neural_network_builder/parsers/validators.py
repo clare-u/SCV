@@ -186,7 +186,7 @@ class ModelConfig(BaseModel):
 
     @field_validator('dataName')
     def validate_data_name(cls, v):
-        valid_datasets = ['MNIST', 'FashionMNIST', 'CIFAR10', 'SVHN', 'EMNIST']
+        valid_datasets = ['MNIST', 'FASHION_MNIST', 'CIFAR10', 'SVHN', 'EMNIST']
         if v not in valid_datasets:
             raise ValueError(f'데이터셋은 {valid_datasets}에 존재하는 것 중 선택해야합니다.')
         return v

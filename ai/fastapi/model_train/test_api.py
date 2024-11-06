@@ -10,7 +10,7 @@ def test_model_training():
     test_configs = [
         {
             "modelId": 1,
-            "versionId": 1,
+            "versionId": 2,
             "config": {
                 "modelLayerAt": {
                     "layers": [
@@ -50,13 +50,20 @@ def test_model_training():
     ]
 
     for test_case in test_configs:
-        print(f"\nTesting model version {test_case['versionId']}...")
+        print(f"\n모델 버전 {test_case['versionId']} 테스트 중...")
 
         try:
             # 모델 학습 요청
             train_url = f"{BASE_URL}/api/v1/models/{test_case['modelId']}/versions/{test_case['versionId']}"
+            print("\nSending training request to:", train_url)
+            print("\nRequest body:")
+            print(json.dumps(test_case['config'], indent=2))
+
             response = requests.post(train_url, json=test_case['config'])
             response.raise_for_status()
+
+            print("\nFull Training Response:")
+            print(json.dumps(response.json(), indent=2))
 
             result = response.json()
             # results 키가 있다면 그 안의 데이터를 사용, 없다면 전체 응답 사용
@@ -97,8 +104,13 @@ def test_model_training():
 
             # 저장된 모델 테스트
             test_url = f"{BASE_URL}/api/v1/models/{test_case['modelId']}/versions/{test_case['versionId']}/test"
+            print("\nSending test request to:", test_url)
+
             test_response = requests.get(test_url)
             test_response.raise_for_status()
+
+            print("\nFull Test Response:")
+            print(json.dumps(test_response.json(), indent=2))
 
             test_data = test_response.json()
             # results 키가 있다면 그 안의 데이터를 사용, 없다면 전체 응답 사용
@@ -132,5 +144,5 @@ def test_model_training():
 
 
 if __name__ == "__main__":
-    print("Starting API tests...")
+    print("API 테스트를 시작중입니다...")
     test_model_training()

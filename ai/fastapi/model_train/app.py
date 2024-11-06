@@ -11,7 +11,7 @@ sys.path.append(root_dir)
 
 from model_test.neural_network_builder.parsers.validators import ModelConfig, ModelLayerConfig, layer_classes
 try:
-    from .model_train import ModelTrainer  # 상대 경로 import
+    from .model_run import ModelTrainer  # 상대 경로 import
     from .save_minio import save_model_to_minio  # save_model 파일명이 save_minio로 변경
 except ImportError:
     # 상대 경로 import가 실패하면 절대 경로로 시도
@@ -20,7 +20,7 @@ except ImportError:
 app = FastAPI()
 logger = logging.getLogger(__name__)
 
-@app.post("/api/v1/models/{modelId}/versions/{versionId}")
+@app.post("/api/v1/models/{modelId}/versions/{versionId}/train")
 async def train_model(
     modelId: int = Path(..., title="Model ID", description="모델 ID"),
     versionId: int = Path(..., title="Version ID", description="모델 버전 ID"),
@@ -111,19 +111,51 @@ async def test_model(
         modelId: int = Path(..., title="Model ID"),
         versionId: int = Path(..., title="Version ID")
 ):
+    """모델 테스트 엔드포인트"""
     try:
         trainer = ModelTrainer()
         result = trainer.test_saved_model(str(versionId))
 
         return {
-            "status": "success",
-            "modelId": modelId,
-            "versionId": versionId,
+            # "status": "success",
+            # "modelId": modelId,
+            # "versionId": versionId,
             "results": result
         }
 
     except Exception as e:
         raise HTTPException(status_code=500, detail=str(e))
+
+
+@app.post("/api/v1/models/{modelId}/versions/{versionId}")
+async def run_model(
+        modelId: int = Path(..., title="Model ID", description="모델 ID"),
+        versionId: int = Path(..., title="Version ID", description="모델 버전 ID"),
+        config: Dict[str, Any] = None
+):
+    """모델 학습 및 테스트를 연속으로 수행하는 엔드포인트"""
+    try:
+        # 1. 학습 수행
+        train_result = await train_model(modelId, versionId, config)
+
+        # 2. 테스트 수행
+        test_result = await test_model(modelId, versionId)
+
+        result = {
+            "status": "success",
+            "modelId": modelId,
+            "versionId": versionId,
+            "test_results": test_result
+        }
+
+        return result
+
+    except Exception as e:
+        logger.error(f"run_model 실행 중 에러 발생 : {str(e)}")
+        raise HTTPException(
+            status_code=500,
+            detail=f"Error during run_model process: {str(e)}"
+        )
 
 if __name__ == "__main__":
     import uvicorn
