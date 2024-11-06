@@ -35,7 +35,6 @@ import org.springframework.http.ResponseEntity;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 import org.springframework.web.client.RestTemplate;
-import org.springframework.web.servlet.HandlerMapping;
 
 import java.util.HashMap;
 import java.util.List;
@@ -54,7 +53,6 @@ public class ModelVersionService {
             .configure(DeserializationFeature.FAIL_ON_UNKNOWN_PROPERTIES, false)
             .configure(SerializationFeature.WRITE_ENUMS_USING_TO_STRING, true)
             .enable(SerializationFeature.INDENT_OUTPUT);
-    private final HandlerMapping resourceHandlerMapping;
     private final DataRepository dataRepository;
 
     private String convertToJson(Object data) {
