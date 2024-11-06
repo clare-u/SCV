@@ -1,6 +1,7 @@
 "use client";
 import { useState } from "react";
 import { BlockDefinition, BlockCategory } from "@/types";
+import { toast } from "sonner";
 
 interface BlockItemProps {
   block: BlockDefinition;
@@ -90,8 +91,26 @@ const BlockItem: React.FC<BlockItemProps> = ({
                           ? "0.0"
                           : ""
                     }
-                    min={param.min}
-                    max={param.max}
+                    // min={param.min}
+                    // max={param.max}
+                    onBlur={(e) => {
+                      const value = parseFloat(e.target.value);
+                      // 숫자가 아닌 입력값 체크 (NaN 체크)
+                      if (isNaN(value)) {
+                        toast.error("숫자만 입력 가능합니다.");
+                        e.target.value = String(param.min); // 최솟값으로 초기화
+                        return;
+                      }
+
+                      if (param.min !== undefined && value < param.min) {
+                        toast.error(`최솟값은 ${param.min}입니다.`);
+                        e.target.value = String(param.min);
+                      }
+                      if (param.max !== undefined && value > param.max) {
+                        toast.error(`최댓값은 ${param.max}입니다.`);
+                        e.target.value = String(param.max);
+                      }
+                    }}
                   />
                 </li>
               ))}
