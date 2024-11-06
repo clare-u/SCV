@@ -50,7 +50,6 @@ const BlockItem: React.FC<BlockItemProps> = ({
   onBlurParam,
 }) => {
   const [isOpen, setIsOpen] = useState(false);
-  // TODO: Params 유효성 검증
 
   const toggleOpen = () => {
     if (!small) {
@@ -86,37 +85,31 @@ const BlockItem: React.FC<BlockItemProps> = ({
                   <input
                     type="number"
                     className={`appearance-none rounded-[20px] border ${colorClasses.border} w-[60px] bg-white p-2 text-center text-sm placeholder-gray-500 transition-all duration-200 ease-in-out focus:shadow-md focus:ring-2 focus:ring-opacity-50 ${colorClasses.border.replace("border", "ring")}`}
-                    placeholder={
-                      param.type === "int"
-                        ? "0"
-                        : param.type === "float"
-                          ? "0.0"
-                          : ""
-                    }
-                    // min={param.min}
-                    // max={param.max}
                     onBlur={(e) => {
-                      const value = parseFloat(e.target.value);
-                      // 숫자가 아닌 입력값 체크 (NaN 체크)
-                      if (isNaN(value)) {
-                        toast.error("숫자만 입력 가능합니다.");
-                        e.target.value = String(param.min); // 최솟값으로 초기화
+                      if (block.name == "start") return;
+                      if (e.target.value.trim().length == 0) {
+                        e.target.value = "";
+                        param.value = undefined;
                         return;
                       }
+                      const value = parseFloat(e.target.value);
+                      param.value = value;
 
                       if (param.min !== undefined && value < param.min) {
                         toast.error(`최솟값은 ${param.min}입니다.`);
                         e.target.value = String(param.min);
+                        param.value = param.min;
                       }
                       if (param.max !== undefined && value > param.max) {
                         toast.error(`최댓값은 ${param.max}입니다.`);
                         e.target.value = String(param.max);
+                        param.value = param.max;
                       }
-                      param.value = value;
                       if (param.value !== undefined && onBlurParam) {
-                        onBlurParam(idx, value); // 파라미터 값 업데이트
+                        onBlurParam(idx, param.value); // 파라미터 값 업데이트
                       }
                     }}
+                    readOnly={block.name == "start" ? true : false}
                   />
                 </li>
               ))}

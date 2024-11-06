@@ -150,7 +150,7 @@ export default function Edit() {
         </div>
       </div>
       <div className="flex flex-1">
-        <BlockList />
+        <BlockList dataset={dataset} />
         <div className="flex w-[600px] flex-col border-l border-gray-500">
           <div className="flex max-h-[450px] w-full flex-1 overflow-y-auto overflow-x-hidden border-b border-gray-500">
             <CodeViewer></CodeViewer>

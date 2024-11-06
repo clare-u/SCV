@@ -3,9 +3,13 @@ import { useState, useEffect } from "react";
 import { Tab, TabPanel, TabGroup, TabList, TabPanels } from "@headlessui/react";
 import { DragDropContext, Draggable, Droppable } from "@hello-pangea/dnd";
 import { CustomBlockList } from "./CustomBlockList";
-import { BlockDefinition, BlockCategory } from "@/types";
+import { BlockDefinition, BlockCategory, Dataset } from "@/types";
 import BlockItem from "./BlockItem";
-import { useBlockStore } from "@/store/blockStore";
+import {
+  datasetChannels,
+  datasetSizes,
+  useBlockStore,
+} from "@/store/blockStore";
 
 // 카테고리 표시 이름 매핑
 const categoryDisplayNames: Record<BlockCategory, string> = {
@@ -32,7 +36,11 @@ interface DroppedBlock extends BlockDefinition {
   category: BlockCategory;
 }
 
-const BlockList: React.FC = () => {
+interface BlockListProps {
+  dataset: Dataset;
+}
+
+const BlockList: React.FC<BlockListProps> = (props) => {
   const categories = Object.entries(CustomBlockList).filter(
     ([category]) => category !== "Basic",
   ) as [BlockCategory, BlockDefinition[]][];
@@ -43,7 +51,23 @@ const BlockList: React.FC = () => {
       id: "start",
       name: "start",
       category: "Basic",
-      params: [{ name: "start", type: "int", value: 0 }],
+      params: [
+        {
+          name: "input_channels",
+          type: "int",
+          value: datasetChannels[props.dataset],
+        },
+        {
+          name: "input_width",
+          type: "int",
+          value: datasetSizes[props.dataset],
+        },
+        {
+          name: "input_height",
+          type: "int",
+          value: datasetSizes[props.dataset],
+        },
+      ] as { name: string; type: "int" | "float"; value: 0 }[],
     },
     {
       id: "end",

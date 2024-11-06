@@ -9,17 +9,17 @@ export const CustomBlockList: Record<BlockCategory, BlockDefinition[]> = {
     {
       name: "nn.Conv2d",
       params: [
-        { name: "in_channels", type: "int", min: 1, value: 1 },
-        { name: "out_channels", type: "int", min: 1, value: 1 },
-        { name: "kernel_size", type: "int", min: 1, value: 1 },
+        { name: "in_channels", type: "int", min: 1, value: undefined },
+        { name: "out_channels", type: "int", min: 1, value: undefined },
+        { name: "kernel_size", type: "int", min: 1, value: undefined },
       ],
     },
     {
       name: "nn.ConvTranspose2d",
       params: [
-        { name: "in_channels", type: "int", min: 1, value: 1 },
-        { name: "out_channels", type: "int", min: 1, value: 1 },
-        { name: "kernel_size", type: "int", min: 1, value: 1 },
+        { name: "in_channels", type: "int", min: 1, value: undefined },
+        { name: "out_channels", type: "int", min: 1, value: undefined },
+        { name: "kernel_size", type: "int", min: 1, value: undefined },
       ],
     },
   ],
@@ -27,36 +27,36 @@ export const CustomBlockList: Record<BlockCategory, BlockDefinition[]> = {
     {
       name: "MaxPool2d",
       params: [
-        { name: "kernel_size", type: "int", min: 1, value: 1 },
-        { name: "stride", type: "int", min: 1, value: 1 },
+        { name: "kernel_size", type: "int", min: 1, value: undefined },
+        { name: "stride", type: "int", min: 1, value: undefined },
       ],
     },
     {
       name: "AvgPool2d",
       params: [
-        { name: "kernel_size", type: "int", min: 1, value: 1 },
-        { name: "stride", type: "int", min: 1, value: 1 },
+        { name: "kernel_size", type: "int", min: 1, value: undefined },
+        { name: "stride", type: "int", min: 1, value: undefined },
       ],
     },
   ],
   Padding: [
     {
       name: "ReflectionPad2d",
-      params: [{ name: "padding", type: "int", min: 0, value: 0 }],
+      params: [{ name: "padding", type: "int", min: 0, value: undefined }],
     },
     {
       name: "ReplicationPad2d",
-      params: [{ name: "padding", type: "int", min: 0, value: 0 }],
+      params: [{ name: "padding", type: "int", min: 0, value: undefined }],
     },
     {
       name: "ZeroPad2d",
-      params: [{ name: "padding", type: "int", min: 0, value: 0 }],
+      params: [{ name: "padding", type: "int", min: 0, value: undefined }],
     },
     {
       name: "ConstantPad2d",
       params: [
-        { name: "padding", type: "int", min: 0, value: 0 },
-        { name: "value", type: "float", value: 0.0 },
+        { name: "padding", type: "int", min: 0, value: undefined },
+        { name: "value", type: "float", value: undefined },
       ],
     },
   ],
@@ -64,28 +64,30 @@ export const CustomBlockList: Record<BlockCategory, BlockDefinition[]> = {
     { name: "ReLU", params: [] },
     {
       name: "LeakyReLU",
-      params: [{ name: "negative_slope", type: "float", min: 0.0, value: 0.0 }],
+      params: [
+        { name: "negative_slope", type: "float", min: 0.0, value: undefined },
+      ],
     },
     {
       name: "ELU",
-      params: [{ name: "alpha", type: "float", min: 0.0, value: 0.0 }],
+      params: [{ name: "alpha", type: "float", min: 0.0, value: undefined }],
     },
     {
       name: "PReLU",
       params: [
         // { name: "num_parameters", type: "int" },
-        { name: "init", type: "float", min: 0.0, value: 0.0 },
+        { name: "init", type: "float", min: 0.0, value: undefined },
       ],
     },
     { name: "Sigmoid", params: [] },
     { name: "Tanh", params: [] },
     {
       name: "Softmax",
-      params: [{ name: "dim", type: "int", min: 0, max: 2, value: 0 }],
+      params: [{ name: "dim", type: "int", min: 0, max: 2, value: undefined }],
     },
     {
       name: "LogSoftmax",
-      params: [{ name: "dim", type: "int", min: 0, max: 2, value: 0 }],
+      params: [{ name: "dim", type: "int", min: 0, max: 2, value: undefined }],
     },
     { name: "GELU", params: [] },
   ],
@@ -93,8 +95,8 @@ export const CustomBlockList: Record<BlockCategory, BlockDefinition[]> = {
     {
       name: "Linear",
       params: [
-        { name: "in_features", type: "int", min: 1, value: 1 },
-        { name: "out_features", type: "int", min: 1, value: 1 },
+        { name: "in_features", type: "int", min: 1, value: undefined },
+        { name: "out_features", type: "int", min: 1, value: undefined },
       ],
     },
   ],
