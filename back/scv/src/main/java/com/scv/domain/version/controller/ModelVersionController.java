@@ -1,7 +1,10 @@
 package com.scv.domain.version.controller;
 
+import com.fasterxml.jackson.core.JsonProcessingException;
+import com.scv.domain.data.enums.DataSet;
 import com.scv.domain.oauth2.AuthUser;
 import com.scv.domain.oauth2.CustomOAuth2User;
+import com.scv.domain.result.dto.request.ResultRequest;
 import com.scv.domain.version.dto.request.ModelVersionRequest;
 import com.scv.domain.version.dto.response.ModelVersionDetail;
 import com.scv.domain.version.dto.response.ModelVersionResponse;
@@ -101,6 +104,17 @@ public class ModelVersionController {
         Page<ModelVersionResponse> modelVersions = modelVersionService.getModelVersionsOnWorking(user, pageable);
 
         return ResponseEntity.ok(modelVersions);
+    }
+
+    @PostMapping("/{versionId}/result")
+    public ResponseEntity<Void> saveResult(@PathVariable Long versionId, DataSet dataName, @AuthUser CustomOAuth2User user) throws BadRequestException, JsonProcessingException {
+        modelVersionService.saveResult(versionId, dataName);
+        return ResponseEntity.status(201).build();
+    }
+
+    @PostMapping("/{versionId}/analysis")
+    public ResponseEntity<Void> saveAnalysis(@PathVariable Long versionId, DataSet dataName, @RequestBody ResultRequest request, @AuthUser CustomOAuth2User user) throws BadRequestException {
+        return ResponseEntity.status(201).build();
     }
 
 

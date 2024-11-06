@@ -1,5 +1,6 @@
 package com.scv.domain.model.repository;
 
+import com.scv.domain.data.enums.DataSet;
 import com.scv.domain.model.domain.Model;
 import org.springframework.data.domain.Page;
 import org.springframework.data.domain.Pageable;
@@ -18,7 +19,7 @@ public interface ModelRepository extends JpaRepository<Model, Long> {
             "AND (:dataName IS NULL OR m.data.name = :dataName) " +
             "AND (:userId IS NULL OR m.user.userId = :userId)")
     Page<Model> searchMyModels(@Param("modelName") String modelName,
-                               @Param("dataName") String dataName,
+                               @Param("dataName") DataSet dataName,
                                @Param("userId") Long userId,
                                Pageable pageable);
 
@@ -27,7 +28,7 @@ public interface ModelRepository extends JpaRepository<Model, Long> {
             "AND (:modelName IS NULL OR m.name LIKE CONCAT('%', :modelName, '%')) " +
             "AND (:dataName IS NULL OR m.data.name = :dataName) ")
     Page<Model> searchModels(@Param("modelName") String modelName,
-                             @Param("dataName") String dataName,
+                             @Param("dataName") DataSet dataName,
                              Pageable pageable);
 
 }

@@ -19,9 +19,9 @@ public class ConvTranspose2dDTO extends LayerDTO {
 
     @JsonCreator
     public ConvTranspose2dDTO(
-            @JsonProperty("inChannels") int inChannels,
-            @JsonProperty("outChannels") int outChannels,
-            @JsonProperty("kernelSize") int kernelSize) {
+            @JsonProperty("in_channels") int inChannels,
+            @JsonProperty("out_channels") int outChannels,
+            @JsonProperty("kernel_size") int kernelSize) {
         this.inChannels = inChannels;
         this.outChannels = outChannels;
         this.kernelSize = kernelSize;

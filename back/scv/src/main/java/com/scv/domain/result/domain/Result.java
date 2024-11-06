@@ -1,6 +1,7 @@
 package com.scv.domain.result.domain;
 
 import com.scv.domain.version.domain.ModelVersion;
+import com.scv.global.shared.BaseEntity;
 import jakarta.persistence.*;
 import lombok.*;
 
@@ -10,32 +11,49 @@ import lombok.*;
 @Builder(toBuilder = true)
 @AllArgsConstructor
 @NoArgsConstructor(access = AccessLevel.PROTECTED)
-public class Result {
+public class Result extends BaseEntity {
 
     @Id
-    @GeneratedValue(strategy = GenerationType.IDENTITY)
-    @Column(name = "result_id", nullable = false)
+    @Column(name = "model_version_id", nullable = false)
     private Long id;
 
     @OneToOne(fetch = FetchType.LAZY)
+    @MapsId
     @JoinColumn(name = "model_version_id", nullable = false)
     private ModelVersion modelVersion;
 
-    @Column(name = "test_loss", nullable = false)
-    private double testLoss;
+    @Column(name = "code_view", columnDefinition = "JSON")
+    private String code;
 
-    @Column(name = "test_accuracy", nullable = false)
-    private double testAccuracy;
+    @Column(name = "test_accuracy")
+    private Double testAccuracy;
 
-    @Column(name = "train_result", columnDefinition = "JSON")
-    private String trainResult;
+    @Column(name = "test_loss")
+    private Double testLoss;
 
-    @Column(name = "layer_result", columnDefinition = "JSON")
-    private String layerResult;
+    @Column(name = "train_info", columnDefinition = "JSON")
+    private String trainInfo;
 
     @Column(name = "confusion_matrix", columnDefinition = "JSON")
     private String confusionMatrix;
 
-    @Column(name = "incorrect_img", columnDefinition = "JSON")
-    private String incorrectImages;
+    @Column(name = "example_img", columnDefinition = "JSON")
+    private String exampleImg;
+
+    @Column(name = "total_params")
+    private int totalParams;
+
+    @Column(name = "params", columnDefinition = "JSON")
+    private String params;
+
+    @Column(name = "layer_params", columnDefinition = "JSON")
+    private String layerParams;
+
+    @Column(name = "feature_activation", columnDefinition = "JSON")
+    private String featureActivation;
+
+    @Column(name = "activation_maximization", columnDefinition = "JSON")
+    private String activationMaximization;
+
+
 }
