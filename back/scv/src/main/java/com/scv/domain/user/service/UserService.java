@@ -22,7 +22,7 @@ public class UserService {
 
     private final UserRepository userRepository;
 
-    public UserProfileResponseDTO getUserProfile(CustomOAuth2User user2, Long userId) {
+    public UserProfileResponseDTO getUserProfile(Long userId) {
         User user = userRepository.findById(userId).orElseThrow(UserNotFoundException::getInstance);
         return UserProfileResponseDTO.builder()
                 .userEmail(user.getUserEmail())

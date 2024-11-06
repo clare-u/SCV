@@ -1,50 +1,31 @@
 package com.scv.domain.oauth2.handler;
 
+import com.scv.domain.oauth2.CustomOAuth2User;
+import com.scv.global.util.CookieUtil;
 import com.scv.global.util.JwtUtil;
-import jakarta.servlet.http.Cookie;
 import jakarta.servlet.http.HttpServletRequest;
 import jakarta.servlet.http.HttpServletResponse;
 import lombok.RequiredArgsConstructor;
-import org.springframework.beans.factory.annotation.Value;
 import org.springframework.security.core.Authentication;
 import org.springframework.security.web.authentication.SimpleUrlAuthenticationSuccessHandler;
 import org.springframework.stereotype.Component;
 
 import java.io.IOException;
 
+import static com.scv.global.util.JwtUtil.*;
+
 @Component
 @RequiredArgsConstructor
 public class CustomLoginSuccessHandler extends SimpleUrlAuthenticationSuccessHandler {
 
-    private final JwtUtil jwtUtil;
-
-    private final String ACCESS_TOKEN_NAME = System.getenv("JWT_ACCESS_NAME");
-    private final String REFRESH_TOKEN_NAME = System.getenv("JWT_REFRESH_NAME");
-
-    @Value("${spring.jwt.token.access.expiration}")
-    private int ACCESS_TOKEN_EXPIRATION;
-
-    @Value("${spring.jwt.token.refresh.expiration}")
-    private int REFRESH_TOKEN_EXPIRATION;
-
     @Override
     public void onAuthenticationSuccess(HttpServletRequest request, HttpServletResponse response, Authentication authentication) throws IOException {
-        String accessToken = jwtUtil.createAccessToken(authentication.getName());
-        String refreshToken = jwtUtil.createRefreshToken(authentication.getName());
+        String accessToken = JwtUtil.createAccessToken((CustomOAuth2User) authentication.getPrincipal());
+        String refreshToken = JwtUtil.createRefreshToken((CustomOAuth2User) authentication.getPrincipal());
 
-        response.addCookie(createCookie(ACCESS_TOKEN_NAME, accessToken, ACCESS_TOKEN_EXPIRATION));
-        response.addCookie(createCookie(REFRESH_TOKEN_NAME, refreshToken, REFRESH_TOKEN_EXPIRATION));
+        response.addCookie(CookieUtil.createCookie(ACCESS_TOKEN_NAME, accessToken, ACCESS_TOKEN_EXPIRATION));
+        response.addCookie(CookieUtil.createCookie(REFRESH_TOKEN_NAME, refreshToken, REFRESH_TOKEN_EXPIRATION));
 
         response.sendRedirect("http://localhost:3000/");
-    }
-
-    private Cookie createCookie(String key, String value, int expiration) {
-        Cookie cookie = new Cookie(key, value);
-        cookie.setMaxAge(expiration * 60);
-//        cookie.setSecure(true);
-        cookie.setPath("/");
-        cookie.setHttpOnly(true);
-
-        return cookie;
     }
 }

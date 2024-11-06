@@ -5,7 +5,6 @@ import lombok.RequiredArgsConstructor;
 import org.springframework.security.core.GrantedAuthority;
 import org.springframework.security.oauth2.core.user.OAuth2User;
 
-import java.time.LocalDateTime;
 import java.util.Collection;
 import java.util.Collections;
 import java.util.Map;
@@ -38,31 +37,11 @@ public class CustomOAuth2User implements OAuth2User {
         return oauth2UserDTO.getUserUuid();
     }
 
-    public String getUserEmail() {
-        return oauth2UserDTO.getUserEmail();
-    }
-
-    public String getUserImageUrl() {
-        return oauth2UserDTO.getUserImageUrl();
-    }
-
     public String getUserNickname() {
         return oauth2UserDTO.getUserNickname();
     }
 
     public String getUserRepo() {
         return oauth2UserDTO.getUserRepo();
-    }
-
-    public LocalDateTime getUserCreatedAt() {
-        return oauth2UserDTO.getUserCreatedAt();
-    }
-
-    public LocalDateTime getUserUpdatedAt() {
-        return oauth2UserDTO.getUserUpdatedAt();
-    }
-
-    public boolean getUserIsDeleted() {
-        return oauth2UserDTO.isUserIsDeleted();
     }
 }
