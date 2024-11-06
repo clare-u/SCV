@@ -1,3 +1,5 @@
+import logging
+
 import torch
 import torch.nn as nn
 import torch.optim as optim
@@ -9,11 +11,19 @@ import sys
 import os
 from typing import List, Dict, Any, Optional, Tuple
 from pathlib import Path
+logging.basicConfig(
+    level=logging.INFO,
+    format='%(asctime)s - %(levelname)s - %(message)s',
+    handlers=[
+        logging.StreamHandler(),
+        logging.FileHandler('model_trainer.log')
+    ]
+)
+logger = logging.getLogger(__name__)
 
 from neural_network_builder.exceptions.custom_exceptions import ValidationError
 from .datasets.datasets_registry import setup_logger
 from .datasets import DatasetRegistry, DatasetFactory, DatasetInfo
-from .utils import logger
 from .validators.model_validator import ModelValidator
 
 current_dir = os.path.dirname(os.path.abspath(__file__))

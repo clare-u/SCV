@@ -4,29 +4,30 @@ import yaml
 import logging
 
 
-# 로거 설정
-def setup_logger():
-    logger = logging.getLogger("DatasetRegistry")
-    if not logger.handlers:  # 핸들러가 없을 때만 추가
-        logger.setLevel(logging.INFO)
+def setup_logger(name="DatasetRegistry"):
+    """단일 로거 인스턴스를 생성하고 반환"""
+    logger = logging.getLogger(name)
 
-        # 콘솔 핸들러
-        console_handler = logging.StreamHandler()
-        console_handler.setLevel(logging.INFO)
+    # 이미 핸들러가 설정되어 있다면 기존 로거 반환
+    if logger.handlers:
+        return logger
 
-        # 포맷터
-        formatter = logging.Formatter(
-            '%(asctime)s - %(name)s - %(levelname)s - %(message)s',
-            datefmt='%Y-%m-%d %H:%M:%S'
-        )
-        console_handler.setFormatter(formatter)
-        logger.addHandler(console_handler)
+    # 상위 로거로부터 메시지 전파 방지
+    logger.propagate = False
 
-        # 파일 핸들러 (선택적)
-        file_handler = logging.FileHandler('dataset_registry.log')
-        file_handler.setLevel(logging.INFO)
-        file_handler.setFormatter(formatter)
-        logger.addHandler(file_handler)
+    logger.setLevel(logging.INFO)
+
+    # 콘솔 핸들러
+    console_handler = logging.StreamHandler()
+    console_handler.setLevel(logging.INFO)
+
+    # 포맷터
+    formatter = logging.Formatter(
+        '%(asctime)s - %(name)s - %(levelname)s - %(message)s',
+        datefmt='%Y-%m-%d %H:%M:%S'
+    )
+    console_handler.setFormatter(formatter)
+    logger.addHandler(console_handler)
 
     return logger
 

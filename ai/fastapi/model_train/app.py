@@ -1,9 +1,19 @@
 # 모델 학습 요청을 받을 FastAPI
+import logging
+
 from fastapi import FastAPI, HTTPException, Path
 import sys
 import os
-import logging
 from typing import Dict, Any, Optional
+logging.basicConfig(
+    level=logging.INFO,
+    format='%(asctime)s - %(levelname)s - %(message)s',
+    handlers=[
+        logging.StreamHandler(),  # 콘솔 출력
+        logging.FileHandler('app.log')  # 파일 출력
+    ]
+)
+logger = logging.getLogger(__name__)
 
 current_dir = os.path.dirname(os.path.abspath(__file__))
 root_dir = os.path.dirname(current_dir)
@@ -18,7 +28,7 @@ except ImportError:
     from model_train import ModelTrainer
     from save_minio import save_model_to_minio
 app = FastAPI()
-logger = logging.getLogger(__name__)
+
 
 @app.post("/api/v1/models/{modelId}/versions/{versionId}/train")
 async def train_model(
@@ -31,8 +41,7 @@ async def train_model(
         if config is None:
             raise HTTPException(status_code=400, detail="Config is required")
 
-        # 요청 받은 데이터 로깅
-        logger.debug(f"Received config: {config}")
+        logger.info(f"Received config: {config}")
 
         # 기본 설정 검증
         required_fields = ['modelLayerAt', 'dataName', 'dataTrainCnt', 'dataTestCnt', 'dataLabelCnt', 'dataEpochCnt']
@@ -99,7 +108,9 @@ async def train_model(
             logger.error(f"Validation error: {str(ve)}")
             raise HTTPException(status_code=422, detail=str(ve))
 
+
     except HTTPException as he:
+        logger.error(f"HTTP Exception: {str(he)}")
         raise he
     except Exception as e:
         logger.error(f"Unexpected error: {str(e)}")
@@ -115,6 +126,7 @@ async def test_model(
     try:
         trainer = ModelTrainer()
         result = trainer.test_saved_model(str(versionId))
+        logger.info(f"Test completed successfully for version {versionId}")  # 로깅 추가
 
         return {
             # "status": "success",
@@ -123,7 +135,9 @@ async def test_model(
             "results": result
         }
 
+
     except Exception as e:
+        logger.error(f"Error during model testing: {e}")
         raise HTTPException(status_code=500, detail=str(e))
 
 
@@ -135,11 +149,15 @@ async def run_model(
 ):
     """모델 학습 및 테스트를 연속으로 수행하는 엔드포인트"""
     try:
+        logger.info(f"Starting run_model process for model {modelId}, version {versionId}")
+
         # 1. 학습 수행
         train_result = await train_model(modelId, versionId, config)
+        logger.info("Training completed successfully")
 
         # 2. 테스트 수행
         test_result = await test_model(modelId, versionId)
+        logger.info("Testing completed successfully")
 
         result = {
             "status": "success",
@@ -148,14 +166,18 @@ async def run_model(
             "test_results": test_result
         }
 
+        logger.info("run_model completed successfully")
         return result
 
     except Exception as e:
-        logger.error(f"run_model 실행 중 에러 발생 : {str(e)}")
+        error_message = f"run_model 실행 중 에러 발생: {e}"
+        logger.error(error_message)
+
         raise HTTPException(
             status_code=500,
-            detail=f"Error during run_model process: {str(e)}"
+            detail=error_message
         )
+
 
 if __name__ == "__main__":
     import uvicorn
