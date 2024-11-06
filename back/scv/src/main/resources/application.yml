@@ -39,12 +39,19 @@ spring:
       port: ${REDIS_PORT}
       password: ${REDIS_PASSWORD}
 
-management:  # 여기에 추가
+management:
   endpoints:
     web:
+      base-path: /actuator  # actuator 기본 경로 설정
       exposure:
-        include: health
+        include: health,info  # 노출할 엔드포인트
   endpoint:
     health:
+      show-details: always  # 상세 정보 표시
       probes:
-        enabled: true
+        enabled: true  # k8s 프로브 활성화
+  health:
+    livenessstate:
+      enabled: true
+    readinessstate:
+      enabled: true
