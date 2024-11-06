@@ -132,9 +132,6 @@ export default function Edit() {
           </div>
         </div>
         <div className="flex items-center gap-10 px-10">
-          <Button size="m" design="outline" color="indigo" icon="save_alt">
-            새로운 버전으로 저장
-          </Button>
           <Button size="m" design="fill" color="indigo" icon="save">
             저장
           </Button>
@@ -149,8 +146,8 @@ export default function Edit() {
           </Button>
         </div>
       </div>
-      <div className="flex flex-1">
-        <BlockList dataset={dataset} />
+      <div className="flex h-[92vh]">
+        <BlockList dataset={dataset}/>
         <div className="flex w-[600px] flex-col border-l border-gray-500">
           <div className="flex max-h-[450px] w-full flex-1 overflow-y-auto overflow-x-hidden border-b border-gray-500">
             <CodeViewer></CodeViewer>

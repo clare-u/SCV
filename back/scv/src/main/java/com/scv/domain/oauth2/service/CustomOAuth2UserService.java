@@ -44,6 +44,7 @@ public class CustomOAuth2UserService extends DefaultOAuth2UserService {
 
         User existUser = userRepository.findByUserEmail(oAuth2Response.getUserEmail()).orElse(null);
 
+        // 신규 회원
         if (existUser == null) {
             User user = User.builder()
                     .userUuid(UUID.randomUUID().toString())
@@ -58,26 +59,18 @@ public class CustomOAuth2UserService extends DefaultOAuth2UserService {
             OAuth2UserDTO oAuth2UserDTO = OAuth2UserDTO.builder()
                     .userId(savedUser.getUserId())
                     .userUuid(savedUser.getUserUuid())
-                    .userEmail(savedUser.getUserEmail())
-                    .userImageUrl(savedUser.getUserImageUrl())
                     .userNickname(savedUser.getUserNickname())
                     .userRepo(savedUser.getUserRepo())
-                    .userCreatedAt(savedUser.getUserCreatedAt())
-                    .userUpdatedAt(savedUser.getUserUpdatedAt())
-                    .userIsDeleted(savedUser.isUserIsDeleted())
                     .build();
             return new CustomOAuth2User(oAuth2UserDTO);
-        } else {
+        }
+        // 기존 회원
+        else {
             OAuth2UserDTO oAuth2UserDTO = OAuth2UserDTO.builder()
                     .userId(existUser.getUserId())
                     .userUuid(existUser.getUserUuid())
-                    .userEmail(existUser.getUserEmail())
-                    .userImageUrl(existUser.getUserImageUrl())
                     .userNickname(existUser.getUserNickname())
                     .userRepo(existUser.getUserRepo())
-                    .userCreatedAt(existUser.getUserCreatedAt())
-                    .userUpdatedAt(existUser.getUserUpdatedAt())
-                    .userIsDeleted(existUser.isUserIsDeleted())
                     .build();
             return new CustomOAuth2User(oAuth2UserDTO);
         }

@@ -38,4 +38,3 @@ public class OAuth2GithubResponse implements OAuth2Response {
         return ZonedDateTime.parse(String.valueOf(attributes.get("updated_at")), DateTimeFormatter.ISO_OFFSET_DATE_TIME).toLocalDateTime();
     }
 }
-

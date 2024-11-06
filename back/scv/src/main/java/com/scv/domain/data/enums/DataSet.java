@@ -6,10 +6,10 @@ import lombok.Getter;
 
 @Getter
 @AllArgsConstructor
-public enum Dataset {
+public enum DataSet {
 
     MNIST(1, "MNIST"),
-    FASHION(2, "Fashion"),
+    Fashion(2, "Fashion"),
     CIFAR10(3, "CIFAR-10"),
     SVHN(4, "SVHN"),
     EMNIST(5, "EMNIST");
@@ -17,8 +17,8 @@ public enum Dataset {
     private final int id;
     private final String name;
 
-    public static Dataset fromId(int id) {
-        for (Dataset dataset : Dataset.values()) {
+    public static DataSet fromId(int id) {
+        for (DataSet dataset : DataSet.values()) {
             if (dataset.getId() == id) {
                 return dataset;
             }
