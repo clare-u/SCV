@@ -7,6 +7,7 @@ interface BlockItemProps {
   block: BlockDefinition;
   category: BlockCategory;
   small?: boolean;
+  onBlurParam?: (paramIndex: number, value: number) => void;
 }
 
 const categoryColors = {
@@ -46,6 +47,7 @@ const BlockItem: React.FC<BlockItemProps> = ({
   block,
   category,
   small = false,
+  onBlurParam,
 }) => {
   const [isOpen, setIsOpen] = useState(false);
   // TODO: Params 유효성 검증
@@ -76,7 +78,7 @@ const BlockItem: React.FC<BlockItemProps> = ({
             className={`flex flex-col items-center justify-center rounded-b-12 border-2 p-20 ${colorClasses.openBg} ${colorClasses.border} transition-all duration-300 ease-in-out ${isOpen ? "translate-y-0 transform" : "-translate-y-4 transform"} `}
           >
             <ul className="flex flex-col items-center justify-center gap-10">
-              {block.params.map((param) => (
+              {block.params.map((param, idx) => (
                 <li key={param.name} className="mb-2 flex gap-10">
                   <label className="font-semibold text-white">
                     {param.name}
@@ -109,6 +111,10 @@ const BlockItem: React.FC<BlockItemProps> = ({
                       if (param.max !== undefined && value > param.max) {
                         toast.error(`최댓값은 ${param.max}입니다.`);
                         e.target.value = String(param.max);
+                      }
+                      param.value = value;
+                      if (param.value !== undefined && onBlurParam) {
+                        onBlurParam(idx, value); // 파라미터 값 업데이트
                       }
                     }}
                   />

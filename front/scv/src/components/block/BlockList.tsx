@@ -1,10 +1,11 @@
 "use client";
-import { useState } from "react";
+import { useState, useEffect } from "react";
 import { Tab, TabPanel, TabGroup, TabList, TabPanels } from "@headlessui/react";
 import { DragDropContext, Draggable, Droppable } from "@hello-pangea/dnd";
 import { CustomBlockList } from "./CustomBlockList";
 import { BlockDefinition, BlockCategory } from "@/types";
 import BlockItem from "./BlockItem";
+import { useBlockStore } from "@/store/blockStore";
 
 // 카테고리 표시 이름 매핑
 const categoryDisplayNames: Record<BlockCategory, string> = {
@@ -42,13 +43,13 @@ const BlockList: React.FC = () => {
       id: "start",
       name: "start",
       category: "Basic",
-      params: [{ name: "start", type: "int" }],
+      params: [{ name: "start", type: "int", value: 0 }],
     },
     {
       id: "end",
       name: "end",
       category: "Basic",
-      params: [] as { name: string; type: "int" | "float" }[],
+      params: [] as { name: string; type: "int" | "float"; value: 0 }[],
     },
   ];
 
@@ -144,6 +145,27 @@ const BlockList: React.FC = () => {
     }
   };
 
+  const { setBlockList } = useBlockStore();
+  useEffect(() => {
+    setBlockList(droppedBlocks);
+  }, [droppedBlocks]);
+  const handleBlur = (
+    blockIndex: number,
+    paramIndex: number,
+    value: number,
+  ) => {
+    setDroppedBlocks((blocks) => {
+      const updatedBlocks = [...blocks];
+      const updatedBlock = { ...updatedBlocks[blockIndex] };
+      updatedBlock.params = [...updatedBlock.params];
+      updatedBlock.params[paramIndex] = {
+        ...updatedBlock.params[paramIndex],
+        value,
+      };
+      updatedBlocks[blockIndex] = updatedBlock;
+      return updatedBlocks;
+    });
+  };
   return (
     <DragDropContext onDragEnd={handleDragEnd}>
       <div className="flex flex-1">
@@ -234,7 +256,13 @@ const BlockList: React.FC = () => {
                       {...provided.draggableProps}
                       {...provided.dragHandleProps}
                     >
-                      <BlockItem block={block} category={block.category} />
+                      <BlockItem
+                        block={block}
+                        category={block.category}
+                        onBlurParam={(paramIndex, value) =>
+                          handleBlur(index, paramIndex, value)
+                        }
+                      />
                     </div>
                   )}
                 </Draggable>
