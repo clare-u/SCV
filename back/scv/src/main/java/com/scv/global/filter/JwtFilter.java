@@ -15,6 +15,7 @@ import org.springframework.security.authentication.UsernamePasswordAuthenticatio
 import org.springframework.security.core.Authentication;
 import org.springframework.security.core.context.SecurityContextHolder;
 import org.springframework.stereotype.Component;
+import org.springframework.util.AntPathMatcher;
 import org.springframework.web.filter.OncePerRequestFilter;
 
 import java.io.IOException;
@@ -25,10 +26,14 @@ import static com.scv.global.util.JwtUtil.*;
 @RequiredArgsConstructor
 public class JwtFilter extends OncePerRequestFilter {
 
+    private static final AntPathMatcher pathMatcher = new AntPathMatcher();
+
     @Override
     protected boolean shouldNotFilter(HttpServletRequest request) throws ServletException {
         String requestURI = request.getRequestURI();
-        return requestURI.equals("/") || requestURI.equals("/login");
+        return pathMatcher.match("/", requestURI)
+                || pathMatcher.match("/login", requestURI)
+                || pathMatcher.match("/actuator/**", requestURI);
     }
 
     @Override
@@ -54,13 +59,6 @@ public class JwtFilter extends OncePerRequestFilter {
             return;
         }
 
-        // 엑세스 토큰이 none 알고리즘이면 로그인
-        if (JwtUtil.isAccessTokenNoneAlgorithmUsed(accessTokenCookie.getValue())) {
-            CookieUtil.deleteCookie(response, accessTokenCookie);
-            response.sendError(HttpServletResponse.SC_UNAUTHORIZED);
-            return;
-        }
-
         // 리프레시 토큰이 없으면 로그인
         if (refreshTokenCookie == null) {
             response.sendError(HttpServletResponse.SC_UNAUTHORIZED);
@@ -69,13 +67,6 @@ public class JwtFilter extends OncePerRequestFilter {
 
         // 리프레시 토큰이 위조됐으면 로그인
         if (JwtUtil.isRefreshTokenTampered(refreshTokenCookie.getValue())) {
-            CookieUtil.deleteCookie(response, refreshTokenCookie);
-            response.sendError(HttpServletResponse.SC_UNAUTHORIZED);
-            return;
-        }
-
-        // 리프레시 토큰이 none 알고리즘이면 로그인
-        if (JwtUtil.isRefreshTokenNoneAlgorithmUsed(refreshTokenCookie.getValue())) {
             CookieUtil.deleteCookie(response, refreshTokenCookie);
             response.sendError(HttpServletResponse.SC_UNAUTHORIZED);
             return;
