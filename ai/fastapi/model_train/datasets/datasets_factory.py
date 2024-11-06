@@ -50,7 +50,17 @@ class DatasetFactory:
         if dataset_name == "SVHN":
             # SVHN은 split 파라미터 사용
             train_dataset = datasets.SVHN('data', split='train', download=True, transform=train_transform)
-            test_dataset = datasets.SVHN('data', split='test', transform=test_transform)
+            test_dataset = datasets.SVHN('data', split='test', download=True, transform=test_transform)
+        elif dataset_name == "EMNIST":
+            # EMNIST는 split 파라미터를 사용하여 letters 데이터를 가져옵니다.
+            train_dataset = datasets.EMNIST('data', split='letters', train=True, download=True,
+                                            transform=train_transform)
+            test_dataset = datasets.EMNIST('data', split='letters', train=False, download=True,
+                                           transform=test_transform)
+
+            # 레이블을 0-based로 변환
+            train_dataset.targets = train_dataset.targets - 1
+            test_dataset.targets = test_dataset.targets - 1
         else:
             # 다른 데이터셋들은 train 파라미터 사용
             dataset_class = dataset_mapping.get(dataset_name)
@@ -58,7 +68,7 @@ class DatasetFactory:
                 raise ValueError(f"Dataset {dataset_name} is not implemented")
 
             train_dataset = dataset_class('data', train=True, download=True, transform=train_transform)
-            test_dataset = dataset_class('data', train=False, transform=test_transform)
+            test_dataset = dataset_class('data', train=False, download=True, transform=test_transform)
 
         if train_count and train_count < len(train_dataset):
             train_dataset = Subset(train_dataset, random.sample(range(len(train_dataset)), train_count))
