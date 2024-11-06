@@ -26,7 +26,7 @@ export default function RootLayout({
       <body>
         <QueryProvider>
           <NavigationWrapper />
-          <div className="flex flex-col items-center justify-center">
+          <div className="flex min-h-screen flex-col items-center justify-center">
             {children}
           </div>
           <Toaster richColors position="top-right" />
