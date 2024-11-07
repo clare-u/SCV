@@ -10,7 +10,7 @@ def test_model_training():
     test_configs = [
         {
             "modelId": 1,
-            "versionId": 2,
+            "versionId": 1,
             "config": {
                 "modelLayerAt": {
                     "layers": [

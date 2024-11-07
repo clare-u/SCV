@@ -112,12 +112,12 @@ class ModelCodeGenerator:
             return str(value)
         return str(value)
 
-    def generate_model_code(self, model: nn.Module, version_no: str, dataset_info: dict) -> str:
+    def generate_model_code(self, model: nn.Module, model_name: str, dataset_info: dict) -> str:
         """모델 코드 생성
 
            Args:
                model: PyTorch 모델
-               version_no: 모델 버전
+               model_name: 모델 이름
                dataset_info: 데이터셋 정보
 
            Returns:
@@ -129,7 +129,7 @@ class ModelCodeGenerator:
             "import torch",
             "import torch.nn as nn",
             "",
-            f"# 모델 버전: {version_no}",
+            f"# 모델 이름: {model_name}",
             f"# 데이터셋: {dataset_info.get('dataName', 'Unknown')}",
             f"# 학습 데이터 수: {dataset_info.get('dataTrainCnt', 'Unknown')}",
             f"# 테스트 데이터 수: {dataset_info.get('dataTestCnt', 'Unknown')}",

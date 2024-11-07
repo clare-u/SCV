@@ -11,12 +11,18 @@ import sys
 import os
 from typing import List, Dict, Any, Optional, Tuple
 from pathlib import Path
+
+current_dir = os.path.dirname(os.path.abspath(__file__))
+root_dir = os.path.dirname(current_dir)
+log_dir = os.path.join(root_dir, 'logs')
+os.makedirs(log_dir, exist_ok=True)
+
 logging.basicConfig(
     level=logging.INFO,
     format='%(asctime)s - %(levelname)s - %(message)s',
     handlers=[
         logging.StreamHandler(),
-        logging.FileHandler('model_trainer.log')
+        logging.FileHandler(os.path.join(log_dir, 'model_trainer.log'))
     ]
 )
 logger = logging.getLogger(__name__)
@@ -49,19 +55,22 @@ class ModelTrainer:
 
         print(f"Using device: {self.device}")
 
-    def save_model_with_info(self, model: nn.Module, version_no: str,
+    def save_model_with_info(self, model: nn.Module, model_id: int, version_no: str,
                              dataset_info: DatasetInfo, training_history: List,
                              model_layer: Dict) -> None:
         """모델과 관련 정보를 저장"""
         try:
+            model_name = f"model_{model_id}_v{version_no}"
+
             # 모델에 메타데이터 추가
             model.dataset_info = dataset_info.to_dict()
             model.training_history = training_history
             model.model_layer = model_layer
+            model.model_id = model_id # 식별자
 
             # MinIO에 저장
-            save_model_to_minio(model, version_no)
-            logger.info(f"모델 저장 성공: {version_no}.pth")
+            save_model_to_minio(model, model_name)
+            logger.info(f"모델 저장 성공: {model_name}.pth")
 
         except Exception as e:
             logger.error(f"모델 저장 실패: {str(e)}")
@@ -205,14 +214,15 @@ class ModelTrainer:
                     # 모델 저장
                     self.save_model_with_info(
                         model=model,
-                        version_no=str(config.versionNo),
+                        model_id=config.modelId,
+                        version_no=str(config.versionId),
                         dataset_info=dataset_info,
                         training_history=training_history,
                         model_layer=self.model_layer
                     )
 
             return {
-                "model_version": config.versionNo,
+                "model_version": config.versionId,
                 "model_layer": self.model_layer,
                 "final_train_accuracy": train_acc,
                 "final_test_accuracy": test_acc,
@@ -224,7 +234,7 @@ class ModelTrainer:
             logger.error(f"학습 중 오류 발생: {str(e)}")
             raise
 
-    def test_saved_model(self, model_version: str):
+    def test_saved_model(self, model_name: str):
         """저장된 모델을 로드하여 테스트하는 메서드"""
         try:
             # MinIO에서 모델 로드
@@ -236,8 +246,20 @@ class ModelTrainer:
             )
 
             # 임시 파일로 다운로드
-            model_path = f"temp_model_{model_version}.pth"
-            client.fget_object(minio_model_bucket, f"{model_version}.pth", model_path)
+            model_path = f"{model_name}.pth"
+            try:
+                # MinIO에서 파일이 존재하는지 확인
+                client.stat_object(minio_model_bucket, f"{model_name}.pth")
+
+                # 파일이 존재하면 다운로드
+                client.fget_object(
+                    minio_model_bucket,
+                    f"{model_name}.pth",
+                    model_path
+                )
+
+            except Exception as e:
+                raise ValueError(f"모델 파일을 찾을 수 없습니다: {model_name}.pth")
 
             # 모델 로드 및 평가 모드 설정
             model = torch.load(model_path)
@@ -268,7 +290,7 @@ class ModelTrainer:
             # 모델 파이썬 코드로 생성
             model_code = self.code_generator.generate_model_code(
                 model=model,
-                version_no=model_version,
+                model_name=model_name,
                 dataset_info=model_layer
             )
 
