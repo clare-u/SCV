@@ -5,7 +5,10 @@ import Link from "next/link";
 
 export default function LoginButton() {
   return (
-    <Link href="http://localhost:8080/oauth2/authorization/github" passHref>
+    <Link
+      href="https://k11a107.p.ssafy.io/oauth2/authorization/github"
+      passHref
+    >
       <button className="flex items-center justify-center gap-3 rounded-[4px] bg-black px-[60px] py-[12px] text-[18px] font-semibold text-white">
         <Image
           src="/github-mark-white.png"
