@@ -11,6 +11,7 @@ import jakarta.servlet.http.Cookie;
 import jakarta.servlet.http.HttpServletRequest;
 import jakarta.servlet.http.HttpServletResponse;
 import lombok.RequiredArgsConstructor;
+import lombok.extern.slf4j.Slf4j;
 import org.springframework.security.authentication.UsernamePasswordAuthenticationToken;
 import org.springframework.security.core.Authentication;
 import org.springframework.security.core.context.SecurityContextHolder;
@@ -24,6 +25,7 @@ import static com.scv.global.util.JwtUtil.*;
 
 @Component
 @RequiredArgsConstructor
+@Slf4j
 public class JwtFilter extends OncePerRequestFilter {
 
     private static final AntPathMatcher pathMatcher = new AntPathMatcher();
@@ -31,9 +33,12 @@ public class JwtFilter extends OncePerRequestFilter {
     @Override
     protected boolean shouldNotFilter(HttpServletRequest request) throws ServletException {
         String requestURI = request.getRequestURI();
-        return pathMatcher.match("/", requestURI)
+        log.info("Request URI: {}", requestURI);
+        boolean shouldNotFilter = pathMatcher.match("/", requestURI)
                 || pathMatcher.match("/login", requestURI)
                 || pathMatcher.match("/actuator/**", requestURI);
+        log.info("Should Not Filter for {}: {}", requestURI, shouldNotFilter);
+        return shouldNotFilter;
     }
 
     @Override
