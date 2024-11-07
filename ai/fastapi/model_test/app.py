@@ -16,7 +16,7 @@ load_dotenv(verbose=True)
 app = FastAPI(root_path="/fast/v1/model/test")
 
 # 모델이 확정되어 결과 분석, CKA 저장 하는 함수
-@app.post("/analyze/{model_version_id}/{dataset}", response_model=Model_Analyze_Response)
+@app.get("/analyze/{model_version_id}/{dataset}", response_model=Model_Analyze_Response)
 async def analyze_model(model_version_id: str, dataset: Literal["mnist", "fashion_mnist", "cifar10", "svhn", "emnist"]):
 
     # model 가져오기
