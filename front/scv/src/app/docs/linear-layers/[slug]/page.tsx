@@ -23,7 +23,7 @@ export default function Post({ params }: PageProps) {
   const { slug } = params;
   const filePath = path.join(
     process.cwd(),
-    "content/convolution-layers",
+    "content/linear-layers",
     `${slug}.md`,
   );
   const fileContent = fs.readFileSync(filePath, "utf8");
