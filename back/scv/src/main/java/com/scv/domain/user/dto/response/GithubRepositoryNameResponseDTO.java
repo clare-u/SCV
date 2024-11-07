@@ -8,8 +8,8 @@ import lombok.NoArgsConstructor;
 @Builder
 @NoArgsConstructor
 @AllArgsConstructor
-public class CommonSuccessResponseDTO {
+public class GithubRepositoryNameResponseDTO {
 
-    @JsonProperty("message")
-    private String message;
+    @JsonProperty("repoName")
+    private String repoName;
 }
