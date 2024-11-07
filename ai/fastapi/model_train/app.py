@@ -1,9 +1,19 @@
 # 모델 학습 요청을 받을 FastAPI
+import logging
 from fastapi import FastAPI, HTTPException, Path
 import sys
 import os
-import logging
 from typing import Dict, Any, Optional
+
+logging.basicConfig(
+    level=logging.INFO,
+    format='%(asctime)s - %(levelname)s - %(message)s',
+    handlers=[
+        logging.StreamHandler(),  # 콘솔 출력
+        logging.FileHandler('app.log')  # 파일 출력
+    ]
+)
+logger = logging.getLogger(__name__)
 
 current_dir = os.path.dirname(os.path.abspath(__file__))
 root_dir = os.path.dirname(current_dir)
@@ -11,16 +21,40 @@ sys.path.append(root_dir)
 
 from model_test.neural_network_builder.parsers.validators import ModelConfig, ModelLayerConfig, layer_classes
 try:
-    from .model_train import ModelTrainer  # 상대 경로 import
-    from .save_minio import save_model_to_minio  # save_model 파일명이 save_minio로 변경
+    from .model_run import ModelTrainer
+    from .save_minio import save_model_to_minio
 except ImportError:
-    # 상대 경로 import가 실패하면 절대 경로로 시도
     from model_train import ModelTrainer
     from save_minio import save_model_to_minio
-app = FastAPI()
-logger = logging.getLogger(__name__)
+from typing import Union
 
-@app.post("/api/v1/models/{modelId}/versions/{versionId}")
+
+def generate_model_name(model_id: Union[int, str], version_id: Union[int, str]) -> str:
+    """모델ID랑 버전 ID로 고유한 모델 이름 생성"""
+    try:
+        model_id = int(model_id)
+        version_id = int(version_id)
+
+        if model_id < 0 or version_id < 0:
+            raise ValueError("모델 ID와 버전 ID는 0 양수만 가능합니다.")
+
+        model_name = f"model_{model_id}_v{version_id}"
+        logger.debug(f"Generated model name: {model_name}")
+
+        return model_name
+
+    except ValueError as e:
+        error_msg = f"잘못된 입력값: {str(e)}"
+        logger.error(error_msg)
+        raise HTTPException(status_code=400, detail=error_msg)
+    except Exception as e:
+        error_msg = f"모델 이름 생성 중 오류 발생: {str(e)}"
+        logger.error(error_msg)
+        raise HTTPException(status_code=500, detail=error_msg)
+app = FastAPI()
+
+
+@app.post("/api/v1/models/{modelId}/versions/{versionId}/train")
 async def train_model(
     modelId: int = Path(..., title="Model ID", description="모델 ID"),
     versionId: int = Path(..., title="Version ID", description="모델 버전 ID"),
@@ -31,8 +65,12 @@ async def train_model(
         if config is None:
             raise HTTPException(status_code=400, detail="Config is required")
 
-        # 요청 받은 데이터 로깅
-        logger.debug(f"Received config: {config}")
+        model_name = generate_model_name(modelId, versionId)
+        logger.info(f"생성된 모델 이름: {model_name}")
+        config["modelId"] = modelId
+        config["versionId"] = versionId
+
+        logger.info(f"Received config: {config}")
 
         # 기본 설정 검증
         required_fields = ['modelLayerAt', 'dataName', 'dataTrainCnt', 'dataTestCnt', 'dataLabelCnt', 'dataEpochCnt']
@@ -62,9 +100,9 @@ async def train_model(
                         if field in layer_config:
                             layer_dict[field] = layer_config[field]
                         elif field == 'padding' and layer_type == 'Conv2d':
-                            layer_dict[field] = 1  # Conv2d의 padding 기본값을 1로 설정
+                            layer_dict[field] = 0
                         elif field == 'stride' and layer_type == 'Conv2d':
-                            layer_dict[field] = 1  # Conv2d의 stride 기본값을 1로 설정
+                            layer_dict[field] = 1
 
                     # Layer 인스턴스 생성
                     layer = layer_class(**layer_dict)
@@ -75,13 +113,7 @@ async def train_model(
 
             # ModelConfig 생성 및 검증
             model_config = ModelConfig(
-                modelLayerAt=ModelLayerConfig(**config['modelLayerAt']),
-                dataName=config['dataName'].upper(),
-                dataTrainCnt=config['dataTrainCnt'],
-                dataTestCnt=config['dataTestCnt'],
-                dataLabelCnt=config['dataLabelCnt'],
-                dataEpochCnt=config['dataEpochCnt'],
-                versionNo=versionId
+               **config
             )
 
             trainer = ModelTrainer()
@@ -99,7 +131,9 @@ async def train_model(
             logger.error(f"Validation error: {str(ve)}")
             raise HTTPException(status_code=422, detail=str(ve))
 
+
     except HTTPException as he:
+        logger.error(f"HTTP Exception: {str(he)}")
         raise he
     except Exception as e:
         logger.error(f"Unexpected error: {str(e)}")
@@ -111,19 +145,65 @@ async def test_model(
         modelId: int = Path(..., title="Model ID"),
         versionId: int = Path(..., title="Version ID")
 ):
+    """모델 테스트 엔드포인트"""
     try:
+        model_name = generate_model_name(modelId, versionId)
+        logger.info(f"Testing model: {model_name}")
+
         trainer = ModelTrainer()
-        result = trainer.test_saved_model(str(versionId))
+        result = trainer.test_saved_model(model_name)
+        logger.info(f"Test completed successfully for version {model_name}")  # 로깅 추가
 
         return {
-            "status": "success",
-            "modelId": modelId,
-            "versionId": versionId,
+            # "status": "success",
+            # "modelId": modelId,
+            # "versionId": versionId,
             "results": result
         }
 
+
     except Exception as e:
+        logger.error(f"Error during model testing: {e}")
         raise HTTPException(status_code=500, detail=str(e))
+
+
+@app.post("/api/v1/models/{modelId}/versions/{versionId}")
+async def run_model(
+        modelId: int = Path(..., title="Model ID", description="모델 ID"),
+        versionId: int = Path(..., title="Version ID", description="모델 버전 ID"),
+        config: Dict[str, Any] = None
+):
+    """모델 학습 및 테스트를 연속으로 수행하는 엔드포인트"""
+    try:
+        logger.info(f"Starting run_model process for model {modelId}, version {versionId}")
+
+        # 1. 학습 수행
+        train_result = await train_model(modelId, versionId, config)
+        logger.info("Training completed successfully")
+
+        # 2. 테스트 수행
+        test_result = await test_model(modelId, versionId)
+        logger.info("Testing completed successfully")
+
+        result = {
+            "status": "success",
+            "modelId": modelId,
+            "versionId": versionId,
+            "test_results": test_result
+        }
+
+        logger.info("run_model completed successfully")
+        return result
+
+    except Exception as e:
+        error_message = f"run_model 실행 중 에러 발생: {e}"
+        logger.error(error_message)
+
+        raise HTTPException(
+            status_code=500,
+            detail=error_message
+        )
+
 
 if __name__ == "__main__":
     import uvicorn
