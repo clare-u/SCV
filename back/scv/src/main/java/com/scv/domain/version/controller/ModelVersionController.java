@@ -26,7 +26,7 @@ import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.*;
 
 @RestController
-@RequestMapping("/api/v1/models/versions")
+@RequestMapping("/v1/models/versions")
 @Tag(name = "모델 버전 컨트롤러", description = "모델 버전 관련 API")
 @RequiredArgsConstructor
 public class ModelVersionController {
@@ -107,19 +107,19 @@ public class ModelVersionController {
         return ResponseEntity.ok(modelVersions);
     }
 
-    @PostMapping("/{versionId}/result/save")
-    @Operation(summary = "결과 저장", description = "학습 결과(이미지들)를 저장합니다.")
-    public ResponseEntity<Void> saveResult(@PathVariable Long versionId, DataSet dataName, @AuthUser CustomOAuth2User user) throws BadRequestException, JsonProcessingException {
-        modelVersionService.saveResult(versionId, dataName);
-        return ResponseEntity.status(201).build();
-    }
-
-    @PostMapping("/{versionId}/result/run")
-    @Operation(summary = "실행 저장", description = "실행 결과를 저장합니다.")
-    public ResponseEntity<Void> saveAnalysis(@PathVariable Long versionId, DataSet dataName, @RequestBody ResultRequest request, @AuthUser CustomOAuth2User user) throws BadRequestException {
+//    @PostMapping("/{versionId}/result/save")
+//    @Operation(summary = "결과 저장", description = "학습 결과(이미지들)를 저장합니다.")
+//    public ResponseEntity<Void> saveResult(@PathVariable Long versionId, DataSet dataName, @AuthUser CustomOAuth2User user) throws BadRequestException, JsonProcessingException {
+//        modelVersionService.saveResult(versionId, dataName);
+//        return ResponseEntity.status(201).build();
+//    }
+//
+//    @PostMapping("/{versionId}/result/run")
+//    @Operation(summary = "실행 저장", description = "실행 결과를 저장합니다.")
+//    public ResponseEntity<Void> saveAnalysis(@PathVariable Long versionId, DataSet dataName, @RequestBody ResultRequest request, @AuthUser CustomOAuth2User user) throws BadRequestException {
 //        modelVersionService.runResult();
-        return ResponseEntity.status(201).build();
-    }
+//        return ResponseEntity.status(201).build();
+//    }
 
 
 }
