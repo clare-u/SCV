@@ -100,9 +100,12 @@ public class GithubApiService {
     // Github 에서 파일에서 sha 를 가져오는 메서드
     public String getShaFromGithubRepositoryFile(CustomOAuth2User user, String path) {
         GithubRepositoryFileApiResponseDTO githubRepositoryFile = getGithubRepositoryFile(user, path);
+        System.out.println("555");
         if (githubRepositoryFile == null) {
+            System.out.println("666");
             return null;
         }
+        System.out.println("777");
         return githubRepositoryFile.getSha();
     }
 
@@ -118,20 +121,22 @@ public class GithubApiService {
     // Github 에 파일을 커밋하는 메서드
     // https://docs.github.com/ko/rest/repos/contents?apiVersion=2022-11-28#create-or-update-file-contents
     public String commitGithubRepositoryFile(CustomOAuth2User authUser, CommitGithubRepositoryFileRequestDTO requestDTO) {
+        System.out.println("aaa");
         String url = GITHUB_API_URL + "/repos/" + authUser.getUserNickname() + "/" + authUser.getUserRepo() + "/contents/" + requestDTO.getPath();
-
+        System.out.println("url = " + url);
         CommitGithubRepositoryFileApiRequestDTO requestBody = CommitGithubRepositoryFileApiRequestDTO.builder()
                 .message("feat: [" + LocalDateTime.now() + "] " + requestDTO.getPath())
                 .content(Base64.getEncoder().encodeToString(requestDTO.getContent().getBytes()))
                 .build();
-
-        HttpEntity<CommitGithubRepositoryFileApiRequestDTO> entity = new HttpEntity<>(requestBody, createHeaders(authUser.getName()));
+        System.out.println("requestBody = " + requestBody);
+        HttpEntity<CommitGithubRepositoryFileApiRequestDTO> entity = new HttpEntity<>(requestBody, createHeaders(getAccessToken(authUser.getName())));
         ResponseEntity<String> responseEntity = restTemplate.exchange(url, HttpMethod.PUT, entity, String.class);
 
         if (!responseEntity.getStatusCode().is2xxSuccessful()) {
+            System.out.println("bbb");
             return null;
         }
-
+        System.out.println("ccc");
         return responseEntity.getBody();
     }
 
@@ -146,7 +151,7 @@ public class GithubApiService {
                 .sha(sha)
                 .build();
 
-        HttpEntity<CommitGithubRepositoryFileApiRequestDTO> entity = new HttpEntity<>(requestBody, createHeaders(authUser.getName()));
+        HttpEntity<CommitGithubRepositoryFileApiRequestDTO> entity = new HttpEntity<>(requestBody, createHeaders(getAccessToken(authUser.getName())));
         ResponseEntity<String> responseEntity = restTemplate.exchange(url, HttpMethod.PUT, entity, String.class);
 
         if (!responseEntity.getStatusCode().is2xxSuccessful()) {
@@ -159,16 +164,20 @@ public class GithubApiService {
     // Github 에서 파일을 가져오는 메서드
     // https://docs.github.com/ko/rest/repos/contents?apiVersion=2022-11-28#get-repository-content
     private GithubRepositoryFileApiResponseDTO getGithubRepositoryFile(CustomOAuth2User authUser, String path) {
+        System.out.println("888");
         String url = GITHUB_API_URL + "/repos/" + authUser.getUserNickname() + "/" + authUser.getUserRepo() + "/contents/" + path;
-
+        System.out.println("url = " + url);
         HttpEntity<GithubRepositoryFileApiResponseDTO> entity = new HttpEntity<>(createHeaders(getAccessToken(authUser.getName())));
-        ResponseEntity<GithubRepositoryFileApiResponseDTO> responseEntity = restTemplate.exchange(url, HttpMethod.GET, entity, new ParameterizedTypeReference<>() {
-        });
 
-        if (!responseEntity.getStatusCode().is2xxSuccessful()) {
+        try {
+            ResponseEntity<GithubRepositoryFileApiResponseDTO> responseEntity = restTemplate.exchange(url, HttpMethod.GET, entity, new ParameterizedTypeReference<>() {
+            });
+            System.out.println("000");
+            return responseEntity.getBody();
+        } catch (Exception e) {
+            System.out.println("999");
             return null;
         }
 
-        return responseEntity.getBody();
     }
 }
