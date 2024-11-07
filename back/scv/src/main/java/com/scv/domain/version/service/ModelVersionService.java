@@ -17,6 +17,8 @@ import com.scv.domain.result.repository.ResultRepository;
 import com.scv.domain.version.domain.ModelVersion;
 import com.scv.domain.version.dto.request.ModelVersionRequest;
 import com.scv.domain.version.dto.response.ModelVersionDetail;
+import com.scv.domain.version.dto.response.ModelVersionDetailWithResult;
+import com.scv.domain.version.dto.response.ModelVersionOnWorking;
 import com.scv.domain.version.dto.response.ModelVersionResponse;
 import com.scv.domain.version.exception.ModelVersionNotFoundException;
 import com.scv.domain.version.repository.ModelVersionRepository;
@@ -34,6 +36,7 @@ import org.springframework.transaction.annotation.Transactional;
 import org.springframework.web.client.RestTemplate;
 
 import java.util.HashMap;
+import java.util.List;
 import java.util.Map;
 import java.util.Optional;
 
@@ -72,15 +75,19 @@ public class ModelVersionService {
         ModelVersion version = modelVersionRepository.findById(versionId).orElseThrow(ModelVersionNotFoundException::new);
 
         Optional<Result> result = resultRepository.findById(versionId);
+        if (result.isPresent()) {
+            ResultAnalysisResponse resultAnalysisResponse = new ResultAnalysisResponse(result.get());
+            return new ModelVersionDetailWithResult(version, resultAnalysisResponse);
+        }
 
         return new ModelVersionDetail(version);
     }
 
     // 개발중인 모델 조회
-    public Page<ModelVersionResponse> getModelVersionsOnWorking(CustomOAuth2User user, Pageable pageable) {
+    public Page<ModelVersionOnWorking> getModelVersionsOnWorking(CustomOAuth2User user, Pageable pageable) {
         Page<ModelVersion> modelVersions = modelVersionRepository.findAllByUserAndIsWorkingTrueAndDeletedFalse(user.getUserId(), pageable);
-        // TODO ModelResponse로 주기
-        return modelVersions.map(ModelVersionResponse::new);
+
+        return modelVersions.map(ModelVersionOnWorking::new);
     }
 
     // 모델 버전 수정
@@ -114,7 +121,7 @@ public class ModelVersionService {
         modelVersionRepository.save(modelVersion);
     }
 
-
+    // 이건 결과저장
     public void saveResult(Long modelVersionId, DataSet dataName) {
         ModelVersion modelVersion = modelVersionRepository.findById(modelVersionId)
                 .orElseThrow(ModelVersionNotFoundException::new);
@@ -148,7 +155,6 @@ public class ModelVersionService {
         String featureActivation = ParsingUtil.getJsonFieldAsString(rootNode, "feature_activation");
         String exampleImage = ParsingUtil.getJsonFieldAsString(rootNode, "example_image");
         String trainInfoJson = ParsingUtil.getJsonFieldAsString(rootNode, "train_info");
-        String layerParams = ParsingUtil.getJsonFieldAsString(rootNode, "layer_params");
         String params = ParsingUtil.getJsonFieldAsString(rootNode, "params");
 
         Result result = Result.builder()
@@ -160,7 +166,6 @@ public class ModelVersionService {
                 .confusionMatrix(confusionMatrix)
                 .exampleImg(exampleImage)
                 .totalParams(rootNode.path("totalParams").asInt())
-                .layerParams(layerParams)
                 .params(params)
                 .featureActivation(featureActivation)
                 .activationMaximization(activationMaximization)
@@ -170,8 +175,8 @@ public class ModelVersionService {
     }
 
     // TODO 개판이니까 리팩토링 필요,,,,,, 다른 얽힌 메서드들 추가하기
-    // 저장 했을 때 필요한 서비스
-    public void saveAnalysis(Long modelVersionId, DataSet dataName, ResultRequest request) {
+    // 실핸하기
+    public void runResult(Long modelVersionId, DataSet dataName, ResultRequest request) {
         ModelVersion modelVersion = modelVersionRepository.findById(modelVersionId)
                 .orElseThrow(ModelVersionNotFoundException::new);
         Result result = resultRepository.findById(modelVersionId)
@@ -188,8 +193,8 @@ public class ModelVersionService {
         String trainInfoJson = ParsingUtil.toJson(resultResponse.trainInfos());
 
         result = result.toBuilder()
-                .activationMaximization(resultResponse.activationMaximization())
                 .confusionMatrix(resultResponse.confusionMatrix())
+                .activationMaximization(resultResponse.activationMaximization())
                 .exampleImg(resultResponse.exampleImg())
                 .featureActivation(resultResponse.featureActivation())
                 .build();

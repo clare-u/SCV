@@ -45,9 +45,9 @@ public class Result extends BaseEntity {
 
     @Column(name = "params", columnDefinition = "JSON")
     private String params;
-
-    @Column(name = "layer_params", columnDefinition = "JSON")
-    private String layerParams;
+//
+//    @Column(name = "layer_params", columnDefinition = "JSON")
+//    private String layerParams;
 
     @Column(name = "feature_activation", columnDefinition = "JSON")
     private String featureActivation;
