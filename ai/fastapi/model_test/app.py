@@ -39,6 +39,11 @@ async def analyze_model(model_version_id: str, dataset: Literal["mnist", "fashio
     maximization_input = [None, None, None]
     activation_map = [None, None, None]
 
+    # confusion matrix 를 위한 변수 선언
+
+    true_label = []
+    predicted_label = []
+
     outputs = []
     # 테스트
     model.eval()
@@ -46,6 +51,9 @@ async def analyze_model(model_version_id: str, dataset: Literal["mnist", "fashio
         for index, (input, label) in enumerate(test_dataset):
 
             x = input
+
+            # confusion matrix를 위한 true label 저장
+            true_label.extend(label.numpy())
 
             for i in range(0, len(model)):
                 x = model[i](x)
@@ -58,6 +66,9 @@ async def analyze_model(model_version_id: str, dataset: Literal["mnist", "fashio
                             activation_map[j] = x[0][j]
                             maximization_input[j] = input
 
+            # confusion matrix 를 위한 예측 레이블 저장
+            predicted_label.extend(torch.max(x, 1)[1].numpy())
+
             outputs.append({
                 "input" : input,
                 "label": label,
@@ -68,7 +79,7 @@ async def analyze_model(model_version_id: str, dataset: Literal["mnist", "fashio
     test_accuracy = get_test_accuracy() # 현재
     test_loss = get_test_loss() # 현재
     train_info = get_train_info() # 현재
-    confusion_matrix = get_confusion_matrix() # 현재
+    confusion_matrix = get_confusion_matrix(true_label, predicted_label) # 나
     example_image = get_example_image(outputs, dataset) # 나
     total_params = get_total_params() # 현재
     params = get_params() # 현재

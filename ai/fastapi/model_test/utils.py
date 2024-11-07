@@ -3,6 +3,7 @@ from classes import Train_Info, feature_activation, activation_maximization
 import json
 import torch
 from torch.optim import Adam
+from sklearn.metrics import confusion_matrix
 
 dataset_labels = {
     "mnist": [0,1,2,3,4,5,6,7,8,9]
@@ -23,8 +24,10 @@ def get_train_info() -> Train_Info:
         "accuracy" : [0.0]
         }
 
-def get_confusion_matrix() -> str:
-    return "string"
+def get_confusion_matrix(true, pred) -> str:
+    conf_matrix = confusion_matrix(true, pred)
+
+    return json.dumps(conf_matrix.tolist())
 
 def get_example_image(outputs, dataset) -> str:
 
