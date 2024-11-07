@@ -44,7 +44,7 @@ public class SecurityConfig {
         http.cors(cors -> cors.configurationSource(request -> {
             CorsConfiguration configuration = new CorsConfiguration();
 
-            configuration.setAllowedOrigins(Arrays.asList("http://localhost:3000", "https://k11a107.p.ssafy.io"));
+            configuration.setAllowedOrigins(Arrays.asList("http://localhost:3000", "http://k11a107.p.ssafy.io", "https://k11a107.p.ssafy.io"));
             configuration.setAllowedHeaders(Collections.singletonList("*"));
             configuration.setAllowedMethods(Collections.singletonList("*"));
             configuration.setAllowCredentials(true);
