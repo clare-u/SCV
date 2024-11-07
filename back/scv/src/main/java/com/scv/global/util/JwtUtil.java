@@ -39,35 +39,55 @@ public class JwtUtil {
                 .compact();
     }
 
-    public static boolean isAccessTokenTampered(String token) {
+    public static boolean isAccessTokenTampered(String accessToken) {
+        try {
+            Jws<Claims> claimsJws = Jwts.parserBuilder()
+                    .setSigningKey(ACCESS_TOKEN_SECRET_KEY_BYTES)
+                    .build()
+                    .parseClaimsJws(accessToken);
+
+            String algorithm = claimsJws.getHeader().getAlgorithm();
+            if (SignatureAlgorithm.NONE.getValue().equalsIgnoreCase(algorithm)) {
+                return true;
+            }
+
+            return false;
+        } catch (Exception e) {
+            return false;
+        }
+    }
+
+    public static boolean isRefreshTokenTampered(String refreshToken) {
+        try {
+            Jws<Claims> claimsJws = Jwts.parserBuilder()
+                    .setSigningKey(REFRESH_TOKEN_SECRET_KEY_BYTES)
+                    .build()
+                    .parseClaimsJws(refreshToken);
+
+            String algorithm = claimsJws.getHeader().getAlgorithm();
+            if (SignatureAlgorithm.NONE.getValue().equalsIgnoreCase(algorithm)) {
+                return true;
+            }
+
+            return false;
+        } catch (Exception e) {
+            return false;
+        }
+    }
+
+    public static boolean isAccessTokenExpired(String accessToken) {
         return false;
     }
 
-    public static boolean isRefreshTokenTampered(String token) {
+    public static boolean isRefreshTokenExpired(String refreshToken) {
         return false;
     }
 
-    public static boolean isAccessTokenNoneAlgorithmUsed(String token) {
-        return false;
-    }
-
-    public static boolean isRefreshTokenNoneAlgorithmUsed(String token) {
-        return false;
-    }
-
-    public static boolean isAccessTokenExpired(String token) {
-        return false;
-    }
-
-    public static boolean isRefreshTokenExpired(String token) {
-        return false;
-    }
-
-    public static String reIssueAccessToken(String token) {
+    public static String reIssueAccessToken(String accessToken) {
         return "";
     }
 
-    public static String reIssueRefreshToken(String token) {
+    public static String reIssueRefreshToken(String refreshToken) {
         return "";
     }
 
