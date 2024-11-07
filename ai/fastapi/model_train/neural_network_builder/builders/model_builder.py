@@ -65,7 +65,7 @@ class ModelBuilder:
 
         # Sequential 모델 생성
         model = nn.Sequential(*torch_layers)
-        logger.info(f"Successfully built model with {len(torch_layers)} layers")
+        logger.info(f"{len(torch_layers)}개의 레이어로 모델을 성공적으로 구축했습니다.")
         return model
 
     @handle_errors
