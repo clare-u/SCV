@@ -4,7 +4,7 @@ import com.scv.domain.github.dto.response.GithubEmailApiResponseDTO;
 import com.scv.domain.github.dto.response.GithubRepositoryApiResponseDTO;
 import com.scv.domain.oauth2.CustomOAuth2User;
 import com.scv.domain.user.dto.request.CommitGithubRepositoryFileRequestDTO;
-import com.scv.domain.user.dto.request.CreateGithubRepositoryRequestDTO;
+import com.scv.domain.user.dto.request.GithubRepositoryNameRequestDTO;
 import com.scv.domain.user.dto.request.PullGithubRepositoryFileRequestDTO;
 import lombok.RequiredArgsConstructor;
 import org.springframework.stereotype.Service;
@@ -28,31 +28,31 @@ public class GithubService {
     }
 
     // Github 에서 Repository 리스트의 이름들을 Set 으로 반환
-    public Set<String> getGithubRepositoryNames(CustomOAuth2User user) {
-        return githubApiService.getGithubRepositoryList(user).stream()
+    public Set<String> getGithubRepositoryNames(CustomOAuth2User authUser) {
+        return githubApiService.getGithubRepositoryList(authUser).stream()
                 .map(GithubRepositoryApiResponseDTO::getName)
                 .collect(Collectors.toSet());
     }
 
     // Github 에 Repository 생성하는 메서드
-    public void createGithubRepository(CustomOAuth2User user, CreateGithubRepositoryRequestDTO requestDTO) {
-        githubApiService.createGithubRepository(user, requestDTO.getRepoName());
+    public String createGithubRepository(CustomOAuth2User authUser, GithubRepositoryNameRequestDTO requestDTO) {
+        return githubApiService.createGithubRepository(authUser, requestDTO.getRepoName());
     }
 
     // Github 에 파일을 커밋하는 메서드
-    public void commitGithubRepositoryFile(CustomOAuth2User user, CommitGithubRepositoryFileRequestDTO requestDTO) {
-        String sha = githubApiService.getShaFromGithubRepositoryFile(user, requestDTO.getPath());
+    public String commitGithubRepositoryFile(CustomOAuth2User authUser, CommitGithubRepositoryFileRequestDTO requestDTO) {
+        String sha = githubApiService.getShaFromGithubRepositoryFile(authUser, requestDTO.getPath());
 
         if (sha == null) {
-            githubApiService.commitGithubRepositoryFile(user, requestDTO);
+            return githubApiService.commitGithubRepositoryFile(authUser, requestDTO);
         } else {
-            githubApiService.updateGithubRepositoryFile(user, requestDTO, sha);
+            return githubApiService.updateGithubRepositoryFile(authUser, requestDTO, sha);
         }
     }
 
     // Github 에서 파일에서 내용을 가져오는 메서드
-    public String getGithubRepositoryFile(CustomOAuth2User user, PullGithubRepositoryFileRequestDTO requestDTO) {
-        return githubApiService.getContentFromGithubRepositoryFile(user, requestDTO.getPath());
+    public String getGithubRepositoryFile(CustomOAuth2User authUser, PullGithubRepositoryFileRequestDTO requestDTO) {
+        return githubApiService.getContentFromGithubRepositoryFile(authUser, requestDTO.getPath());
     }
 
 }

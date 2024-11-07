@@ -32,6 +32,9 @@ spring:
             client-id: ${OAUTH_CLIENT_ID}
             client-secret: ${OAUTH_CLIENT_SECRET}
             scope: user:email, repo, contents, metadata
+    user:
+      name: actuator
+      password: ${ACTUATOR_PASSWORD}
 
   data:
     redis:
@@ -39,17 +42,23 @@ spring:
       port: ${REDIS_PORT}
       password: ${REDIS_PASSWORD}
 
+# actuator health 체크 설정
 management:
   endpoints:
     web:
-      base-path: /actuator  # actuator 기본 경로 설정
+      base-path: /actuator
       exposure:
-        include: health,info  # 노출할 엔드포인트
+        include: health,info
   endpoint:
     health:
-      show-details: always  # 상세 정보 표시
+      show-details: when_authorized
       probes:
         enabled: true  # k8s 프로브 활성화
+    info:
+      enabled: true
+  info:
+    env:
+      enabled: true
   health:
     livenessstate:
       enabled: true

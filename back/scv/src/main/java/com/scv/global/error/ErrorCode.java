@@ -10,9 +10,10 @@ public enum ErrorCode {
     INVALID_TOKEN(401, "INVALID_TOKEN", "유효하지 않은 토큰입니다."),
     EXPIRED_TOKEN(403, "EXPIRED_TOKEN", "만료된 토큰입니다."),
     USER_NOT_FOUND(404, "USER_NOT_FOUND", "사용자를 찾을 수 없습니다."),
-    DUPLICATE_REPO_NAME(409, "DUPLICATE_REPO_NAME", "중복된 이름입니다."),
+    DUPLICATE_REPO_NAME(409, "DUPLICATE_REPO_NAME", "이미 존재하는 리포지토리입니다."),
     RESULT_NOT_FOUND(404, "RESULT_NOT_FOUND", "결과를 찾을 수 없습니다."),
     DATA_NOT_FOUND(404, "DATA_NOT_FOUND", "데이터를 찾을 수 없습니다."),
+    REPO_NOT_FOUND(404, "REPO_NOT_FOUND", "리포지토리를 찾을 수 없습니다."),
     MODEL_VERSION_NOT_FOUND(404, "MODEL_VERSION_NOT_FOUND", "버전을 찾을 수 없습니다."),
     MODEL_NOT_FOUND(404, "MODEL_NOT_FOUND", "모델을 찾을 수 없습니다.");
 

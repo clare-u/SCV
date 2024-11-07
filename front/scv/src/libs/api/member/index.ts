@@ -7,5 +7,5 @@ export const fetchMember = async () => {
 };
 
 export const logOut = async () => {
-  return handleApiRequest<void, "get">("/logout", "get");
+  return handleApiRequest<void, "post">("/logout", "post");
 };

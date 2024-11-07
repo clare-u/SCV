@@ -16,9 +16,12 @@ public interface ModelVersionRepository extends JpaRepository<ModelVersion, Long
 
     List<ModelVersion> findAllByModel_IdAndDeletedFalse(Long id);
 
-    Optional<ModelVersion> findByIdAndDeletedFalse(Long id);
+//    Optional<ModelVersion> findByIdAndDeletedFalse(Long id);
 
     @Query("SELECT mv FROM ModelVersion mv JOIN mv.model m WHERE m.user.userId = :userId AND mv.isWorkingOn = true AND mv.deleted = false")
     Page<ModelVersion> findAllByUserAndIsWorkingTrueAndDeletedFalse(@Param("userId") Long userId, Pageable pageable);
+
+
+
 
 }

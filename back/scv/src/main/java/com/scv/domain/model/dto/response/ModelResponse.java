@@ -8,7 +8,6 @@ import com.scv.domain.user.dto.response.UserProfileResponseDTO;
 import java.time.LocalDateTime;
 
 public record ModelResponse(
-        Long userId,
         UserProfileResponseDTO userProfile,
         Long modelId,
         String modelName,
@@ -19,7 +18,6 @@ public record ModelResponse(
 ) {
     public ModelResponse(User user, Model model) {
         this(
-                user.getUserId(),
                 new UserProfileResponseDTO(user),
                 model.getId(),
                 model.getName(),
