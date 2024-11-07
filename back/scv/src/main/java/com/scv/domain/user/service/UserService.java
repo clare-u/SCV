@@ -25,6 +25,7 @@ public class UserService {
     public UserProfileResponseDTO getUserProfile(Long userId) {
         User user = userRepository.findById(userId).orElseThrow(UserNotFoundException::getInstance);
         return UserProfileResponseDTO.builder()
+                .userId(userId)
                 .userEmail(user.getUserEmail())
                 .userImageUrl(user.getUserImageUrl())
                 .userNickname(user.getUserNickname())
