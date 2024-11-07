@@ -54,7 +54,7 @@ def generate_model_name(model_id: Union[int, str], version_id: Union[int, str]) 
 app = FastAPI()
 
 
-@app.post("/api/v1/models/{modelId}/versions/{versionId}/train")
+@app.post("/fast/v1/models/{modelId}/versions/{versionId}/train")
 async def train_model(
     modelId: int = Path(..., title="Model ID", description="모델 ID"),
     versionId: int = Path(..., title="Version ID", description="모델 버전 ID"),
@@ -140,7 +140,7 @@ async def train_model(
         raise HTTPException(status_code=500, detail=str(e))
 
 
-@app.get("/api/v1/models/{modelId}/versions/{versionId}/test")
+@app.get("/fast/v1/models/{modelId}/versions/{versionId}/test")
 async def test_model(
         modelId: int = Path(..., title="Model ID"),
         versionId: int = Path(..., title="Version ID")
@@ -167,7 +167,7 @@ async def test_model(
         raise HTTPException(status_code=500, detail=str(e))
 
 
-@app.post("/api/v1/models/{modelId}/versions/{versionId}")
+@app.post("/fast/v1/models/{modelId}/versions/{versionId}")
 async def run_model(
         modelId: int = Path(..., title="Model ID", description="모델 ID"),
         versionId: int = Path(..., title="Version ID", description="모델 버전 ID"),
