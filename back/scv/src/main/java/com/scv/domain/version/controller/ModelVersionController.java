@@ -108,12 +108,14 @@ public class ModelVersionController {
     }
 
     @PostMapping("/{versionId}/result/save")
+    @Operation(summary = "결과 저장", description = "학습 결과(이미지들)를 저장합니다.")
     public ResponseEntity<Void> saveResult(@PathVariable Long versionId, DataSet dataName, @AuthUser CustomOAuth2User user) throws BadRequestException, JsonProcessingException {
         modelVersionService.saveResult(versionId, dataName);
         return ResponseEntity.status(201).build();
     }
 
     @PostMapping("/{versionId}/result/run")
+    @Operation(summary = "실행 저장", description = "실행 결과를 저장합니다.")
     public ResponseEntity<Void> saveAnalysis(@PathVariable Long versionId, DataSet dataName, @RequestBody ResultRequest request, @AuthUser CustomOAuth2User user) throws BadRequestException {
 //        modelVersionService.runResult();
         return ResponseEntity.status(201).build();

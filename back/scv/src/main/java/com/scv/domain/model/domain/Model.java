@@ -36,16 +36,30 @@ public class Model extends BaseEntity {
     @Column(name = "model_name", length = 20, nullable = false)
     private String name;
 
-    @Column(name = "model_latest", nullable = false)
-    private int latestVersion;
+    @Column(name = "model_latest")
+    private Integer latestVersion;
+
+    @Column(name = "model_latest_accuracy")
+    private Double accuracy;
 
     /**
-     * 최신 버전 갱신
+     * 최신 버전 번호 설정
+     *
+     * @param versionNo 새로운 최신 버전 번호
      */
-    public void updateLatestVersion() {
-        this.latestVersion++;
+    public void setLatestVersion(int versionNo) {
+        this.latestVersion = versionNo;
     }
-    
+
+    /**
+     * 최신 버전 정확도 설정 설정
+     *
+     * @param accuracy 새로운 최신 버전 정확도
+     */
+    public void setAccuracy(double accuracy) {
+        this.accuracy = accuracy;
+    }
+
     /**
      * 이름 변경
      */
