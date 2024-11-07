@@ -15,7 +15,6 @@ import org.springframework.security.authentication.UsernamePasswordAuthenticatio
 import org.springframework.security.core.Authentication;
 import org.springframework.security.core.context.SecurityContextHolder;
 import org.springframework.stereotype.Component;
-import org.springframework.util.AntPathMatcher;
 import org.springframework.web.filter.OncePerRequestFilter;
 
 import java.io.IOException;
@@ -26,29 +25,18 @@ import static com.scv.global.util.JwtUtil.*;
 @RequiredArgsConstructor
 public class JwtFilter extends OncePerRequestFilter {
 
-    private static final AntPathMatcher pathMatcher = new AntPathMatcher();
-
-    @Override
-    protected boolean shouldNotFilter(HttpServletRequest request) throws ServletException {
-        String requestURI = request.getRequestURI();
-        return pathMatcher.match("/", requestURI)
-                || pathMatcher.match("/login", requestURI)
-                || pathMatcher.match("/actuator/**", requestURI);
-    }
-
     @Override
     protected void doFilterInternal(HttpServletRequest request, HttpServletResponse response, FilterChain filterChain) throws ServletException, IOException {
         Cookie accessTokenCookie = CookieUtil.getCookie(request, ACCESS_TOKEN_NAME);
         Cookie refreshTokenCookie = CookieUtil.getCookie(request, REFRESH_TOKEN_NAME);
 
         if (accessTokenCookie == null && request.getRequestURI().equals("/api/v1/users")) {
-            response.setStatus(HttpServletResponse.SC_OK);
             return;
         }
 
         // 엑세스 토큰이 없으면 로그인
         if (accessTokenCookie == null) {
-            response.sendError(HttpServletResponse.SC_UNAUTHORIZED);
+            filterChain.doFilter(request, response);
             return;
         }
 
@@ -73,7 +61,7 @@ public class JwtFilter extends OncePerRequestFilter {
         }
 
         // 엑세스 토큰이 만료됐을 때, 리프레시 토큰이 만료되지 않았으면 엑세스 토큰 유효시간 연장
-        if(JwtUtil.isAccessTokenExpired(accessTokenCookie.getValue())) {
+        if (JwtUtil.isAccessTokenExpired(accessTokenCookie.getValue())) {
             String newAccessToken = JwtUtil.reIssueAccessToken(accessTokenCookie.getValue());
             accessTokenCookie = CookieUtil.createCookie(ACCESS_TOKEN_NAME, newAccessToken, ACCESS_TOKEN_EXPIRATION);
             response.addCookie(accessTokenCookie);
