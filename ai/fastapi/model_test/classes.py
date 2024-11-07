@@ -14,8 +14,8 @@ class activation_maximization(BaseModel):
     label: str
     image: str
 
-class Model_Analyze_Request(BaseModel):
-    layers: str
+# class Model_Analyze_Request(BaseModel):
+#     # layers: str
 
 class Model_Analyze_Response(BaseModel):
     model_version_id: str

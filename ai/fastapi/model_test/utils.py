@@ -12,8 +12,8 @@ dataset_labels = {
 def get_code() -> str:
     return "string"
 
-def get_test_accuracy() -> float:
-    return 0.0
+def get_test_accuracy(model) -> float:
+    return model.test_accuracy
 
 def get_test_loss() -> float:
     return 0.0

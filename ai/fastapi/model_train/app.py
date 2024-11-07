@@ -19,7 +19,7 @@ current_dir = os.path.dirname(os.path.abspath(__file__))
 root_dir = os.path.dirname(current_dir)
 sys.path.append(root_dir)
 
-from model_test.neural_network_builder.parsers.validators import ModelConfig, ModelLayerConfig, layer_classes
+from neural_network_builder.parsers.validators import ModelConfig, ModelLayerConfig, layer_classes
 try:
     from .model_run import ModelTrainer
     from .save_minio import save_model_to_minio
