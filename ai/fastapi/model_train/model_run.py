@@ -17,14 +17,14 @@ root_dir = os.path.dirname(current_dir)
 log_dir = os.path.join(root_dir, 'logs')
 os.makedirs(log_dir, exist_ok=True)
 
-logging.basicConfig(
-    level=logging.INFO,
-    format='%(asctime)s - %(levelname)s - %(message)s',
-    handlers=[
-        logging.StreamHandler(),
-        logging.FileHandler(os.path.join(log_dir, 'model_trainer.log'))
-    ]
-)
+# logging.basicConfig(
+#     level=logging.INFO,
+#     format='%(asctime)s - %(levelname)s - %(message)s',
+#     handlers=[
+#         logging.StreamHandler(),
+#         logging.FileHandler(os.path.join(log_dir, 'scv_model.log'))
+#     ]
+# )
 logger = logging.getLogger(__name__)
 
 from neural_network_builder.exceptions.custom_exceptions import ValidationError
@@ -98,7 +98,7 @@ class ModelTrainer:
             total += target.size(0)
 
             if batch_idx % 100 == 0:
-                print(f'Train Batch: {batch_idx}/{len(train_loader)}, Loss: {loss.item():.4f}')
+                logger.info(f"Train Batch: {batch_idx}/{len(train_loader)}, Loss: {loss.item():.4f}")
 
         accuracy = 100. * correct / total
         avg_loss = total_loss / len(train_loader)
@@ -125,8 +125,8 @@ class ModelTrainer:
         test_loss /= len(test_loader)
         accuracy = 100. * correct / total
 
-        print(f"\n실행결과")
-        print(f"{accuracy:.2f}% ({correct}/{total})")
+        logger.info(f"\n실행결과")
+        logger.info(f"{accuracy:.2f}% ({correct}/{total})")
 
         return test_loss, accuracy
 
@@ -144,14 +144,14 @@ class ModelTrainer:
             )
 
             # 모델 생성
-            print("모델을 생성중입니다...")
+            logger.info("모델을 생성중입니다...")
             model = self.model_builder.create_model(config.model_dump())
             model = model.to(self.device)
 
             # 모델 검증
             validator = ModelValidator()
             validation_result = validator.validate_model(model, config.dataName)
-            print(f"모델 검증 결과: {validation_result}")
+            logger.info(f"모델 검증 결과: {validation_result}")
 
             # 레이어 간 연결 검증
             validator.check_layer_connections(model, config.dataName)
@@ -162,12 +162,12 @@ class ModelTrainer:
             epochs = config.dataEpochCnt
 
             # 학습 수행
-            print(f"{epochs} 개의 Epoch에 대한 학습을 시작합니다...")
+            logger.info(f"{epochs} 개의 Epoch에 대한 학습을 시작합니다...")
             best_accuracy = 0
             training_history = []
 
             for epoch in range(epochs):
-                print(f"\nEpoch {epoch + 1}/{epochs}")
+                logger.info(f"\nEpoch {epoch + 1}/{epochs}")
 
                 # 학습
                 train_loss, train_acc = self.train_epoch(model, train_loader, optimizer, criterion)
@@ -185,8 +185,8 @@ class ModelTrainer:
                 }
                 training_history.append(epoch_results)
 
-                print(f'Training - Loss: {train_loss:.4f}, Accuracy: {train_acc:.2f}%')
-                print(f'Testing  - Loss: {test_loss:.4f}, Accuracy: {test_acc:.2f}%')
+                logger.info(f'Training - Loss: {train_loss:.4f}, Accuracy: {train_acc:.2f}%')
+                logger.info(f'Testing  - Loss: {test_loss:.4f}, Accuracy: {test_acc:.2f}%')
 
             #TODO 고쳐야함
 

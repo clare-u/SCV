@@ -9,8 +9,7 @@ logging.basicConfig(
     level=logging.INFO,
     format='%(asctime)s - %(levelname)s - %(message)s',
     handlers=[
-        logging.StreamHandler(),  # 콘솔 출력
-        logging.FileHandler('app.log')  # 파일 출력
+        logging.StreamHandler()
     ]
 )
 logger = logging.getLogger(__name__)
