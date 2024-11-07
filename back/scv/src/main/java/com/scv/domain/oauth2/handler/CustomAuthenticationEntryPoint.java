@@ -22,7 +22,7 @@ public class CustomAuthenticationEntryPoint implements AuthenticationEntryPoint 
         String url = request.getServletPath();
 
         if (url.startsWith("/swagger-ui") || url.startsWith("/v3/api-docs")) {
-            response.sendRedirect("/oauth2/authorization/github");
+            response.sendRedirect("/api/oauth2/authorization/github");
             return;
         }
 
