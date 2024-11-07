@@ -11,7 +11,7 @@ export interface BlockParam {
   type: "int" | "float";
   min?: number;
   max?: number;
-  value: number;
+  value: number | undefined;
 }
 
 export interface BlockDefinition {

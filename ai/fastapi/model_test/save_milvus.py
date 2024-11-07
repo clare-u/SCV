@@ -29,7 +29,10 @@ async def save_cka_to_milvus(model, dataset, model_version_id, conv_idx, test_ac
 
     for i in cka_matrix.keys():
         mat = np.array(cka_matrix[i])
-        cka = (mat @ mat.T).flatten()
+        n = mat.shape[0]
+        # centering matrix
+        H = np.eye(n) - np.ones((n, n)) / n
+        cka = (H @ mat @ mat.T @ H).flatten()
         cka_vec = cka / np.linalg.norm(cka)
         async with httpx.AsyncClient() as client:
             res = await client.post(f"http://{fast_match_host_name}:{fast_match_port}/fast/v1/model/match/{model_version_id}/{i}",
