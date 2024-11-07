@@ -36,8 +36,8 @@ current_dir = os.path.dirname(os.path.abspath(__file__))
 root_dir = os.path.dirname(current_dir)
 sys.path.append(root_dir)
 
-from neural_network_builder.builders import ModelBuilder, ModelCodeGenerator
-from neural_network_builder.parsers.validators import ModelConfig
+from model_test.neural_network_builder.builders import ModelBuilder, ModelCodeGenerator
+from model_test.neural_network_builder.parsers.validators import ModelConfig
 from .save_minio import save_model_to_minio, minio_host_name, minio_user_name, minio_user_password, minio_model_bucket, \
     minio_api_port
 
@@ -147,7 +147,7 @@ class ModelTrainer:
             print("모델을 생성중입니다...")
             model = self.model_builder.create_model(config.model_dump())
             model = model.to(self.device)
-            model.layers = config.modelLayerAt.layers
+
             # 모델 검증
             validator = ModelValidator()
             validation_result = validator.validate_model(model, config.dataName)
@@ -211,7 +211,6 @@ class ModelTrainer:
                         "dataEpochCnt": config.dataEpochCnt
                     }
 
-                    model.test_accuracy = test_acc
                     # 모델 저장
                     self.save_model_with_info(
                         model=model,
@@ -221,6 +220,7 @@ class ModelTrainer:
                         training_history=training_history,
                         model_layer=self.model_layer
                     )
+
             return {
                 "model_version": config.versionId,
                 "model_layer": self.model_layer,
