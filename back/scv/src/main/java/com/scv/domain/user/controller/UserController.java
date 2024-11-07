@@ -2,8 +2,8 @@ package com.scv.domain.user.controller;
 
 import com.scv.domain.oauth2.AuthUser;
 import com.scv.domain.oauth2.CustomOAuth2User;
-import com.scv.domain.user.dto.request.CreateGithubRepositoryRequestDTO;
-import com.scv.domain.user.dto.response.CommonSuccessResponseDTO;
+import com.scv.domain.user.dto.request.GithubRepositoryNameRequestDTO;
+import com.scv.domain.user.dto.response.GithubRepositoryNameResponseDTO;
 import com.scv.domain.user.dto.response.UserProfileResponseDTO;
 import com.scv.domain.user.service.UserService;
 import com.scv.global.error.ErrorResponse;
@@ -33,21 +33,33 @@ public class UserController {
             @ApiResponse(responseCode = "200", description = "유저 프로필 조회 성공"),
             @ApiResponse(responseCode = "404", description = "사용자를 찾을 수 없음", content = @Content(schema = @Schema(implementation = ErrorResponse.class)))
     })
-    public ResponseEntity<UserProfileResponseDTO> getUserProfile(@AuthUser CustomOAuth2User user) {
-        UserProfileResponseDTO responseDTO = userService.getUserProfile(user.getUserId());
+    public ResponseEntity<UserProfileResponseDTO> getUserProfile(@AuthUser CustomOAuth2User authUser) {
+        UserProfileResponseDTO responseDTO = userService.getUserProfile(authUser);
         return new ResponseEntity<>(responseDTO, HttpStatus.OK);
     }
 
     @PostMapping("/repo")
-    @Operation(summary = "깃허브 리포지토리 생성", description = "깃허브 리포지토리를 새롭게 생성해서 연결합니다.")
+    @Operation(summary = "깃허브 새 리포를 메인 리포로 설정", description = "깃허브 새 리포를 메인 리포로 설정합니다.")
     @ApiResponses(value = {
-            @ApiResponse(responseCode = "201", description = "깃허브 리포지토리 생성 성공"),
+            @ApiResponse(responseCode = "201", description = "깃허브 새 리포를 메인 리포로 설정 성공"),
             @ApiResponse(responseCode = "404", description = "사용자를 찾을 수 없음", content = @Content(schema = @Schema(implementation = ErrorResponse.class)))
     })
-    public ResponseEntity<CommonSuccessResponseDTO> createGithubRepository(@AuthUser CustomOAuth2User user,
-                                                                           @RequestBody CreateGithubRepositoryRequestDTO requestDTO) {
-        CommonSuccessResponseDTO responseDTO = userService.createGithubRepository(user, requestDTO);
+    public ResponseEntity<GithubRepositoryNameResponseDTO> setNewGithubRepository(@AuthUser CustomOAuth2User authUser,
+                                                                                  @RequestBody GithubRepositoryNameRequestDTO requestDTO) {
+        GithubRepositoryNameResponseDTO responseDTO = userService.setNewGithubRepository(authUser, requestDTO);
         return new ResponseEntity<>(responseDTO, HttpStatus.CREATED);
+    }
+
+    @PutMapping("/repo")
+    @Operation(summary = "깃허브 기존 리포를 메인 리포로 설정", description = "깃허브 기존 리포를 메인 리포로 설정합니다.")
+    @ApiResponses(value = {
+            @ApiResponse(responseCode = "200", description = "깃허브 기존 리포를 메인 리포로 설정 성공"),
+            @ApiResponse(responseCode = "404", description = "사용자를 찾을 수 없음", content = @Content(schema = @Schema(implementation = ErrorResponse.class)))
+    })
+    public ResponseEntity<GithubRepositoryNameResponseDTO> setCurrentGithubRepository(@AuthUser CustomOAuth2User authUser,
+                                                                                      @RequestBody GithubRepositoryNameRequestDTO requestDTO) {
+        GithubRepositoryNameResponseDTO responseDTO = userService.setCurrentGithubRepository(authUser, requestDTO);
+        return new ResponseEntity<>(responseDTO, HttpStatus.OK);
     }
 
 }
