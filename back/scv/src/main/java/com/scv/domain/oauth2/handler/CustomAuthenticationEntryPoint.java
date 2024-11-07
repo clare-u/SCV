@@ -28,6 +28,7 @@ public class CustomAuthenticationEntryPoint implements AuthenticationEntryPoint 
 
         ErrorResponse errorResponse = new ErrorResponse(INVALID_TOKEN);
         response.setStatus(INVALID_TOKEN.getHttpStatus());
+        response.setCharacterEncoding("UTF-8");
         response.getWriter().write(objectMapper.writeValueAsString(errorResponse));
     }
 }
