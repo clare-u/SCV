@@ -27,6 +27,7 @@ public class UserProfileResponseDTO {
     private String userRepo;
 
     public UserProfileResponseDTO(User user) {
+        this.userId = user.getUserId();
         this.userEmail = user.getUserEmail();
         this.userImageUrl = user.getUserImageUrl();
         this.userNickname = user.getUserNickname();
