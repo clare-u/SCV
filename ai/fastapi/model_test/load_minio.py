@@ -26,21 +26,21 @@ client = Minio("{}:9002".format(minio_host_name),
     )
 
 def load_model_from_minio(model_version_id : str):
-    try:
-        obj = client.get_object(
-            bucket_name=minio_model_bucket,
-            object_name=f"{model_version_id}.pth",
-        )
-        # 바이트 데이터를 메모리 파일로 변환
-        model_bytes = io.BytesIO(obj.read())
-        # PyTorch 모델 로드
-        model = torch.load(model_bytes)
-        # model = torch.jit.load(model_bytes, map_location='cpu')
-    except:
-        raise ModelNotFound(model_version_id)
-    finally:
-        obj.close()
-        obj.release_conn()
+# try:
+    obj = client.get_object(
+        bucket_name=minio_model_bucket,
+        object_name=f"{model_version_id}.pth",
+    )
+    # 바이트 데이터를 메모리 파일로 변환
+    model_bytes = io.BytesIO(obj.read())
+    # PyTorch 모델 로드
+    model = torch.load(model_bytes)
+    # model = torch.jit.load(model_bytes, map_location='cpu')
+# except:
+#     raise ModelNotFound(model_version_id)
+# finally:
+    obj.close()
+    obj.release_conn()
     print(model)
     return model
 
