@@ -25,7 +25,7 @@ import org.springframework.web.bind.annotation.*;
 import java.util.List;
 
 @RestController
-@RequestMapping("/api/v1/models")
+@RequestMapping("/v1/models")
 @RequiredArgsConstructor
 @Tag(name = "모델 컨트롤러", description = "모델 관련 API")
 public class ModelController {

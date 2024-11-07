@@ -2,6 +2,7 @@ package com.scv.domain.version.service;
 
 import com.fasterxml.jackson.databind.JsonNode;
 import com.scv.domain.data.domain.Data;
+import com.scv.domain.data.dto.DataDTO;
 import com.scv.domain.data.enums.DataSet;
 import com.scv.domain.data.exception.DataNotFoundException;
 import com.scv.domain.data.repository.DataRepository;
@@ -19,7 +20,6 @@ import com.scv.domain.version.dto.request.ModelVersionRequest;
 import com.scv.domain.version.dto.response.ModelVersionDetail;
 import com.scv.domain.version.dto.response.ModelVersionDetailWithResult;
 import com.scv.domain.version.dto.response.ModelVersionOnWorking;
-import com.scv.domain.version.dto.response.ModelVersionResponse;
 import com.scv.domain.version.exception.ModelVersionNotFoundException;
 import com.scv.domain.version.repository.ModelVersionRepository;
 import com.scv.global.util.ParsingUtil;
@@ -35,10 +35,7 @@ import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 import org.springframework.web.client.RestTemplate;
 
-import java.util.HashMap;
-import java.util.List;
-import java.util.Map;
-import java.util.Optional;
+import java.util.*;
 
 @Service
 @RequiredArgsConstructor
@@ -51,6 +48,7 @@ public class ModelVersionService {
     private final DataRepository dataRepository;
 
     // 모델 버전 생성
+    @Transactional
     public void createModelVersion(Long modelId, ModelVersionRequest request, CustomOAuth2User user) throws BadRequestException {
         Model model = modelRepository.findById(modelId).orElseThrow(ModelNotFoundException::new);
 
@@ -62,7 +60,7 @@ public class ModelVersionService {
 
         ModelVersion modelVersion = ModelVersion.builder()
                 .model(model)
-                .versionNo(request.versionNo())
+                .versionNo(0)
                 .layers(layersJson)
                 .build();
 
@@ -71,6 +69,7 @@ public class ModelVersionService {
 
 
     // 모델버전 상세 조회
+    @Transactional(readOnly = true)
     public ModelVersionDetail getModelVersion(Long versionId) {
         ModelVersion version = modelVersionRepository.findById(versionId).orElseThrow(ModelVersionNotFoundException::new);
 
@@ -84,6 +83,7 @@ public class ModelVersionService {
     }
 
     // 개발중인 모델 조회
+    @Transactional(readOnly = true)
     public Page<ModelVersionOnWorking> getModelVersionsOnWorking(CustomOAuth2User user, Pageable pageable) {
         Page<ModelVersion> modelVersions = modelVersionRepository.findAllByUserAndIsWorkingTrueAndDeletedFalse(user.getUserId(), pageable);
 
@@ -91,6 +91,7 @@ public class ModelVersionService {
     }
 
     // 모델 버전 수정
+    @Transactional
     public void updateModelVersion(Long modelVersionId, ModelVersionRequest request, CustomOAuth2User user) throws BadRequestException {
         ModelVersion modelVersion = modelVersionRepository.findById(modelVersionId)
                 .orElseThrow(ModelVersionNotFoundException::new);
@@ -103,29 +104,101 @@ public class ModelVersionService {
         String layersJson = ParsingUtil.toJson(request.layers());
 
         // 모델 버전 정보 업데이트
-        modelVersion.updateVersionNo(request.versionNo());
         modelVersion.updateLayers(layersJson);
+        Optional<Result> result = resultRepository.findById(modelVersionId);
 
+        result.ifPresent(resultRepository::delete);
         modelVersionRepository.save(modelVersion);
     }
 
+
     // 모델 버전 삭제
+    @Transactional
     public void deleteModelVersion(Long modelVersionId, CustomOAuth2User user) throws BadRequestException {
-        ModelVersion modelVersion = modelVersionRepository.findById(modelVersionId).orElseThrow(ModelVersionNotFoundException::new);
-        if (user.getUserId() != modelVersion.getModel().getUser().getUserId()) {
+        ModelVersion modelVersion = modelVersionRepository.findById(modelVersionId)
+                .orElseThrow(ModelVersionNotFoundException::new);
+        if (!user.getUserId().equals(modelVersion.getModel().getUser().getUserId())) {
             throw new BadRequestException("제작자만 삭제할 수 있습니다.");
         }
 
+        Model model = modelVersion.getModel();
         modelVersion.delete();
-        // TODO 최신버전 삭제하면 Model에 최신버전 변경하기
         modelVersionRepository.save(modelVersion);
+
+        // 버전, 정확도관리
+        if (model.getLatestVersion() != 0) {
+            List<ModelVersion> modelVersionList = modelVersionRepository.findAllByModel_IdAndDeletedFalse(model.getId());
+            modelVersionList.sort(Comparator.comparingInt(ModelVersion::getVersionNo).reversed());
+
+            if (!modelVersionList.isEmpty()) {
+                for (int i = 0; i < modelVersionList.size(); i++) {
+                    if (modelVersionList.get(i).getResult() != null) {
+                        model.setAccuracy(modelVersionList.get(i).getResult().getTestAccuracy());
+                        model.setLatestVersion(modelVersionList.get(i).getVersionNo());
+                        break;
+                    }
+                }
+            } else {
+                model.setLatestVersion(0);
+                model.setAccuracy(-1.0);
+            }
+        }
+        modelRepository.save(model);
     }
 
-    // 이건 결과저장
+    //    실행하기
+    @Transactional
+    public String runResult(Long modelVersionId) {
+        ModelVersion modelVersion = modelVersionRepository.findById(modelVersionId)
+                .orElseThrow(ModelVersionNotFoundException::new);
+        Data data = dataRepository.findById(modelVersion.getModel().getData().getId()).orElseThrow(DataNotFoundException::new);
+
+        ResultRequest request = new ResultRequest(modelVersion.getLayers(), new DataDTO(data));
+
+        String url = "http://localhost:8002/fast/v1/models/" + modelVersionId + "/versions/0";
+
+        RestTemplate restTemplate = new RestTemplate();
+        ResponseEntity<String> response = restTemplate.postForEntity(url, request, String.class);
+        String jsonResponse = response.getBody();
+
+        JsonNode rootNode = ParsingUtil.parseJson(jsonResponse, JsonNode.class);
+        JsonNode testResults = rootNode.path("test_results").path("results");
+
+        double finalTestAccuracy = testResults.path("final_test_accuracy").asDouble(0.0);
+        double finalTestLoss = testResults.path("final_test_loss").asDouble(0.0);
+        String modelCode = testResults.path("model_code").asText("");
+
+        // 레이어 파라미터의 합계 계산
+        int totalParams = 0;
+        for (JsonNode paramNode : testResults.path("layer_parameters")) {
+            totalParams += paramNode.asInt(0);
+        }
+
+        // Result 객체 생성
+        Result result = Result.builder()
+                .modelVersion(modelVersion)
+                .code(modelCode)
+                .testAccuracy(finalTestAccuracy)
+                .testLoss(finalTestLoss)
+                .trainInfo(testResults.path("train_result_per_epoch").toString())
+                .params(testResults.path("layer_parameters").toString())
+                .totalParams(totalParams)
+                .build();
+
+        // 데이터베이스에 저장
+        resultRepository.save(result);
+
+        return jsonResponse;
+    }
+
+    // TODO 저장하면 버전 생기게, 모델 업데이트, isWorking = false
+    // 결과저장
+    @Transactional
     public void saveResult(Long modelVersionId, DataSet dataName) {
         ModelVersion modelVersion = modelVersionRepository.findById(modelVersionId)
                 .orElseThrow(ModelVersionNotFoundException::new);
         Data data = dataRepository.findByName(dataName).orElseThrow(DataNotFoundException::new);
+        Result result = resultRepository.findById(modelVersionId).orElseThrow(ResultNotFoundException::new);
 
         String url = "http://localhost:8002/fast/v1/model/test/analyze/" + 0 + "/" + dataName.toString().toLowerCase();
         RestTemplate restTemplate = new RestTemplate();
@@ -157,16 +230,16 @@ public class ModelVersionService {
         String trainInfoJson = ParsingUtil.getJsonFieldAsString(rootNode, "train_info");
         String params = ParsingUtil.getJsonFieldAsString(rootNode, "params");
 
-        Result result = Result.builder()
-                .modelVersion(modelVersion)
-                .code(codeView)
-                .testAccuracy(rootNode.path("test_accuracy").asDouble())
-                .testLoss(rootNode.path("test_loss").asDouble())
-                .trainInfo(trainInfoJson)
+        result = result.toBuilder()
+//                .modelVersion(modelVersion)
+//                .code(codeView)
+//                .testAccuracy(rootNode.path("test_accuracy").asDouble())
+//                .testLoss(rootNode.path("test_loss").asDouble())
+//                .trainInfo(trainInfoJson)
                 .confusionMatrix(confusionMatrix)
                 .exampleImg(exampleImage)
-                .totalParams(rootNode.path("totalParams").asInt())
-                .params(params)
+//                .totalParams(rootNode.path("totalParams").asInt())
+//                .params(params)
                 .featureActivation(featureActivation)
                 .activationMaximization(activationMaximization)
                 .build();
@@ -174,31 +247,5 @@ public class ModelVersionService {
         resultRepository.save(result);
     }
 
-    // TODO 개판이니까 리팩토링 필요,,,,,, 다른 얽힌 메서드들 추가하기
-    // 실핸하기
-    public void runResult(Long modelVersionId, DataSet dataName, ResultRequest request) {
-        ModelVersion modelVersion = modelVersionRepository.findById(modelVersionId)
-                .orElseThrow(ModelVersionNotFoundException::new);
-        Result result = resultRepository.findById(modelVersionId)
-                .orElseThrow(ResultNotFoundException::new);
 
-        String url = "http://localhost:8002/fast/v1/model/test/analyze/" + modelVersionId + "/" + dataName;
-
-        RestTemplate restTemplate = new RestTemplate();
-        ResponseEntity<String> response = restTemplate.getForEntity(url, String.class);
-        String jsonResponse = response.getBody();
-
-        ResultAnalysisResponse resultResponse = ParsingUtil.parseJson(jsonResponse, ResultAnalysisResponse.class);
-
-        String trainInfoJson = ParsingUtil.toJson(resultResponse.trainInfos());
-
-        result = result.toBuilder()
-                .confusionMatrix(resultResponse.confusionMatrix())
-                .activationMaximization(resultResponse.activationMaximization())
-                .exampleImg(resultResponse.exampleImg())
-                .featureActivation(resultResponse.featureActivation())
-                .build();
-
-        resultRepository.save(result);
-    }
 }

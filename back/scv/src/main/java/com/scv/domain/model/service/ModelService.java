@@ -37,38 +37,42 @@ public class ModelService {
     private final DataRepository dataRepository;
     private final UserRepository userRepository;
 
-    // TODO ModelResponse에 정확도 추가하기
-
     // 모델 생성
     @Transactional
     public void createModel(ModelCreateRequest request, CustomOAuth2User user) {
         Data data = dataRepository.findByName(request.dataName()).orElseThrow(DataNotFoundException::new);
         User existingUser = userRepository.findById(user.getUserId()).orElseThrow(UserNotFoundException::getInstance);
 
-        // 요청에 따라 모델 생성
         Model model = Model.builder()
                 .user(existingUser)
                 .data(data)
+                .latestVersion(0)
                 .name(request.modelName())
-//                .latestVersion(1)
                 .modelVersions(new ArrayList<>())
                 .build();
 
-        // 모델 저장
         Model savedModel = modelRepository.save(model);
 
-        // 첫번째 버전 생성
         ModelVersion firstVersion = ModelVersion.builder()
                 .model(savedModel)
-                .versionNo(1)
+                .versionNo(0)
                 .layers("[]")
                 .build();
 
-        // 모델에 추가
         savedModel.getModelVersions().add(firstVersion);
 
-        // 모델 버전 저장
         modelVersionRepository.save(firstVersion);
+    }
+
+
+    // 전체 모델 조회
+    @Transactional(readOnly = true)
+    public Page<ModelResponse> getAllModels(Pageable pageable, DataSet dataName, String modelName) {
+        modelName = (modelName == null || modelName.isEmpty()) ? null : modelName;
+
+        Page<Model> models = modelRepository.searchModels(modelName, dataName, pageable);
+
+        return models.map(ModelResponse::new);
     }
 
 
@@ -77,23 +81,11 @@ public class ModelService {
     public Page<ModelResponse> getMyModels(Pageable pageable, CustomOAuth2User user, DataSet dataName, String modelName) {
         modelName = (modelName == null || modelName.isEmpty()) ? null : modelName;
         Long userId = user.getUserId();
-        User existingUser = userRepository.findById(userId).orElseThrow(UserNotFoundException::getInstance);
 
         Page<Model> models = modelRepository.searchMyModels(modelName, dataName, userId, pageable);
-        return models.map(model -> new ModelResponse(existingUser, model));
+        return models.map(ModelResponse::new);
     }
 
-    @Transactional(readOnly = true)
-    public Page<ModelResponse> getAllModels(Pageable pageable, DataSet dataName, String modelName) {
-        modelName = (modelName == null || modelName.isEmpty()) ? null : modelName;
-
-        Page<Model> models = modelRepository.searchModels(modelName, dataName, pageable);
-
-        return models.map(model -> {
-            User user = model.getUser();
-            return new ModelResponse(user, model);
-        });
-    }
 
     // 모델 버전 조회
     @Transactional(readOnly = true)
