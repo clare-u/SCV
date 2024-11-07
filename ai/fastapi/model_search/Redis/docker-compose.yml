@@ -1,0 +1,11 @@
+version: "1"
+services:
+  redis-service:
+    image: redis
+    command: redis-server --port ${REDIS_PORT}
+    container_name: scv-redis
+    labels:
+      - "name=scv-fast-redis"
+      - "mode=standalone"
+    ports:
+      - ${REDIS_PORT}:${REDIS_PORT}
