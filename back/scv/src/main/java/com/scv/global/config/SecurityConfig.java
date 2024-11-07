@@ -78,7 +78,8 @@ public class SecurityConfig {
 
         // 경로별 인가 작업
         http.authorizeHttpRequests(auth -> auth
-                .anyRequest().permitAll());
+                .requestMatchers("/actuator/**").permitAll()
+                .anyRequest().authenticated());
 
         // 세션 설정 : STATELESS
         http.sessionManagement(session -> session.
