@@ -17,3 +17,11 @@ export const createRepo = async (data: CreateRepo) => {
     data,
   );
 };
+
+export const existingRepo = async (data: CreateRepo) => {
+  return handleApiRequest<CreateRepo, "put", CreateRepo>(
+    "/api/v1/users/repo",
+    "put",
+    data,
+  );
+};
