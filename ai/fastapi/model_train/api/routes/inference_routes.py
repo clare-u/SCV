@@ -29,10 +29,27 @@ minio_client = Minio(
 
 CLASS_LABELS = {
     "MNIST": {i: str(i) for i in range(10)},
+
     "FASHION_MNIST": {
         0: "T-shirt/top", 1: "Trouser", 2: "Pullover",
         3: "Dress", 4: "Coat", 5: "Sandal",
         6: "Shirt", 7: "Sneaker", 8: "Bag", 9: "Ankle boot"
+    },
+
+    "CIFAR10": {
+        0: "Airplane", 1: "Automobile", 2: "Bird",
+        3: "Cat", 4: "Deer", 5: "Dog",
+        6: "Frog", 7: "Horse", 8: "Ship", 9: "Truck"
+    },
+
+    "SVHN": {i: str(i) for i in range(10)},  # Street View House Numbers (0-9)
+
+    "EMNIST": {  # Extended MNIST (알파벳 A-Z)
+        0: "A", 1: "B", 2: "C", 3: "D", 4: "E", 5: "F",
+        6: "G", 7: "H", 8: "I", 9: "J", 10: "K", 11: "L",
+        12: "M", 13: "N", 14: "O", 15: "P", 16: "Q", 17: "R",
+        18: "S", 19: "T", 20: "U", 21: "V", 22: "W", 23: "X",
+        24: "Y", 25: "Z"
     }
 }
 

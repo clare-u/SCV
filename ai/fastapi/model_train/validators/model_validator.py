@@ -1,13 +1,13 @@
+import logging
 import os
 import sys
-import yaml
-import torch
-import logging
-from typing import Dict, Tuple, Any, Union
 from pathlib import Path
+from typing import Dict, Tuple, Any, Union
+
+import torch
+import yaml
 from pydantic import ValidationError as PydanticValidationError
 from torch import nn
-
 
 # 상위 경로 추가
 current_dir = os.path.dirname(os.path.abspath(__file__))
@@ -19,6 +19,7 @@ from model_test.neural_network_builder.exceptions.custom_exceptions import (
     ValidationError, InputShapeError, ArchitectureError, LayerConnectionError
 )
 from model_test.neural_network_builder.parsers.validators import ModelConfig
+
 
 class ModelValidator:
     """신경망 모델의 구조와 입력 데이터를 검증하는 클래스"""
@@ -40,9 +41,9 @@ class ModelValidator:
         """Parse and validate model configuration using Pydantic."""
         try:
             if isinstance(config, dict):
-                return ModelConfig.parse_obj(config)
+                return ModelConfig.model_validate(config)
             elif isinstance(config, str):
-                return ModelConfig.parse_raw(config)
+                return ModelConfig.model_validate_json(config)
             else:
                 raise ValidationError(f"지원되지 않는 설정 형식: {type(config)}")
         except Exception as e:

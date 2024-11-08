@@ -4,6 +4,8 @@ from typing import Dict, List
 
 import cv2
 
+from model_train.datasets.preprocess.preprocess_config import PreprocessConfig
+
 """
 pip install opencv-python
 pip install opencv-python-headless 로 다운받기
@@ -29,10 +31,16 @@ class ImageProcessor:
         self.mean = tuple(dataset_info['mean'])
         self.std = tuple(dataset_info['std'])
         self.num_channels = self.input_shape[0]
+        self.dataset_name = dataset_info.get('name', '')
+
+        # 전처리 설정 로드
+        self.preprocess_config = PreprocessConfig()
+        self.params = self.preprocess_config.get_params(self.dataset_name)
 
         logger.info(f"데이터세트 구성이 로드되었습니다:")
         logger.info(f"입력 형태: {self.input_shape}")
         logger.info(f"평균: {self.mean}, 표준: {self.std}")
+        logger.info(f"전처리 파라미터: {self.params}")
 
         self.transform = self._create_transform()
 
@@ -58,6 +66,8 @@ class ImageProcessor:
 
         # 데이터셋별 정규화 적용
         transform_list.append(transforms.Normalize(self.mean, self.std))
+
+        logger.debug(f"변환 파이프라인 생성: {transform_list}")
 
         return transforms.Compose(transform_list)
 
@@ -86,60 +96,91 @@ class ImageProcessor:
                 f"손상된 이미지 파일입니다.: {str(e)}"
             )
 
-    def _preprocess_single_channel(self, image_path: str) -> np.ndarray:
-        """흑백 이미지 전처리 (MNIST류 데이터셋용)"""
-        # 이미지 로드 및 그레이스케일 변환
-        img = cv2.imread(image_path, cv2.IMREAD_GRAYSCALE)
+    def _preprocess_image(self, img: np.ndarray) -> np.ndarray:
+        """이미지 전처리"""
         if img is None:
-            raise DataPreprocessException("이미지를 로드할 수 없습니다")
+            raise DataPreprocessException("이미지를 불러올 수 없습니다.")
 
-        # 노이즈 제거
-        img = cv2.GaussianBlur(img, (5, 5), 0)
+        # 채널 수에 따른 처리
+        if self.num_channels == 1:  # MNIST, Fashion_MNIST, EMNIST
+            if len(img.shape) == 3:
+                img = cv2.cvtColor(img, cv2.COLOR_BGR2GRAY)
 
-        # Otsu's 이진화로 자동 임계값 설정
-        _, img = cv2.threshold(img, 0, 255, cv2.THRESH_BINARY + cv2.THRESH_OTSU)
+            # 노이즈 제거
+            kernel_size = self.params['blur_kernel']
+            img = cv2.GaussianBlur(img, (kernel_size, kernel_size), 0)
 
-        # 윤곽선 찾기
-        contours, _ = cv2.findContours(img, cv2.RETR_EXTERNAL, cv2.CHAIN_APPROX_SIMPLE)
+            # 엣지 보존 처리 (Fashion MNIST 등)
+            if self.params.get('edge_preserve', False):
+                clahe = cv2.createCLAHE(
+                    clipLimit=self.params.get('clahe_clip_limit', 2.0),
+                    tileGridSize=tuple(self.params.get('clahe_grid_size', (8, 8)))
+                )
+                img = clahe.apply(img)
+                edges = cv2.Canny(
+                    img,
+                    self.params.get('edge_low', 50),
+                    self.params.get('edge_high', 150),
+                )
+                edge_weight = self.params.get('edge_weight', 0.3)
+                img = cv2.addWeighted(img, 1 - edge_weight, edges, edge_weight, 0)
 
-        if contours:
-            # 가장 큰 윤곽선 선택
-            main_contour = max(contours, key=cv2.contourArea)
-            x, y, w, h = cv2.boundingRect(main_contour)
+            # 이진화
+            threshold_block_size = self.params.get('threshold_block_size', 11)
+            threshold_c = self.params.get('threshold_c', 2)
+            img = cv2.adaptiveThreshold(
+                img, 255,
+                cv2.ADAPTIVE_THRESH_GAUSSIAN_C,
+                cv2.THRESH_BINARY_INV,
+                threshold_block_size,
+                threshold_c
+            )
+        else:  # CIFAR10, SVHN (3채널 컬러이미지)
+            # 컬러모드 처리
+            if self.params.get('color_mode') == 'RGB':
+                img = cv2.cvtColor(img, cv2.COLOR_BGR2RGB)
 
-            # 여백 추가
-            padding = int(max(w, h) * 0.1)  # 동적 패딩
-            x = max(0, x - padding)
-            y = max(0, y - padding)
-            w = min(img.shape[1] - x, w + 2 * padding)
-            h = min(img.shape[0] - y, h + 2 * padding)
+            # 대비 계산
+            alpha = self.params.get('contrast_alpha', 1.0)
+            beta = self.params.get('contrast_beta', 1.0)
+            img = cv2.convertScaleAbs(img, alpha=alpha, beta=beta)
 
-            # 숫자 영역 추출
-            img = img[y:y + h, x:x + w]
+            # 노이즈 제거
+            if self.params.get('noise_reduction', False):
+                denoise_strength = self.params.get('denoise_strength', 10)
+                img = cv2.fastNlMeansDenoisingColored(img, None, denoise_strength, denoise_strength)
 
-            # 정사각형 만들기
-            target_size = max(w, h)
-            square_img = np.zeros((target_size, target_size), dtype=np.uint8)
-            x_offset = (target_size - w) // 2
-            y_offset = (target_size - h) // 2
-            square_img[y_offset:y_offset + h, x_offset:x_offset + w] = img
+        if self.num_channels == 1:
+            contours, _ = cv2.findContours(
+                img,
+                cv2.RETR_EXTERNAL,
+                cv2.CHAIN_APPROX_SIMPLE,
+            )
 
-            # 목표 크기로 조정
-            img = cv2.resize(square_img, (self.input_shape[1], self.input_shape[2]))
+            if contours:
+                # 가장 큰 윤곽선 선택
+                main_contour = max(contours, key=cv2.contourArea)
+                x, y, w, h = cv2.boundingRect(main_contour)
 
-        return img
+                # 패딩 추가
+                padding_ratio = self.params.get('padding_ratio', 0.2)
+                padding = int(max(w, h) * padding_ratio)
+                x = max(0, x - padding)
+                y = max(0, y - padding)
+                w = min(img.shape[1] - x, w + 2 * padding)
+                h = min(img.shape[0] - y, h + 2 * padding)
 
-    def _preprocess_multi_channel(self, image_path: str) -> np.ndarray:
-        """컬러 이미지 전처리 (CIFAR10, SVHN용)"""
-        img = cv2.imread(image_path)
-        if img is None:
-            raise DataPreprocessException("이미지를 로드할 수 없습니다")
+                # 객체 영역 추출
+                img = img[y:y + h, x:x + w]
 
-        # BGR to RGB
-        img = cv2.cvtColor(img, cv2.COLOR_BGR2RGB)
+                # EMNIST의 경우 회전 보정
+                if self.params.get('rotation_correction', False):
+                    # 여기에 회전 보정 로직 추가 가능
+                    pass
 
-        # 목표 크기로 조정
-        img = cv2.resize(img, (self.input_shape[1], self.input_shape[2]))
+        # 크기 조정
+        target_size = self.input_shape[1:]
+        img = cv2.resize(img, target_size)
 
         return img
 
@@ -150,10 +191,19 @@ class ImageProcessor:
             self.validate_image(image_path)
 
             # 이미지 로드
-            image = Image.open(image_path)
+            image = cv2.imread(image_path)
+
+            # 전처리 수행
+            processed_image = self._preprocess_image(image)
+
+            # PIL Image로 변환
+            if self.num_channels == 1:
+                pil_image = Image.fromarray(processed_image)
+            else:
+                pil_image = Image.fromarray(cv2.cvtColor(processed_image, cv2.COLOR_BGR2RGB))
 
             # 전처리
-            tensor = self.transform(image)
+            tensor = self.transform(pil_image)
 
             # 배치 차원 추가
             tensor = tensor.unsqueeze(0)

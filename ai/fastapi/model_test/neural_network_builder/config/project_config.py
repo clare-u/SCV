@@ -1,7 +1,9 @@
 import os
 from pathlib import Path
 from typing import Dict, Any
+
 import yaml
+
 from ..exceptions.custom_exceptions import ConfigurationError
 
 
@@ -22,12 +24,15 @@ class ProjectConfig:
         try:
             # 기본 설정 파일 경로
             self.config_paths = {
-                'datasets': self.project_root / 'model_train' / 'datasets' / 'configs' / 'datasets.yaml'
+                'datasets': self.project_root / 'model_train' / 'datasets' / 'configs' / 'datasets.yaml',
+                'preprocess': self.project_root / 'model_train' / 'datasets' / 'configs' / 'preprocess_params.yaml'
             }
 
             # 환경 변수로 설정 파일 경로 오버라이드 가능
             if os.getenv('DATASETS_CONFIG_PATH'):
                 self.config_paths['datasets'] = Path(os.getenv('DATASETS_CONFIG_PATH'))
+            if os.getenv('PREPROCESS_CONFIG_PATH'):
+                self.config_paths['preprocess'] = Path(os.getenv('PREPROCESS_CONFIG_PATH'))
 
         except Exception as e:
             raise ConfigurationError(f"설정 로드 중 오류 발생: {str(e)}")
