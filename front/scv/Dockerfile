@@ -20,7 +20,7 @@ FROM node:18-alpine
 WORKDIR /app
 
 # 빌드 결과물과 필요한 파일들만 복사
-COPY --from=build /app/next.config.js* ./
+COPY --from=build /app/next.config.mjs ./
 COPY --from=build /app/public ./public
 COPY --from=build /app/.next ./.next
 COPY --from=build /app/node_modules ./node_modules
