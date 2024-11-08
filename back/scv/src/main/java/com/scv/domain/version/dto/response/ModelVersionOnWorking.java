@@ -1,7 +1,6 @@
 package com.scv.domain.version.dto.response;
 
 import com.scv.domain.data.enums.DataSet;
-import com.scv.domain.user.dto.response.UserProfileResponseDTO;
 import com.scv.domain.version.domain.ModelVersion;
 
 import java.time.LocalDateTime;

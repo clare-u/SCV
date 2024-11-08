@@ -1,7 +1,10 @@
 package com.scv.domain.version.controller;
 
+import com.scv.domain.data.enums.DataSet;
 import com.scv.domain.oauth2.AuthUser;
 import com.scv.domain.oauth2.CustomOAuth2User;
+import com.scv.domain.result.dto.response.ResultResponse;
+import com.scv.domain.result.dto.response.ResultResponseWithImages;
 import com.scv.domain.version.dto.request.ModelVersionRequest;
 import com.scv.domain.version.dto.response.ModelVersionDetail;
 import com.scv.domain.version.dto.response.ModelVersionOnWorking;
@@ -103,19 +106,21 @@ public class ModelVersionController {
         return ResponseEntity.ok(modelVersions);
     }
 
-//    @PostMapping("/{versionId}/result/save")
-//    @Operation(summary = "결과 저장", description = "학습 결과(이미지들)를 저장합니다.")
-//    public ResponseEntity<Void> saveResult(@PathVariable Long versionId, DataSet dataName, @AuthUser CustomOAuth2User user) throws BadRequestException, JsonProcessingException {
-//        modelVersionService.saveResult(versionId, dataName);
-//        return ResponseEntity.status(201).build();
-//    }
-//
-//    @PostMapping("/{versionId}/result/run")
-//    @Operation(summary = "실행 저장", description = "실행 결과를 저장합니다.")
-//    public ResponseEntity<Void> saveAnalysis(@PathVariable Long versionId, DataSet dataName, @RequestBody ResultRequest request, @AuthUser CustomOAuth2User user) throws BadRequestException {
-//        modelVersionService.runResult();
-//        return ResponseEntity.status(201).build();
-//    }
+
+    @PostMapping("/{versionId}/result/run")
+    @Operation(summary = "실행 저장", description = "실행 결과를 저장하고 반환합니다.")
+    public ResponseEntity<ResultResponse> saveAnalysis(@PathVariable Long versionId) {
+        ResultResponse resultResponse = modelVersionService.runResult(versionId);
+        return ResponseEntity.status(201).body(resultResponse);
+    }
+
+
+    @PostMapping("/{versionId}/result/save")
+    @Operation(summary = "결과 저장", description = "학습 결과(이미지들)를 저장하고 반환합니다.")
+    public ResponseEntity<ResultResponseWithImages> saveResult(@PathVariable Long versionId, DataSet dataName) {
+        ResultResponseWithImages resultResponseWithImages = modelVersionService.saveResult(versionId, dataName);
+        return ResponseEntity.status(201).body(resultResponseWithImages);
+    }
 
 
 }
