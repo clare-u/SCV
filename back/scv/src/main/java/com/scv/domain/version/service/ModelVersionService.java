@@ -155,15 +155,17 @@ public class ModelVersionService {
 
         ResultRequest request = new ResultRequest(modelVersion.getLayers(), new DataDTO(data));
 
-        String url = "http://localhost:8002/fast/v1/models/" + modelVersionId + "/versions/0";
+        String url = "http://localhost:8002/fast/v1/models/" + modelVersion.getModel().getId() + "/versions/" + modelVersionId;
 
         RestTemplate restTemplate = new RestTemplate();
         ResponseEntity<String> response = restTemplate.postForEntity(url, request, String.class);
         String jsonResponse = response.getBody();
 
+        // JSON 응답을 파싱하여 필요한 데이터 추출
         JsonNode rootNode = ParsingUtil.parseJson(jsonResponse, JsonNode.class);
         JsonNode testResults = rootNode.path("test_results").path("results");
 
+        // 필요한 필드 추출
         double finalTestAccuracy = testResults.path("final_test_accuracy").asDouble(0.0);
         double finalTestLoss = testResults.path("final_test_loss").asDouble(0.0);
         String modelCode = testResults.path("model_code").asText("");
@@ -174,13 +176,16 @@ public class ModelVersionService {
             totalParams += paramNode.asInt(0);
         }
 
+        // 에포크별 학습 결과 추출
+        String trainInfo = testResults.path("train_result_per_epoch").toString();
+
         // Result 객체 생성
         Result result = Result.builder()
                 .modelVersion(modelVersion)
                 .code(modelCode)
                 .testAccuracy(finalTestAccuracy)
                 .testLoss(finalTestLoss)
-                .trainInfo(testResults.path("train_result_per_epoch").toString())
+                .trainInfo(trainInfo)
                 .params(testResults.path("layer_parameters").toString())
                 .totalParams(totalParams)
                 .build();
@@ -191,33 +196,24 @@ public class ModelVersionService {
         return jsonResponse;
     }
 
-    // TODO 저장하면 버전 생기게, 모델 업데이트, isWorking = false
     // 결과저장
     @Transactional
     public void saveResult(Long modelVersionId, DataSet dataName) {
         ModelVersion modelVersion = modelVersionRepository.findById(modelVersionId)
                 .orElseThrow(ModelVersionNotFoundException::new);
-        Data data = dataRepository.findByName(dataName).orElseThrow(DataNotFoundException::new);
         Result result = resultRepository.findById(modelVersionId).orElseThrow(ResultNotFoundException::new);
+        String data = dataName.toString();
+        if (data.equals("Fashion")) {
+            data += "_MNIST";
+        }
 
-        String url = "http://localhost:8002/fast/v1/model/test/analyze/" + 0 + "/" + dataName.toString().toLowerCase();
+        String url = "http://localhost:8002/fast/v1/model/test/analyze/" + modelVersionId + "/" + data.toLowerCase();
         RestTemplate restTemplate = new RestTemplate();
-
-        Map<String, Object> jsonMap = new HashMap<>();
-        jsonMap.put("layers", ParsingUtil.toJson(modelVersion.getLayers()));
-        jsonMap.put("dataName", dataName.toString());
-        jsonMap.put("dataTrainCnt", data.getTrainCnt());
-        jsonMap.put("dataTestCnt", data.getTestCnt());
-        jsonMap.put("dataLabelCnt", data.getLabelCnt());
-        jsonMap.put("dataEpochCnt", data.getEpochCnt());
-
-        String jsonData = ParsingUtil.toJson(jsonMap);
 
         HttpHeaders headers = new HttpHeaders();
         headers.setContentType(MediaType.APPLICATION_JSON);
-        HttpEntity<String> entity = new HttpEntity<>(jsonData, headers);
 
-        ResponseEntity<String> response = restTemplate.postForEntity(url, entity, String.class);
+        ResponseEntity<String> response = restTemplate.getForEntity(url, String.class);
         String jsonResponse = response.getBody();
 
         JsonNode rootNode = ParsingUtil.parseJson(jsonResponse, JsonNode.class);
@@ -245,6 +241,16 @@ public class ModelVersionService {
                 .build();
 
         resultRepository.save(result);
+
+        Model model = modelVersion.getModel();
+        int latest = model.getLatestVersion();
+
+        modelVersion.updateVersionNo(latest + 1);
+        modelVersion.toggleWork();
+        modelVersionRepository.save(modelVersion);
+
+        model.setLatestVersion(latest + 1);
+        modelRepository.save(model);
     }
 
 
