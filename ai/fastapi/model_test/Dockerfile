@@ -19,7 +19,7 @@ RUN --mount=type=cache,target=/root/.cache/pip \
 COPY . .
 
 # 포트 설정
-EXPOSE 8001
+EXPOSE 8002
 
 # FastAPI 애플리케이션 실행
-CMD ["uvicorn", "main:app", "--host", "0.0.0.0", "--port", "8001"]
+CMD ["uvicorn", "main:app", "--host", "0.0.0.0", "--port", "8002"]
