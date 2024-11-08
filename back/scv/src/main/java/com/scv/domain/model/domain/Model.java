@@ -7,6 +7,7 @@ import com.scv.global.shared.BaseEntity;
 import jakarta.persistence.*;
 import lombok.*;
 
+import java.util.Comparator;
 import java.util.List;
 
 @Table(name = "model")
@@ -66,4 +67,18 @@ public class Model extends BaseEntity {
     public void updateName(String name) {
         this.name = name;
     }
+
+    /**
+     * 최신 버전의 ID 가져오기
+     * @return latestVersionId
+     */
+    public Long getLatestVersionId() {
+        return modelVersions.stream()
+                .filter(version -> !version.isDeleted())
+                .max(Comparator.comparingInt(ModelVersion::getVersionNo))
+                .map(ModelVersion::getId)
+                .orElse(null);
+    }
+
+
 }

@@ -21,7 +21,7 @@ interface WorkspaceCardProps {
 const datasetColors: Record<string, ChipsProps["color"]> = {
   MNIST: "indigo",
   Fashion: "amber",
-  "CIFAR-10": "green",
+  CIFAR10: "green",
   SVHN: "teal",
   EMNIST: "red",
   Editing: "gray",
@@ -30,7 +30,7 @@ const datasetColors: Record<string, ChipsProps["color"]> = {
 const badgeColors: Record<string, BadgeProps["color"]> = {
   MNIST: "indigo",
   Fashion: "amber",
-  "CIFAR-10": "green",
+  CIFAR10: "green",
   SVHN: "teal",
   EMNIST: "red",
   Editing: "gray",

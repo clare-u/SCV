@@ -60,8 +60,12 @@ public class UserService {
         return true;
     }
 
-    public String importModel(CustomOAuth2User auth2User, DataSet dataName, String modelName) {
-        return githubService.getGithubRepositoryFile(auth2User, dataName, modelName);
+    public void disConnectGithubRepository(CustomOAuth2User authUser) {
+        userRepository.updateUserRepoById(authUser.getUserId(), null);
+    }
+
+    public String importModel(CustomOAuth2User auth2User, String modelName) {
+        return githubService.getGithubRepositoryFile(auth2User, modelName);
     }
 
     public boolean exportModel(CustomOAuth2User auth2User, CommitGithubRepositoryFileRequestDTO requestDTO) {

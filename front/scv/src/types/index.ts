@@ -1,5 +1,5 @@
 export * from "./api";
-export * from "./member";
+export * from "./users";
 export * from "./block";
 export * from "./models";
 export * from "./dataset";

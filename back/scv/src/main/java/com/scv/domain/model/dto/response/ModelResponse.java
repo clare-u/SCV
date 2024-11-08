@@ -14,7 +14,8 @@ public record ModelResponse(
         int latestVersion,
         double accuracy,
         LocalDateTime createdAt,
-        LocalDateTime updatedAt
+        LocalDateTime updatedAt,
+        Long latestVersionId
 ) {
     public ModelResponse(Model model) {
         this(
@@ -25,7 +26,8 @@ public record ModelResponse(
                 model.getLatestVersion() != null ? model.getLatestVersion() : 0,
                 model.getAccuracy() != null ? model.getAccuracy() : -1.0, // null일 -값 보여주기
                 model.getCreatedAt(),
-                model.getUpdatedAt()
+                model.getUpdatedAt(),
+                model.getLatestVersionId()
         );
     }
 }

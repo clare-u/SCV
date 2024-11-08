@@ -1,5 +1,5 @@
 import { useMutation, useQueryClient } from "@tanstack/react-query";
-import { deleteModel } from "@/libs/api/models";
+import { deleteModel } from "@/libs";
 
 const DEFAULT_QUERY_KEY = "models";
 

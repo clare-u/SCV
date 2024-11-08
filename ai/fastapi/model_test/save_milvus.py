@@ -16,6 +16,10 @@ fast_match_port = os.getenv("FAST_MATCH_PORT")
 
 async def save_cka_to_milvus(model, dataset, model_version_id, conv_idx, test_accuracy, layers):
     cka_dataset = load_dataset_from_minio(dataset, "cka")
+    id_parse = model_version_id.split("_")
+    model_id = id_parse[1]
+    version_id = id_parse[2][1:]
+    
 # Milvus CKA 저장
     cka_matrix = defaultdict(list)
     with torch.no_grad():
@@ -37,7 +41,7 @@ async def save_cka_to_milvus(model, dataset, model_version_id, conv_idx, test_ac
         cka = (H @ mat @ mat.T @ H).flatten()
         cka_vec = cka / np.linalg.norm(cka)
         async with httpx.AsyncClient() as client:
-            res = await client.post(f"http://{fast_match_host_name}:{fast_match_port}/fast/v1/model/match/{model_version_id}/{i}",
+            res = await client.post(f"http://{fast_match_host_name}:{fast_match_port}/fast/v1/model/match/{model_id}/{version_id}/{i}",
                         json={
                             "test_accuracy": test_accuracy,
                             "layers" : serialize_layers(layers),

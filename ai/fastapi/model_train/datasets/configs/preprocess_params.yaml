@@ -1,0 +1,54 @@
+default:
+  blur_kernel: 3
+  threshold_block_size: 11
+  threshold_c: 2
+  padding_ratio: 0.2
+  edge_preserve: false
+
+MNIST:
+  blur_kernel: 3
+  threshold_block_size: 11
+  threshold_c: 2
+  padding_ratio: 0.2
+  edge_preserve: false
+  # MNIST는 단순한 흑백 숫자라서 기본적인 전처리면 충분
+
+FASHION_MNIST:
+  blur_kernel: 3
+  threshold_block_size: 9
+  threshold_c: 4
+  padding_ratio: 0.15
+  edge_preserve: true
+  clahe_clip_limit: 2.0
+  clahe_grid_size: [ 8, 8 ]
+  edge_low: 50
+  edge_high: 150
+  edge_weight: 0.3
+  # Fashion MNIST는 의류의 텍스처와 패턴을 보존해야 함
+
+CIFAR10:
+  blur_kernel: 3
+  color_mode: "RGB"
+  contrast_alpha: 1.2
+  contrast_beta: 10
+  noise_reduction: true
+  padding_ratio: 0.1
+  # CIFAR10은 컬러 이미지라서 색상 처리 중요
+
+SVHN:
+  blur_kernel: 3
+  color_mode: "RGB"
+  contrast_alpha: 1.3
+  contrast_beta: 5
+  denoise_strength: 10
+  padding_ratio: 0.15
+  # SVHN은 실제 숫자 사진이라 노이즈 제거와 대비 개선 중요
+
+EMNIST:
+  blur_kernel: 3
+  threshold_block_size: 11
+  threshold_c: 2
+  padding_ratio: 0.2
+  edge_preserve: false
+  rotation_correction: true
+  # EMNIST는 MNIST와 비슷하나 글자 방향 보정이 추가로 필요

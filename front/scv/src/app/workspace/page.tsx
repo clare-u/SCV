@@ -8,8 +8,9 @@ import Pagination from "@/components/pagination/Pagination";
 import DatasetRadio from "@/components/input/DatasetRadio";
 import SearchInput from "@/components/input/SearchInput";
 import Loading from "@/components/loading/Loading";
-import { useFetchMyModels } from "@/hooks";
+import { useFetchMyModels, useFetchMyWorkingModels } from "@/hooks";
 import { ModelQueryParams } from "@/types";
+import EditingCard from "@/components/card/EditingCard";
 
 function Community() {
   const router = useRouter();
@@ -31,7 +32,7 @@ function Community() {
   const currentOrder = searchParams.get("order") || "수정일 최신순";
 
   // 상태 관리
-  const dataName = ["전체", "MNIST", "Fashion", "CIFAR-10", "SVHN", "EMNIST"];
+  const dataName = ["전체", "MNIST", "Fashion", "CIFAR10", "SVHN", "EMNIST"];
   const [selected, setSelected] = useState(currentDataName);
   const [selectedFilter, setSelectedFilter] = useState(currentOrder);
   const [viewMode, setViewMode] = useState("완료목록"); // "완료목록" 또는 "임시저장"
@@ -60,14 +61,23 @@ function Community() {
     }
   };
 
-  // 모델 데이터 fetch
-  const { data, isLoading, error } = useFetchMyModels({
-    page: currentPage - 1,
-    size: 12,
-    ...getSortParams(selectedFilter),
-    modelName: currentKeyword || undefined, // 검색어가 없을 때는 undefined
-    dataName: selected !== "전체" ? selected : undefined,
-  });
+  // 모델 데이터 fetch (viewMode에 따라 다른 훅 사용)
+  const { data, isLoading, error } =
+    viewMode === "임시저장"
+      ? useFetchMyWorkingModels({
+          page: currentPage - 1,
+          size: 12,
+          ...getSortParams(selectedFilter),
+          modelName: currentKeyword || undefined,
+          dataName: selected !== "전체" ? selected : undefined,
+        })
+      : useFetchMyModels({
+          page: currentPage - 1,
+          size: 12,
+          ...getSortParams(selectedFilter),
+          modelName: currentKeyword || undefined,
+          dataName: selected !== "전체" ? selected : undefined,
+        });
 
   // URL 업데이트 함수
   const updateURL = (params: {
@@ -170,19 +180,33 @@ function Community() {
           {data?.content.length === 0 ? (
             <div>모델이 없습니다.</div> // 데이터가 없을 경우 메시지 출력
           ) : (
-            data?.content.map((model) => (
-              <WorkspaceCard
-                key={model.modelId}
-                modelId={model.modelId}
-                versionId={`${model.latestVersion}`}
-                title={model.modelName}
-                version={`v${model.latestVersion}`} // version 값 수정
-                dataset={model.dataName}
-                // accuracy={model.accuracy || "N/A"} // 기본값 설정
-                updatedAt={model.updatedAt}
-                createdAt={model.createdAt}
-              />
-            ))
+            data?.content.map((model) =>
+              "modelId" in model ? ( // Model 타입 확인
+                <WorkspaceCard
+                  key={model.modelId}
+                  modelId={model.modelId}
+                  versionId={`${model.latestVersion}`}
+                  title={model.modelName}
+                  version={`v${model.latestVersion}`}
+                  dataset={model.dataName}
+                  accuracy={model.accuracy}
+                  updatedAt={model.updatedAt}
+                  createdAt={model.createdAt}
+                />
+              ) : (
+                // MyModel 타입으로 간주
+                <EditingCard
+                  key={model.modelVersionId}
+                  versionId={model.modelVersionId}
+                  title={model.title}
+                  version={`v${model.version}`}
+                  dataset={model.dataName}
+                  accuracy={model.accuracy}
+                  updatedAt={model.updatedAt}
+                  createdAt={model.createdAt}
+                />
+              ),
+            )
           )}
         </div>
 

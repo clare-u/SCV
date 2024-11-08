@@ -5,7 +5,12 @@ import Image from "next/image";
 import ModalInput from "../input/ModalInput";
 import ModalButton from "../button/ModalButton";
 import ListboxComponent from "../input/ListBoxComponent";
-import { useLogOut } from "@/hooks";
+import {
+  useLogOut,
+  useCreateRepo,
+  useUpdateRepo,
+  useDeleteRepo,
+} from "@/hooks";
 import Loading from "../loading/Loading";
 import { toast } from "sonner";
 
@@ -48,18 +53,33 @@ const MemberModal: React.FC<MemberModalProps> = ({
   };
 
   // 연동하기
+  const { mutate: createRepo, isPending: isRepoPending } = useCreateRepo();
+  const { mutate: updateRepo, isPending: isUpdatePending } = useUpdateRepo();
   const handleRepoSubmit = () => {
     if (!inputValue.trim()) {
       toast.error("레포지토리 이름을 입력해주세요.");
       return;
     }
 
-    // 여기에 실제 연동 로직을 추가하세요
-    alert(`레포지토리 "${inputValue}"와 연동되었습니다.`);
+    // 선택된 옵션에 따라 다른 API 호출
+    if (selectedOption.id === 1) {
+      // 새 레포지토리 생성
+      createRepo({ repoName: inputValue });
+    } else {
+      // 기존 레포지토리 연동
+      updateRepo({ repoName: inputValue });
+    }
   };
+
+  // 연동 해제
+  const { mutate: handleDeleteRepo, isPending: isDeletePending } =
+    useDeleteRepo();
 
   // repo URL의 마지막 부분만 추출
   const formattedRepo = repo ? repo.replace("https://github.com/", "") : "";
+
+  // a 태그 href
+  const githubUrl = `https://github.com/${nickname}/${repo?.replace(" ", "-")}`;
 
   return (
     <div className="absolute right-0 z-50 mt-2 flex flex-col items-center justify-center gap-10 rounded-10 border border-gray-400 bg-indigo-800 p-20 text-white shadow-lg">
@@ -78,20 +98,29 @@ const MemberModal: React.FC<MemberModalProps> = ({
       <div className="h-1 self-stretch border border-gray-400"></div>
       {/* repo가 존재할 경우 링크 표시, 없을 경우 "연동하기" 버튼 */}
       {repo ? (
-        <a
-          href={repo}
-          target="_blank"
-          rel="noopener noreferrer"
-          className="flex gap-[5px] whitespace-nowrap text-white underline"
-        >
-          <Image
-            src="/github-mark-white.png"
-            alt="github-mark-white"
-            width={24}
-            height={24}
-          ></Image>
-          {formattedRepo} {/* 추출된 repo 경로만 표시 */}
-        </a>
+        <>
+          <a
+            href={githubUrl}
+            target="_blank"
+            rel="noopener noreferrer"
+            className="flex gap-[5px] whitespace-nowrap text-white underline"
+          >
+            <Image
+              src="/github-mark-white.png"
+              alt="github-mark-white"
+              width={24}
+              height={24}
+            ></Image>
+            {formattedRepo} {/* 추출된 repo 경로만 표시 */}
+          </a>
+          <ModalButton
+            icon="link_off"
+            onClick={() => handleDeleteRepo()}
+            disabled={isDeletePending}
+          >
+            연동해제
+          </ModalButton>
+        </>
       ) : (
         <>
           <div className="flex flex-col gap-10 p-10">
@@ -123,7 +152,11 @@ const MemberModal: React.FC<MemberModalProps> = ({
                   onChange={handleInputChange}
                   color="dark"
                 />
-                <ModalButton icon="add_link" onClick={handleRepoSubmit}>
+                <ModalButton
+                  icon="add_link"
+                  onClick={handleRepoSubmit}
+                  disabled={isRepoPending || isUpdatePending}
+                >
                   연동하기
                 </ModalButton>
               </>
