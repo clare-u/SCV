@@ -20,7 +20,7 @@ class Conv2d(BaseModel):
     stride: Optional[int] = Field(default=1, gt=0)
     padding: Optional[int] = Field(default=0, ge=0)
 
-    @field_validator('kernel_size', 'stride', 'padding')
+    @field_validator('kernel_size', 'stride')
     @classmethod
     def validate_positive(cls, v: int, info) -> int:
         if v <= 0:
@@ -171,7 +171,8 @@ class ModelConfig(BaseModel):
     dataTestCnt: int = Field(gt=0)
     dataLabelCnt: int = Field(gt=0)
     dataEpochCnt: int = Field(gt=0)
-    versionNo: Optional[int] = None
+    modelId: Optional[int] = None
+    versionId: Optional[int] = None
 
     def model_dump(self) -> Dict[str, Any]:
         return {
@@ -181,12 +182,12 @@ class ModelConfig(BaseModel):
             "dataTestCnt": self.dataTestCnt,
             "dataLabelCnt": self.dataLabelCnt,
             "dataEpochCnt": self.dataEpochCnt,
-            "versionNo": self.versionNo
+            "versionId": self.versionId
         }
 
     @field_validator('dataName')
     def validate_data_name(cls, v):
-        valid_datasets = ['MNIST', 'FashionMNIST', 'CIFAR10', 'SVHN', 'EMNIST']
+        valid_datasets = ['MNIST', 'FASHION_MNIST', 'CIFAR10', 'SVHN', 'EMNIST']
         if v not in valid_datasets:
             raise ValueError(f'데이터셋은 {valid_datasets}에 존재하는 것 중 선택해야합니다.')
         return v

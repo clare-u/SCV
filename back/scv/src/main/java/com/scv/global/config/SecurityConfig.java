@@ -19,6 +19,7 @@ import org.springframework.security.web.authentication.UsernamePasswordAuthentic
 import org.springframework.security.web.authentication.logout.LogoutFilter;
 import org.springframework.web.cors.CorsConfiguration;
 
+import java.util.Arrays;
 import java.util.Collections;
 
 @Configuration
@@ -43,7 +44,7 @@ public class SecurityConfig {
         http.cors(cors -> cors.configurationSource(request -> {
             CorsConfiguration configuration = new CorsConfiguration();
 
-            configuration.setAllowedOrigins(Collections.singletonList("http://localhost:3000"));
+            configuration.setAllowedOrigins(Arrays.asList("http://localhost:3000", "http://k11a107.p.ssafy.io", "https://k11a107.p.ssafy.io"));
             configuration.setAllowedHeaders(Collections.singletonList("*"));
             configuration.setAllowedMethods(Collections.singletonList("*"));
             configuration.setAllowCredentials(true);
@@ -66,6 +67,10 @@ public class SecurityConfig {
 
         // oauth2
         http.oauth2Login(oauth2 -> oauth2
+                .authorizationEndpoint(authorization -> authorization
+                        .baseUri("/api/oauth2/authorization"))
+                .redirectionEndpoint(redirection -> redirection
+                        .baseUri("/api/login/oauth2/code/*"))
                 .userInfoEndpoint(userInfoEndpointConfig -> userInfoEndpointConfig
                         .userService(customOAuth2UserService))
                 .successHandler(customLoginSuccessHandler)

@@ -413,7 +413,7 @@ $RECYCLE.BIN/
 /ai/fastapi/model_test/data
 /ai/fastapi/model_train/data
 /ai/fastapi/model_test/MinIO/data
-
+/ai/fastapi/model_test/MinIO/mnt
 .vscode
 
 # End of https://www.toptal.com/developers/gitignore/api/venv,visualstudiocode,macos,windows,react,dotenv,direnv,intellij,python,jupyternotebooks

@@ -84,9 +84,13 @@ class Linear(BaseModel):
     in_features: int
     out_features: int
 
+# Flatten
+class Flatten(BaseModel):
+    name: Literal["Flatten"]
+
 # Union of All Layer names
 Layer = Union[Conv2d, ConvTranspose2d, MaxPool2d, AvgPool2d, ReflectionPad2d, ReplicationPad2d, ZeroPad2d, 
-              ConstantPad2d, ReLU, LeakyReLU, ELU, PReLU, Sigmoid, Tanh, Softmax, LogSoftmax, GELU, Linear]
+              ConstantPad2d, ReLU, LeakyReLU, ELU, PReLU, Sigmoid, Tanh, Softmax, LogSoftmax, GELU, Linear, Flatten]
 
 layer_classes = {
     "Conv2d": Conv2d,
@@ -106,7 +110,8 @@ layer_classes = {
     "Softmax": Softmax,
     "LogSoftmax": LogSoftmax,
     "GELU": GELU,
-    "Linear": Linear
+    "Linear": Linear,
+    "Flatten": Flatten
 }
 
 def deserialize_layers(layers_json: str) -> List[Layer]:
@@ -128,5 +133,5 @@ def deserialize_layers(layers_json: str) -> List[Layer]:
 def serialize_layers(layers: List[Layer]) -> str:
     """Layer 리스트를 JSON 문자열로 직렬화."""
     print(layers)
-    layer_dicts = [json.dumps(layer) for layer in layers]
+    layer_dicts = [layer.model_dump_json() for layer in layers]
     return json.dumps(layer_dicts)
