@@ -32,6 +32,7 @@ spring:
             client-id: ${OAUTH_CLIENT_ID}
             client-secret: ${OAUTH_CLIENT_SECRET}
             scope: user:email, repo, contents, metadata
+            redirect-uri: ${OAUTH_REDIRECT_URI}
     user:
       name: actuator
       password: ${ACTUATOR_PASSWORD}

@@ -26,6 +26,6 @@ public class CustomLoginSuccessHandler extends SimpleUrlAuthenticationSuccessHan
         response.addCookie(CookieUtil.createCookie(ACCESS_TOKEN_NAME, accessToken, ACCESS_TOKEN_EXPIRATION));
         response.addCookie(CookieUtil.createCookie(REFRESH_TOKEN_NAME, refreshToken, REFRESH_TOKEN_EXPIRATION));
 
-        response.sendRedirect("https://k11a107.p.ssafy.io");
+        response.sendRedirect(System.getenv("DOMAIN"));
     }
 }
