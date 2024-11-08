@@ -1,4 +1,4 @@
-import { MemberResponse } from "../member";
+import { MemberResponse } from "../users";
 
 // 단일 모델 객체에 대한 타입 정의
 export interface Model {

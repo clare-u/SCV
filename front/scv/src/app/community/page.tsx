@@ -31,7 +31,7 @@ function Community() {
   const currentOrder = searchParams.get("order") || "추천순";
 
   // 상태 관리
-  const dataName = ["전체", "MNIST", "Fashion", "CIFAR-10", "SVHN", "EMNIST"];
+  const dataName = ["전체", "MNIST", "Fashion", "CIFAR10", "SVHN", "EMNIST"];
   const [selected, setSelected] = useState(currentDataName);
   const [selectedFilter, setSelectedFilter] = useState(currentOrder);
   const filterOptions = ["추천순", "최신순", "오래된순"];

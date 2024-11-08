@@ -28,7 +28,7 @@ export default function Edit() {
     Editing: "gray",
     MNIST: "indigo",
     Fashion: "amber",
-    "CIFAR-10": "green",
+    CIFAR10: "green",
     SVHN: "teal",
     EMNIST: "red",
   };
@@ -37,7 +37,7 @@ export default function Edit() {
     Editing: "gray",
     MNIST: "indigo",
     Fashion: "amber",
-    "CIFAR-10": "green",
+    CIFAR10: "green",
     SVHN: "teal",
     EMNIST: "red",
   };
@@ -147,7 +147,7 @@ export default function Edit() {
         </div>
       </div>
       <div className="flex h-[92vh]">
-        <BlockList dataset={dataset}/>
+        <BlockList dataset={dataset} />
         <div className="flex w-[600px] flex-col border-l border-gray-500">
           <div className="flex max-h-[450px] w-full flex-1 overflow-y-auto overflow-x-hidden border-b border-gray-500">
             <CodeViewer></CodeViewer>
