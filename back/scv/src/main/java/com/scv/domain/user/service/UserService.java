@@ -66,6 +66,10 @@ public class UserService {
                 .build();
     }
 
+    public void disConnectGithubRepository(CustomOAuth2User authUser) {
+        userRepository.updateUserRepoById(authUser.getUserId(), null);
+    }
+
     public String importModel(CustomOAuth2User auth2User, String modelName) {
         return githubService.getGithubRepositoryFile(auth2User, modelName);
     }
@@ -73,4 +77,5 @@ public class UserService {
     public String exportModel(CustomOAuth2User auth2User, CommitGithubRepositoryFileRequestDTO requestDTO) {
         return githubService.commitGithubRepositoryFile(auth2User, requestDTO);
     }
+
 }
