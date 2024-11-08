@@ -5,7 +5,12 @@ import Image from "next/image";
 import ModalInput from "../input/ModalInput";
 import ModalButton from "../button/ModalButton";
 import ListboxComponent from "../input/ListBoxComponent";
-import { useLogOut, useCreateRepo, useUpdateRepo } from "@/hooks";
+import {
+  useLogOut,
+  useCreateRepo,
+  useUpdateRepo,
+  useDeleteRepo,
+} from "@/hooks";
 import Loading from "../loading/Loading";
 import { toast } from "sonner";
 
@@ -66,6 +71,10 @@ const MemberModal: React.FC<MemberModalProps> = ({
     }
   };
 
+  // 연동 해제
+  const { mutate: handleDeleteRepo, isPending: isDeletePending } =
+    useDeleteRepo();
+
   // repo URL의 마지막 부분만 추출
   const formattedRepo = repo ? repo.replace("https://github.com/", "") : "";
 
@@ -89,20 +98,29 @@ const MemberModal: React.FC<MemberModalProps> = ({
       <div className="h-1 self-stretch border border-gray-400"></div>
       {/* repo가 존재할 경우 링크 표시, 없을 경우 "연동하기" 버튼 */}
       {repo ? (
-        <a
-          href={githubUrl}
-          target="_blank"
-          rel="noopener noreferrer"
-          className="flex gap-[5px] whitespace-nowrap text-white underline"
-        >
-          <Image
-            src="/github-mark-white.png"
-            alt="github-mark-white"
-            width={24}
-            height={24}
-          ></Image>
-          {formattedRepo} {/* 추출된 repo 경로만 표시 */}
-        </a>
+        <>
+          <a
+            href={githubUrl}
+            target="_blank"
+            rel="noopener noreferrer"
+            className="flex gap-[5px] whitespace-nowrap text-white underline"
+          >
+            <Image
+              src="/github-mark-white.png"
+              alt="github-mark-white"
+              width={24}
+              height={24}
+            ></Image>
+            {formattedRepo} {/* 추출된 repo 경로만 표시 */}
+          </a>
+          <ModalButton
+            icon="link_off"
+            onClick={() => handleDeleteRepo()}
+            disabled={isDeletePending}
+          >
+            연동해제
+          </ModalButton>
+        </>
       ) : (
         <>
           <div className="flex flex-col gap-10 p-10">
