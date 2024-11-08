@@ -5,7 +5,7 @@ import Image from "next/image";
 import ModalInput from "../input/ModalInput";
 import ModalButton from "../button/ModalButton";
 import ListboxComponent from "../input/ListBoxComponent";
-import { useLogOut, useCreateRepo } from "@/hooks";
+import { useLogOut, useCreateRepo, useUpdateRepo } from "@/hooks";
 import Loading from "../loading/Loading";
 import { toast } from "sonner";
 
@@ -49,14 +49,21 @@ const MemberModal: React.FC<MemberModalProps> = ({
 
   // 연동하기
   const { mutate: createRepo, isPending: isRepoPending } = useCreateRepo();
+  const { mutate: updateRepo, isPending: isUpdatePending } = useUpdateRepo();
   const handleRepoSubmit = () => {
     if (!inputValue.trim()) {
       toast.error("레포지토리 이름을 입력해주세요.");
       return;
     }
 
-    // 새 레포지토리 생성 뮤테이션 실행
-    createRepo({ repoName: inputValue });
+    // 선택된 옵션에 따라 다른 API 호출
+    if (selectedOption.id === 1) {
+      // 새 레포지토리 생성
+      createRepo({ repoName: inputValue });
+    } else {
+      // 기존 레포지토리 연동
+      updateRepo({ repoName: inputValue });
+    }
   };
 
   // repo URL의 마지막 부분만 추출
@@ -130,7 +137,7 @@ const MemberModal: React.FC<MemberModalProps> = ({
                 <ModalButton
                   icon="add_link"
                   onClick={handleRepoSubmit}
-                  disabled={isRepoPending}
+                  disabled={isRepoPending || isUpdatePending}
                 >
                   연동하기
                 </ModalButton>
