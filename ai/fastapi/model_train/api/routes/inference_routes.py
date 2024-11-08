@@ -7,11 +7,11 @@ from dotenv import load_dotenv
 from fastapi import APIRouter, File, UploadFile, HTTPException, Path
 from minio import Minio
 
-from model_train.inference.exceptions import InvalidInputException, ModelLoadException, InferenceException, \
+from inference.exceptions import InvalidInputException, ModelLoadException, InferenceException, \
     DataPreprocessException
-from model_train.inference.image_processor import ImageProcessor
-from model_train.inference.inference_handler import ModelInferenceHandler
-from model_train.utils.model_utils import generate_model_name
+from inference.image_processor import ImageProcessor
+from inference.inference_handler import ModelInferenceHandler
+from utils.model_utils import generate_model_name
 
 load_dotenv()
 

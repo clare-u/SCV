@@ -4,7 +4,7 @@ from typing import Dict, List
 
 import cv2
 
-from model_train.datasets.preprocess.preprocess_config import PreprocessConfig
+from datasets.preprocess.preprocess_config import PreprocessConfig
 
 """
 pip install opencv-python
@@ -15,7 +15,7 @@ import torch
 from PIL import Image
 from torchvision import transforms
 
-from model_train.inference.exceptions import InvalidInputException, DataPreprocessException
+from inference.exceptions import InvalidInputException, DataPreprocessException
 
 logger = logging.getLogger(__name__)
 
