@@ -6,6 +6,7 @@ export interface Model {
   modelName: string;
   dataName: string;
   latestVersion: number;
+  accuracy: number;
   createdAt: string;
   updatedAt: string;
   userProfile: MemberResponse;
@@ -31,4 +32,20 @@ export interface ModelQueryParams {
   direction?: "asc" | "desc";
   dataName?: string;
   modelName?: string;
+}
+
+// myModel
+export interface MyModel {
+  title: string; // 모델 이름
+  modelVersionId: number; // 모델 버전 ID
+  version: number; // 버전 번호
+  dataName: string; // 데이터셋 이름
+  accuracy: number; // 정확도 값
+  createdAt: string; // 생성 일자 (ISO 형식 문자열)
+  updatedAt: string; // 업데이트 일자 (ISO 형식 문자열)
+}
+
+export interface MyModelList {
+  content: MyModel[];
+  pageable: Pageable;
 }

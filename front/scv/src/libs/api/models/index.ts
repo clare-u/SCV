@@ -1,4 +1,4 @@
-import { Content, ModelQueryParams } from "@/types";
+import { Content, ModelQueryParams, MyModelList } from "@/types";
 import { handleApiRequest } from "../client";
 
 const DEFAULT_PARAMS: ModelQueryParams = {
@@ -54,4 +54,26 @@ export const fetchMyModels = async (
 export const deleteModel = async (modelId: number) => {
   const url = `/api/v1/models/${modelId}`;
   return handleApiRequest<void, "delete">(url, "delete");
+};
+
+// 내 작업중인 모델 리스트를 가져오는 함수
+export const fetchMyWorkingModels = async (
+  params: ModelQueryParams = DEFAULT_PARAMS,
+) => {
+  const queryParams = new URLSearchParams();
+
+  // 기본값과 사용자 지정 매개변수 병합
+  const finalParams = { ...DEFAULT_PARAMS, ...params };
+
+  // 쿼리 파라미터 생성
+  Object.entries(finalParams).forEach(([key, value]) => {
+    if (value !== undefined) {
+      queryParams.append(key, value.toString());
+    }
+  });
+
+  // 최종 URL 생성
+  const url = `/api/v1/models/versions/users/working?${queryParams.toString()}`;
+  console.log("API 요청 URL:", url);
+  return handleApiRequest<MyModelList, "get">(url, "get");
 };

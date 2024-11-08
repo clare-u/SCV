@@ -1,6 +1,6 @@
 // hooks/useFetchModels.ts
 import { useQuery } from "@tanstack/react-query";
-import { fetchMyModels } from "@/libs/api/models";
+import { fetchMyModels } from "@/libs";
 import { ModelQueryParams } from "@/types";
 
 // 기본 쿼리 키 상수
