@@ -24,7 +24,7 @@ const CloneModal = () => {
   };
 
   // 라디오
-  const dataset = ["MNIST", "Fashion", "CIFAR-10", "SVHN", "EMNIST"];
+  const dataset = ["MNIST", "Fashion", "CIFAR10", "SVHN", "EMNIST"];
   const [selected, setSelected] = useState(dataset[0]);
 
   // 새로 만들기

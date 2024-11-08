@@ -31,7 +31,7 @@ function Community() {
   const currentOrder = searchParams.get("order") || "수정일 최신순";
 
   // 상태 관리
-  const dataName = ["전체", "MNIST", "Fashion", "CIFAR-10", "SVHN", "EMNIST"];
+  const dataName = ["전체", "MNIST", "Fashion", "CIFAR10", "SVHN", "EMNIST"];
   const [selected, setSelected] = useState(currentDataName);
   const [selectedFilter, setSelectedFilter] = useState(currentOrder);
   const [viewMode, setViewMode] = useState("완료목록"); // "완료목록" 또는 "임시저장"
