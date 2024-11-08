@@ -7,8 +7,8 @@ from typing import Optional, Dict, Any
 import torch
 from minio import Minio
 
-from model_train.inference.exceptions import ModelLoadException, InferenceException
-from model_train.save_minio import minio_host_name, minio_api_port, minio_user_name, minio_user_password, \
+from inference.exceptions import ModelLoadException, InferenceException
+from save_minio import minio_host_name, minio_api_port, minio_user_name, minio_user_password, \
     minio_model_bucket
 
 logger = logging.getLogger(__name__)
