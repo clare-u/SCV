@@ -9,8 +9,8 @@ def test_model_training():
 
     test_configs = [
         {
-            "modelId": 1,
-            "versionId": 1,
+            "modelId": 9,
+            "versionId": 9,
             "config": {
                 "modelLayerAt": {
                     "layers": [
@@ -54,7 +54,7 @@ def test_model_training():
 
         try:
             # 모델 학습 요청
-            train_url = f"{BASE_URL}/api/v1/models/{test_case['modelId']}/versions/{test_case['versionId']}"
+            train_url = f"{BASE_URL}/fast/v1/models/{test_case['modelId']}/versions/{test_case['versionId']}"
             print("\nSending training request to:", train_url)
             print("\nRequest body:")
             print(json.dumps(test_case['config'], indent=2))
@@ -103,7 +103,7 @@ def test_model_training():
             print(f"\nTraining history saved to {history_path}")
 
             # 저장된 모델 테스트
-            test_url = f"{BASE_URL}/api/v1/models/{test_case['modelId']}/versions/{test_case['versionId']}/test"
+            test_url = f"{BASE_URL}/fast/v1/models/{test_case['modelId']}/versions/{test_case['versionId']}/test"
             print("\nSending test request to:", test_url)
 
             test_response = requests.get(test_url)

@@ -1,16 +1,19 @@
 # 모델 학습 요청을 받을 FastAPI
 import logging
-from fastapi import FastAPI, HTTPException, Path
-import sys
 import os
-from typing import Dict, Any, Optional
+import sys
+from typing import Dict, Any
+
+from fastapi import FastAPI, HTTPException, Path
+
+from .api.routes import inference_routes
+from .utils.model_utils import generate_model_name
 
 logging.basicConfig(
     level=logging.INFO,
     format='%(asctime)s - %(levelname)s - %(message)s',
     handlers=[
-        logging.StreamHandler(),  # 콘솔 출력
-        logging.FileHandler('app.log')  # 파일 출력
+        logging.StreamHandler()
     ]
 )
 logger = logging.getLogger(__name__)
@@ -20,45 +23,49 @@ root_dir = os.path.dirname(current_dir)
 sys.path.append(root_dir)
 
 from neural_network_builder.parsers.validators import ModelConfig, ModelLayerConfig, layer_classes
+from model_test.neural_network_builder.parsers.validators import ModelConfig, layer_classes
+
 try:
     from .model_run import ModelTrainer
     from .save_minio import save_model_to_minio
 except ImportError:
     from model_train import ModelTrainer
     from save_minio import save_model_to_minio
-from typing import Union
+
+# def generate_model_name(model_id: Union[int, str], version_id: Union[int, str]) -> str:
+#     """모델ID랑 버전 ID로 고유한 모델 이름 생성"""
+#     try:
+#         model_id = int(model_id)
+#         version_id = int(version_id)
+#
+#         if model_id < 0 or version_id < 0:
+#             raise ValueError("모델 ID와 버전 ID는 0 양수만 가능합니다.")
+#
+#         model_name = f"model_{model_id}_v{version_id}"
+#         logger.debug(f"Generated model name: {model_name}")
+#
+#         return model_name
+#
+#     except ValueError as e:
+#         error_msg = f"잘못된 입력값: {str(e)}"
+#         logger.error(error_msg)
+#         raise HTTPException(status_code=400, detail=error_msg)
+#     except Exception as e:
+#         error_msg = f"모델 이름 생성 중 오류 발생: {str(e)}"
+#         logger.error(error_msg)
+#         raise HTTPException(status_code=500, detail=error_msg)
 
 
-def generate_model_name(model_id: Union[int, str], version_id: Union[int, str]) -> str:
-    """모델ID랑 버전 ID로 고유한 모델 이름 생성"""
-    try:
-        model_id = int(model_id)
-        version_id = int(version_id)
-
-        if model_id < 0 or version_id < 0:
-            raise ValueError("모델 ID와 버전 ID는 0 양수만 가능합니다.")
-
-        model_name = f"model_{model_id}_v{version_id}"
-        logger.debug(f"Generated model name: {model_name}")
-
-        return model_name
-
-    except ValueError as e:
-        error_msg = f"잘못된 입력값: {str(e)}"
-        logger.error(error_msg)
-        raise HTTPException(status_code=400, detail=error_msg)
-    except Exception as e:
-        error_msg = f"모델 이름 생성 중 오류 발생: {str(e)}"
-        logger.error(error_msg)
-        raise HTTPException(status_code=500, detail=error_msg)
 app = FastAPI()
 
+app.include_router(inference_routes.router)
 
-@app.post("/api/v1/models/{modelId}/versions/{versionId}/train")
+
+@app.post("/fast/v1/models/{modelId}/versions/{versionId}/train")
 async def train_model(
-    modelId: int = Path(..., title="Model ID", description="모델 ID"),
-    versionId: int = Path(..., title="Version ID", description="모델 버전 ID"),
-    config: Dict[str, Any] = None
+        modelId: int = Path(..., title="Model ID", description="모델 ID"),
+        versionId: int = Path(..., title="Version ID", description="모델 버전 ID"),
+        config: Dict[str, Any] = None
 ):
     """모델 학습 엔드포인트"""
     try:
@@ -113,7 +120,7 @@ async def train_model(
 
             # ModelConfig 생성 및 검증
             model_config = ModelConfig(
-               **config
+                **config
             )
 
             trainer = ModelTrainer()
@@ -140,7 +147,7 @@ async def train_model(
         raise HTTPException(status_code=500, detail=str(e))
 
 
-@app.get("/api/v1/models/{modelId}/versions/{versionId}/test")
+@app.get("/fast/v1/models/{modelId}/versions/{versionId}/test")
 async def test_model(
         modelId: int = Path(..., title="Model ID"),
         versionId: int = Path(..., title="Version ID")
@@ -167,7 +174,7 @@ async def test_model(
         raise HTTPException(status_code=500, detail=str(e))
 
 
-@app.post("/api/v1/models/{modelId}/versions/{versionId}")
+@app.post("/fast/v1/models/{modelId}/versions/{versionId}")
 async def run_model(
         modelId: int = Path(..., title="Model ID", description="모델 ID"),
         versionId: int = Path(..., title="Version ID", description="모델 버전 ID"),
@@ -207,4 +214,5 @@ async def run_model(
 
 if __name__ == "__main__":
     import uvicorn
+
     uvicorn.run(app, host="0.0.0.0", port=8003)
