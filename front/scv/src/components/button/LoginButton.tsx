@@ -7,7 +7,7 @@ export default function LoginButton() {
   return (
     <Link
       // href="/oauth2/authorization/github"
-      href="http://localhost:8080/oauth2/authorization/github"
+      href="http://localhost:8080/api/oauth2/authorization/github"
       prefetch={false}
     >
       <button className="flex items-center justify-center gap-3 rounded-[4px] bg-black px-[60px] py-[12px] text-[18px] font-semibold text-white">
