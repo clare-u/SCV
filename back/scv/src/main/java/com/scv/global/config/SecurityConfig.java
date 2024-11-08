@@ -83,6 +83,8 @@ public class SecurityConfig {
 
         // 경로별 인가 작업
         http.authorizeHttpRequests(auth -> auth
+                .requestMatchers("/api/oauth2/authorization").permitAll()
+                .requestMatchers("/api/login/oauth2/code/*").permitAll()
                 .requestMatchers("/actuator/**").permitAll()
                 .anyRequest().authenticated());
 
