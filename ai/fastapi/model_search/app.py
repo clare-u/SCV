@@ -102,7 +102,7 @@ def delete_model(model_id: str, version_id: str):
 
 # 유사 모델 검색
 @app.get("/{model_id}/{version_id}/{layer_id}/search", response_model=Model_Search_Response)
-async def search_model(model_id: str, version_id, layer_id: str):
+async def search_model(model_id: str, version_id: str, layer_id: str):
     
     model_version_layer_id = "{}_{}".format(f"model_{model_id}_v{version_id}", layer_id)
 
