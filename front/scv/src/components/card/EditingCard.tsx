@@ -55,8 +55,6 @@ export default function EditingCard({
     }
   };
 
-  // TODO: 삭제 클릭 시 버전 삭제
-
   return (
     <div onClick={handleCardClick} className="flex w-[325px] cursor-pointer">
       <div className="flex w-full flex-col gap-20 rounded-12 bg-gray-100 p-[30px] shadow-md transition-shadow duration-200 hover:shadow-lg">
@@ -70,7 +68,7 @@ export default function EditingCard({
           </div>
           <DeleteDropdown
             onClick={(e) => e.stopPropagation()}
-            modelId={versionId}
+            versionId={versionId}
           />
         </div>
 
@@ -85,12 +83,6 @@ export default function EditingCard({
               {new Date(createdAt).toISOString().replace("T", " ").slice(0, 19)}
             </p>
           </div>
-          {/* dataset이 Editing이 아닐 때만 accuracy를 렌더링 */}
-          {dataset !== "Editing" && accuracy && (
-            <div className="flex flex-col items-end justify-center">
-              <p className="text-12 font-semibold">{accuracy.toFixed(2)}%</p>
-            </div>
-          )}
         </div>
       </div>
     </div>

@@ -89,7 +89,7 @@ export default function WorkspaceCard({
             </p>
           </div>
           {/* dataset이 Editing이 아닐 때만 accuracy를 렌더링 */}
-          {dataset !== "Editing" && accuracy && (
+          {dataset !== "Editing" && accuracy && accuracy !== -1 && (
             <div className="flex flex-col items-end justify-center">
               <p className="text-12 font-semibold">{accuracy.toFixed(2)}%</p>
             </div>
