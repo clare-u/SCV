@@ -1,14 +1,14 @@
-import { MemberResponse } from "../member";
+import { MemberResponse } from "../users";
 
 // 단일 모델 객체에 대한 타입 정의
 export interface Model {
   modelId: number;
   modelName: string;
   dataName: string;
-  latestNumber: number;
+  latestVersion: number;
   createdAt: string;
   updatedAt: string;
-  userProfileResponseDTO: MemberResponse;
+  userProfile: MemberResponse;
 }
 
 // Content의 루트 객체에 대한 타입 정의

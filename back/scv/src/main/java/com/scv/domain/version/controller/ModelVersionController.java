@@ -1,14 +1,10 @@
 package com.scv.domain.version.controller;
 
-import com.fasterxml.jackson.core.JsonProcessingException;
-import com.scv.domain.data.enums.DataSet;
 import com.scv.domain.oauth2.AuthUser;
 import com.scv.domain.oauth2.CustomOAuth2User;
-import com.scv.domain.result.dto.request.ResultRequest;
 import com.scv.domain.version.dto.request.ModelVersionRequest;
 import com.scv.domain.version.dto.response.ModelVersionDetail;
 import com.scv.domain.version.dto.response.ModelVersionOnWorking;
-import com.scv.domain.version.dto.response.ModelVersionResponse;
 import com.scv.domain.version.service.ModelVersionService;
 import com.scv.global.error.ErrorResponse;
 import com.scv.global.util.PageableUtil;
@@ -26,7 +22,7 @@ import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.*;
 
 @RestController
-@RequestMapping("/v1/models/versions")
+@RequestMapping("/api/v1/models/versions")
 @Tag(name = "모델 버전 컨트롤러", description = "모델 버전 관련 API")
 @RequiredArgsConstructor
 public class ModelVersionController {

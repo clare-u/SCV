@@ -7,7 +7,7 @@ import { toast } from "sonner";
 export const datasetLabels: Record<Dataset, number> = {
   MNIST: 10,
   Fashion: 10,
-  "CIFAR-10": 10,
+  CIFAR10: 10,
   SVHN: 10,
   EMNIST: 26,
 };
@@ -16,7 +16,7 @@ export const datasetLabels: Record<Dataset, number> = {
 export const datasetChannels: Record<Dataset, number> = {
   MNIST: 1,
   Fashion: 1,
-  "CIFAR-10": 3,
+  CIFAR10: 3,
   SVHN: 3,
   EMNIST: 1,
 };
@@ -25,7 +25,7 @@ export const datasetChannels: Record<Dataset, number> = {
 export const datasetSizes: Record<Dataset, number> = {
   MNIST: 28,
   Fashion: 28,
-  "CIFAR-10": 32,
+  CIFAR10: 32,
   SVHN: 32,
   EMNIST: 28,
 };

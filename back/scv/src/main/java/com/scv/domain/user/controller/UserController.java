@@ -2,6 +2,7 @@ package com.scv.domain.user.controller;
 
 import com.scv.domain.oauth2.AuthUser;
 import com.scv.domain.oauth2.CustomOAuth2User;
+import com.scv.domain.user.dto.request.CommitGithubRepositoryFileRequestDTO;
 import com.scv.domain.user.dto.request.GithubRepositoryNameRequestDTO;
 import com.scv.domain.user.dto.response.GithubRepositoryNameResponseDTO;
 import com.scv.domain.user.dto.response.UserProfileResponseDTO;
@@ -59,6 +60,41 @@ public class UserController {
     public ResponseEntity<GithubRepositoryNameResponseDTO> setCurrentGithubRepository(@AuthUser CustomOAuth2User authUser,
                                                                                       @RequestBody GithubRepositoryNameRequestDTO requestDTO) {
         GithubRepositoryNameResponseDTO responseDTO = userService.setCurrentGithubRepository(authUser, requestDTO);
+        return new ResponseEntity<>(responseDTO, HttpStatus.OK);
+    }
+
+    @DeleteMapping("/repo")
+    @Operation(summary = "깃허브 리포 연동을 해제", description = "깃허브 리포 연동을 해제합니다.")
+    @ApiResponses(value = {
+            @ApiResponse(responseCode = "200", description = "깃허브 리포 연동을 해제 성공"),
+            @ApiResponse(responseCode = "404", description = "사용자를 찾을 수 없음", content = @Content(schema = @Schema(implementation = ErrorResponse.class)))
+    })
+    public ResponseEntity<Void> disConnectGithubRepository(@AuthUser CustomOAuth2User authUser) {
+        userService.disConnectGithubRepository(authUser);
+        return new ResponseEntity<>(HttpStatus.NO_CONTENT);
+    }
+
+    @GetMapping("/repo/import")
+    @Operation(summary = "깃허브에서 모델 import", description = "깃허브에서 블록 json 파일을 import 합니다.")
+    @ApiResponses(value = {
+            @ApiResponse(responseCode = "200", description = "깃허브에서 모델 import 성공"),
+            @ApiResponse(responseCode = "404", description = "사용자를 찾을 수 없음", content = @Content(schema = @Schema(implementation = ErrorResponse.class)))
+    })
+    public ResponseEntity<String> importModel(@AuthUser CustomOAuth2User auth2User,
+                                              @RequestParam String modelName) {
+        String responseDTO = userService.importModel(auth2User, modelName);
+        return new ResponseEntity<>(responseDTO, HttpStatus.OK);
+    }
+
+    @PostMapping("repo/export")
+    @Operation(summary = "깃허브에 모델 export", description = "깃허브에 블록 json 파일을 export 합니다.")
+    @ApiResponses(value = {
+            @ApiResponse(responseCode = "200", description = "깃허브에 모델 export 성공"),
+            @ApiResponse(responseCode = "404", description = "사용자를 찾을 수 없음", content = @Content(schema = @Schema(implementation = ErrorResponse.class)))
+    })
+    public ResponseEntity<String> exportModel(@AuthUser CustomOAuth2User auth2User,
+                                              @RequestBody CommitGithubRepositoryFileRequestDTO requestDTO) {
+        String responseDTO = userService.exportModel(auth2User, requestDTO);
         return new ResponseEntity<>(responseDTO, HttpStatus.OK);
     }
 

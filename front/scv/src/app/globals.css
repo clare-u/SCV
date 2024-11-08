@@ -17,3 +17,18 @@ input[type="number"] {
     -moz-appearance: textfield;
     /* Firefox에서 스피너 제거 */
 }
+
+.prose pre {
+    @apply bg-gray-900 text-white p-4 rounded-lg overflow-x-auto;
+    /* 코드 블록 배경, 텍스트 색상, 패딩, 테두리, 스크롤 */
+}
+
+.prose code {
+    @apply bg-gray-100 text-red-600 px-1 rounded;
+    /* 인라인 코드 스타일 */
+}
+
+.prose code::before,
+.prose code::after {
+    content: none !important;
+}

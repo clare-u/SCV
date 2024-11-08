@@ -57,7 +57,7 @@ function Home() {
   const [selectedVersion, setSelectedVersion] = useState(version[0]);
 
   // board카드
-  const datasets = ["MNIST", "Fashion", "CIFAR-10", "SVHN", "EMNIST"];
+  const datasets = ["MNIST", "Fashion", "CIFAR10", "SVHN", "EMNIST"];
 
   // 더미 데이터 생성을 위한 헬퍼 함수
   const cards = datasets.map((dataset, index) => ({
@@ -76,7 +76,7 @@ function Home() {
   const workspaceDatasets = [
     "MNIST",
     "Fashion",
-    "CIFAR-10",
+    "CIFAR10",
     "SVHN",
     "EMNIST",
     "Editing",

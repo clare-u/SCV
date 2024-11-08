@@ -23,7 +23,7 @@ export const fetchModels = async (
   });
 
   // 최종 URL 생성
-  const url = `/models/?${queryParams.toString()}`;
+  const url = `/api/v1/models/?${queryParams.toString()}`;
   console.log("API 요청 URL:", url);
   return handleApiRequest<Content, "get">(url, "get");
 };
@@ -45,13 +45,13 @@ export const fetchMyModels = async (
   });
 
   // 최종 URL 생성
-  const url = `/models/users?${queryParams.toString()}`;
+  const url = `/api/v1/models/users?${queryParams.toString()}`;
   console.log("API 요청 URL:", url);
   return handleApiRequest<Content, "get">(url, "get");
 };
 
 // 모델 삭제하는 함수
 export const deleteModel = async (modelId: number) => {
-  const url = `/models/${modelId}`;
+  const url = `/api/v1/models/${modelId}`;
   return handleApiRequest<void, "delete">(url, "delete");
 };

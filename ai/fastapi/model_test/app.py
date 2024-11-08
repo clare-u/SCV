@@ -16,12 +16,12 @@ load_dotenv(verbose=True)
 app = FastAPI(root_path="/fast/v1/model/test")
 
 # 모델이 확정되어 결과 분석, CKA 저장 하는 함수
-@app.post("/analyze/{model_version_id}/{dataset}", response_model=Model_Analyze_Response)
-async def analyze_model(model_version_id: str, dataset: Literal["mnist", "fashion_mnist", "cifar10", "svhn", "emnist"], req : Model_Analyze_Request):
+@app.get("/analyze/{model_version_id}/{dataset}", response_model=Model_Analyze_Response)
+async def analyze_model(model_version_id: str, dataset: Literal["mnist", "fashion_mnist", "cifar10", "svhn", "emnist"]):
 
     # model 가져오기
     model = load_model_from_minio(model_version_id)
-    layers = req.layers
+    layers = model.layers
     # 데이터 셋 가져오기
     test_dataset = load_dataset_from_minio(dataset, "test")
 
@@ -76,7 +76,7 @@ async def analyze_model(model_version_id: str, dataset: Literal["mnist", "fashio
             })
 
     code = get_code() # 현재
-    test_accuracy = get_test_accuracy() # 현재
+    test_accuracy = get_test_accuracy(model) # 나
     test_loss = get_test_loss() # 현재
     train_info = get_train_info() # 현재
     confusion_matrix = get_confusion_matrix(true_label, predicted_label) # 나

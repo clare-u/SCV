@@ -3,6 +3,7 @@ package com.scv.domain.user.service;
 import com.scv.domain.github.service.GithubService;
 import com.scv.domain.oauth2.CustomOAuth2User;
 import com.scv.domain.user.domain.User;
+import com.scv.domain.user.dto.request.CommitGithubRepositoryFileRequestDTO;
 import com.scv.domain.user.dto.request.GithubRepositoryNameRequestDTO;
 import com.scv.domain.user.dto.response.GithubRepositoryNameResponseDTO;
 import com.scv.domain.user.dto.response.UserProfileResponseDTO;
@@ -46,6 +47,8 @@ public class UserService {
             throw InternalServerErrorException.getInstance();
         }
 
+        userRepository.updateUserRepoById(authUser.getUserId(), requestDTO.getRepoName());
+
         return GithubRepositoryNameResponseDTO.builder()
                 .repoName(requestDTO.getRepoName())
                 .build();
@@ -61,6 +64,18 @@ public class UserService {
         return GithubRepositoryNameResponseDTO.builder()
                 .repoName(requestDTO.getRepoName())
                 .build();
+    }
+
+    public void disConnectGithubRepository(CustomOAuth2User authUser) {
+        userRepository.updateUserRepoById(authUser.getUserId(), null);
+    }
+
+    public String importModel(CustomOAuth2User auth2User, String modelName) {
+        return githubService.getGithubRepositoryFile(auth2User, modelName);
+    }
+
+    public String exportModel(CustomOAuth2User auth2User, CommitGithubRepositoryFileRequestDTO requestDTO) {
+        return githubService.commitGithubRepositoryFile(auth2User, requestDTO);
     }
 
 }

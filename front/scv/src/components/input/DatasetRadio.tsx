@@ -12,7 +12,7 @@ const colorMapping: Record<string, ChipsProps["color"]> = {
   전체: "black",
   MNIST: "indigo",
   Fashion: "amber",
-  "CIFAR-10": "green",
+  CIFAR10: "green",
   SVHN: "teal",
   EMNIST: "red",
 };

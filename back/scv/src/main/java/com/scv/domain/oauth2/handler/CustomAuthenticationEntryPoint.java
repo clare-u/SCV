@@ -21,8 +21,8 @@ public class CustomAuthenticationEntryPoint implements AuthenticationEntryPoint 
     public void commence(HttpServletRequest request, HttpServletResponse response, AuthenticationException authException) throws IOException {
         String url = request.getServletPath();
 
-        if (url.startsWith("/swagger-ui") || url.startsWith("/v3/api-docs")) {
-            response.sendRedirect("/oauth2/authorization/github");
+        if (url.startsWith("/api/swagger-ui") || url.startsWith("/api/v3/api-docs")) {
+            response.sendRedirect("/api/oauth2/authorization/github");
             return;
         }
 

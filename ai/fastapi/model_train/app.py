@@ -22,6 +22,7 @@ current_dir = os.path.dirname(os.path.abspath(__file__))
 root_dir = os.path.dirname(current_dir)
 sys.path.append(root_dir)
 
+from neural_network_builder.parsers.validators import ModelConfig, ModelLayerConfig, layer_classes
 from model_test.neural_network_builder.parsers.validators import ModelConfig, layer_classes
 
 try:

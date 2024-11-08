@@ -5,7 +5,6 @@ import com.scv.domain.github.dto.response.GithubRepositoryApiResponseDTO;
 import com.scv.domain.oauth2.CustomOAuth2User;
 import com.scv.domain.user.dto.request.CommitGithubRepositoryFileRequestDTO;
 import com.scv.domain.user.dto.request.GithubRepositoryNameRequestDTO;
-import com.scv.domain.user.dto.request.PullGithubRepositoryFileRequestDTO;
 import lombok.RequiredArgsConstructor;
 import org.springframework.stereotype.Service;
 
@@ -29,6 +28,9 @@ public class GithubService {
 
     // Github 에서 Repository 리스트의 이름들을 Set 으로 반환
     public Set<String> getGithubRepositoryNames(CustomOAuth2User authUser) {
+        System.out.println(githubApiService.getGithubRepositoryList(authUser).stream()
+                .map(GithubRepositoryApiResponseDTO::getName)
+                .collect(Collectors.toSet()));
         return githubApiService.getGithubRepositoryList(authUser).stream()
                 .map(GithubRepositoryApiResponseDTO::getName)
                 .collect(Collectors.toSet());
@@ -41,18 +43,21 @@ public class GithubService {
 
     // Github 에 파일을 커밋하는 메서드
     public String commitGithubRepositoryFile(CustomOAuth2User authUser, CommitGithubRepositoryFileRequestDTO requestDTO) {
+        System.out.println("111");
         String sha = githubApiService.getShaFromGithubRepositoryFile(authUser, requestDTO.getPath());
-
+        System.out.println("222");
         if (sha == null) {
+            System.out.println("333");
             return githubApiService.commitGithubRepositoryFile(authUser, requestDTO);
         } else {
+            System.out.println("444");
             return githubApiService.updateGithubRepositoryFile(authUser, requestDTO, sha);
         }
     }
 
     // Github 에서 파일에서 내용을 가져오는 메서드
-    public String getGithubRepositoryFile(CustomOAuth2User authUser, PullGithubRepositoryFileRequestDTO requestDTO) {
-        return githubApiService.getContentFromGithubRepositoryFile(authUser, requestDTO.getPath());
+    public String getGithubRepositoryFile(CustomOAuth2User authUser, String path) {
+        return githubApiService.getContentFromGithubRepositoryFile(authUser, path);
     }
 
 }

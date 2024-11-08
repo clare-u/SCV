@@ -17,7 +17,7 @@ import static com.scv.global.util.JwtUtil.*;
 @Component
 @RequiredArgsConstructor
 public class CustomLoginSuccessHandler extends SimpleUrlAuthenticationSuccessHandler {
-
+    
     @Override
     public void onAuthenticationSuccess(HttpServletRequest request, HttpServletResponse response, Authentication authentication) throws IOException {
         String accessToken = JwtUtil.createAccessToken((CustomOAuth2User) authentication.getPrincipal());
@@ -26,6 +26,6 @@ public class CustomLoginSuccessHandler extends SimpleUrlAuthenticationSuccessHan
         response.addCookie(CookieUtil.createCookie(ACCESS_TOKEN_NAME, accessToken, ACCESS_TOKEN_EXPIRATION));
         response.addCookie(CookieUtil.createCookie(REFRESH_TOKEN_NAME, refreshToken, REFRESH_TOKEN_EXPIRATION));
 
-        response.sendRedirect("http://localhost:3000/");
+        response.sendRedirect(System.getenv("DOMAIN"));
     }
 }

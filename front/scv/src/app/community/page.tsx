@@ -31,7 +31,7 @@ function Community() {
   const currentOrder = searchParams.get("order") || "추천순";
 
   // 상태 관리
-  const dataName = ["전체", "MNIST", "Fashion", "CIFAR-10", "SVHN", "EMNIST"];
+  const dataName = ["전체", "MNIST", "Fashion", "CIFAR10", "SVHN", "EMNIST"];
   const [selected, setSelected] = useState(currentDataName);
   const [selectedFilter, setSelectedFilter] = useState(currentOrder);
   const filterOptions = ["추천순", "최신순", "오래된순"];
@@ -146,14 +146,12 @@ function Community() {
             <BoardCard
               key={model.modelId}
               modelId={model.modelId}
-              versionId={`${model.latestNumber}`}
+              versionId={`${model.latestVersion}`}
               title={model.modelName}
-              version={`v${model.latestNumber}`} // version 값 수정
+              version={`v${model.latestVersion}`} // version 값 수정
               dataset={model.dataName}
-              profileImg={
-                model.userProfileResponseDTO.userImageUrl || "/profile.png"
-              }
-              nickname={model.userProfileResponseDTO.userNickname}
+              profileImg={model.userProfile.userImageUrl || "/profile.png"}
+              nickname={model.userProfile.userNickname}
               // accuracy={model.accuracy || "N/A"} // 기본값 설정
               updatedAt={model.updatedAt}
             />

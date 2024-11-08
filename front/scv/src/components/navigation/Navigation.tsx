@@ -5,29 +5,29 @@ import Link from "next/link";
 import Image from "next/image";
 import NavigationItem from "./NavigationItem";
 import NavigationProfile from "./NavigationProfile";
-import { useMemberStore } from "@/store/memberStore";
-import { useFetchMember } from "@/hooks";
+import { useUserStore } from "@/store/userStore";
+import { useFetchUser } from "@/hooks";
 import Loading from "../loading/Loading";
 
 const Navigation = () => {
-  const member = useMemberStore((state) => state.member); // zustand에서 현재 member 상태 가져오기
-  const setMember = useMemberStore((state) => state.setMember); // zustand에서 setMember 가져오기
+  const user = useUserStore((state) => state.user); // zustand에서 현재 member 상태 가져오기
+  const setUser = useUserStore((state) => state.setUser); // zustand에서 setMember 가져오기
   const [fetchData, setFetchData] = useState(false); // API 호출 여부를 제어하기 위한 로컬 상태
 
   useEffect(() => {
-    if (!member) {
+    if (!user) {
       setFetchData(true); // member가 없으면 데이터를 받아오도록 설정
     }
-  }, [member]);
+  }, [user]);
 
-  const { data: memberData, isLoading, error } = useFetchMember(); // 인자 없이 호출
+  const { data: userData, isLoading, error } = useFetchUser(); // 인자 없이 호출
 
   useEffect(() => {
-    if (memberData && !member && fetchData) {
-      setMember(memberData); // member 상태가 없을 때만 zustand에 저장
+    if (userData && !user && fetchData) {
+      setUser(userData); // member 상태가 없을 때만 zustand에 저장
       setFetchData(false); // 데이터를 받아온 후 다시 API 호출을 막기 위해 설정
     }
-  }, [memberData, member, setMember, fetchData]);
+  }, [userData, user, setUser, fetchData]);
 
   return (
     <nav className="sticky top-0 z-50 flex h-[80px] items-center justify-between bg-indigo-800 px-40">
@@ -48,12 +48,12 @@ const Navigation = () => {
         {isLoading ? (
           // 로딩 중일 때 표시할 로딩 스피너 또는 텍스트
           <Loading />
-        ) : memberData ? (
+        ) : userData ? (
           <NavigationProfile
-            image={memberData.userImageUrl}
-            nickname={memberData.userNickname}
-            email={memberData.userEmail}
-            repo={memberData.userRepo}
+            image={userData.userImageUrl}
+            nickname={userData.userNickname}
+            email={userData.userEmail}
+            repo={userData.userRepo}
           />
         ) : (
           <NavigationItem href="/login" icon="login">
