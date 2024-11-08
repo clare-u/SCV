@@ -25,3 +25,7 @@ export const existingRepo = async (data: CreateRepo) => {
     data,
   );
 };
+
+export const deleteRepo = async () => {
+  return handleApiRequest<void, "delete">("/api/v1/users/repo", "delete");
+};
