@@ -9,6 +9,9 @@ public class CommitGithubRepositoryFileRequestDTO {
     @JsonProperty("path")
     private String path;
 
+    @JsonProperty("versionNo")
+    private Long versionNo;
+
     @JsonProperty("content")
     private String content;
 }

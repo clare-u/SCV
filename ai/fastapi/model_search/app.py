@@ -11,12 +11,15 @@ from dotenv import load_dotenv
 from model_layer_class import Layer, deserialize_layers, serialize_layers
 import json
 import os
+import redis
 
 load_dotenv(verbose=True)
 db_name = os.getenv("DB_NAME")
 collection_name = os.getenv("COLLECTION_NAME")
 milvus_host_name = os.getenv("MILVUS_HOST_NAME")
 milvus_port = os.getenv("MILVUS_PORT")
+redis_host_name = os.getenv("REDIS_HOST_NAME")
+redis_port = os.getenv("REDIS_PORT")
 
 app = FastAPI(root_path="/fast/v1/model/match")
 
@@ -29,6 +32,7 @@ client.load_collection(
     collection_name=collection_name
 )
 
+redis = redis.Redis(host=redis_host_name, port= redis_port, db=0)
 
 # vectordb에서 한 레이어 조회
 @app.get("/{model_version_id}/{layer_id}", response_model=Model_Read_Response)
@@ -102,12 +106,19 @@ async def search_model(model_version_id: str, layer_id: str):
     
     model_version_layer_id = "{}_{}".format(model_version_id, layer_id)
 
+    cached = redis.get(model_version_layer_id)
+    if cached:
+        print("응답이 캐싱되었습니다.")
+        cached = json.loads(cached)
+        cached["layers"] = deserialize_layers(cached["layers"])
+        return cached
+
     model = client.get(
         collection_name=collection_name,
         ids=[model_version_layer_id]
     )
 
-    print("layer를 찾았습니다. : {}".format(model))
+    print("layer를 찾았습니다.")
 
     if (len(model) == 0):
         raise InvalidModelId(model_version_layer_id)
@@ -123,12 +134,10 @@ async def search_model(model_version_id: str, layer_id: str):
         output_fields=["model_version_layer_id", "test_accuracy", "cka_vec", "layers"],
         search_params={"metric_type": "IP"}, 
         limit=1,
-        filter="model_version_layer_id != '{}'".format(model_version_layer_id)
+        # filter="model_version_layer_id != '{}'".format(model_version_layer_id)
         # 성능이 더 좋은 모델만 찾아주려면, 아무 것도 찾지 못했을 수 있음
         # filter="test_accuracy > {}".format(model[0]["test_accuracy"])
     )
-
-    print(results)
 
     if(len(results[0]) == 0) :
         raise LayerNotFound()
@@ -148,7 +157,13 @@ async def search_model(model_version_id: str, layer_id: str):
     
     searched = deserialize_layers(searched)
 
-    return {"model_version_id": searched_model_version_id, "layer_id": searched_layer_id, "gpt_description": gpt_description, "test_accuracy": searched_test_accuracy, "layers": searched}
+    resp = {"model_version_id": searched_model_version_id, "layer_id": searched_layer_id, "gpt_description": gpt_description, "test_accuracy": searched_test_accuracy, "layers": serialize_layers(searched)}
+
+    redis.set(model_version_layer_id, json.dumps(resp))
+    redis.expire(model_version_layer_id, 3600)
+
+    resp["layers"] = deserialize_layers(resp["layers"])
+    return resp
 
 @app.exception_handler(InvalidModelId)
 def invalid_model_id_exception_handler(req, exc: InvalidModelId):
