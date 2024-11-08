@@ -15,6 +15,7 @@ import org.springframework.stereotype.Service;
 import org.springframework.web.client.RestTemplate;
 
 import java.time.LocalDateTime;
+import java.time.format.DateTimeFormatter;
 import java.util.Base64;
 import java.util.Collections;
 import java.util.List;
@@ -122,10 +123,10 @@ public class GithubApiService {
     // https://docs.github.com/ko/rest/repos/contents?apiVersion=2022-11-28#create-or-update-file-contents
     public String commitGithubRepositoryFile(CustomOAuth2User authUser, CommitGithubRepositoryFileRequestDTO requestDTO) {
         System.out.println("aaa");
-        String url = GITHUB_API_URL + "/repos/" + authUser.getUserNickname() + "/" + authUser.getUserRepo() + "/contents/" + requestDTO.getPath();
+        String url = GITHUB_API_URL + "/repos/" + authUser.getUserNickname() + "/" + authUser.getUserRepo() + "/contents/" + requestDTO.getPath() + "/block.json";
         System.out.println("url = " + url);
         CommitGithubRepositoryFileApiRequestDTO requestBody = CommitGithubRepositoryFileApiRequestDTO.builder()
-                .message("feat: [" + LocalDateTime.now() + "] " + requestDTO.getPath())
+                .message("feat: [" + LocalDateTime.now().format(DateTimeFormatter.ofPattern("yyyy-MM-dd HH:mm:ss")) + "] " + requestDTO.getPath())
                 .content(Base64.getEncoder().encodeToString(requestDTO.getContent().getBytes()))
                 .build();
         System.out.println("requestBody = " + requestBody);
@@ -143,10 +144,10 @@ public class GithubApiService {
     // Github 에 파일을 커밋하는 메서드
     // https://docs.github.com/ko/rest/repos/contents?apiVersion=2022-11-28#create-or-update-file-contents
     public String updateGithubRepositoryFile(CustomOAuth2User authUser, CommitGithubRepositoryFileRequestDTO requestDTO, String sha) {
-        String url = GITHUB_API_URL + "/repos/" + authUser.getUserNickname() + "/" + authUser.getUserRepo() + "/contents/" + requestDTO.getPath();
+        String url = GITHUB_API_URL + "/repos/" + authUser.getUserNickname() + "/" + authUser.getUserRepo() + "/contents/" + requestDTO.getPath() + "/block.json";
 
         CommitGithubRepositoryFileApiRequestDTO requestBody = CommitGithubRepositoryFileApiRequestDTO.builder()
-                .message("refactor: [" + LocalDateTime.now() + "] " + requestDTO.getPath())
+                .message("refactor: [" + LocalDateTime.now().format(DateTimeFormatter.ofPattern("yyyy-MM-dd HH-mm-ss")) + "] " + requestDTO.getPath())
                 .content(Base64.getEncoder().encodeToString(requestDTO.getContent().getBytes()))
                 .sha(sha)
                 .build();
@@ -165,7 +166,7 @@ public class GithubApiService {
     // https://docs.github.com/ko/rest/repos/contents?apiVersion=2022-11-28#get-repository-content
     private GithubRepositoryFileApiResponseDTO getGithubRepositoryFile(CustomOAuth2User authUser, String path) {
         System.out.println("888");
-        String url = GITHUB_API_URL + "/repos/" + authUser.getUserNickname() + "/" + authUser.getUserRepo() + "/contents/" + path;
+        String url = GITHUB_API_URL + "/repos/" + authUser.getUserNickname() + "/" + authUser.getUserRepo() + "/contents/" + path + "/block.json";
         System.out.println("url = " + url);
         HttpEntity<GithubRepositoryFileApiResponseDTO> entity = new HttpEntity<>(createHeaders(getAccessToken(authUser.getName())));
 
