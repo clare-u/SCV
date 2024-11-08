@@ -11,7 +11,7 @@ export const useDeleteRepo = () => {
 
     onSuccess: () => {
       // 성공 시 토스트 메시지 표시
-      toast.success("레포지토리 연동이 해제되었습니다");
+      toast.success("레포지토리 연동이 해제되었습니다.");
       refetch();
     },
 
