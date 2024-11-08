@@ -63,6 +63,17 @@ public class UserController {
         return new ResponseEntity<>(responseDTO, HttpStatus.OK);
     }
 
+    @DeleteMapping("/repo")
+    @Operation(summary = "깃허브 리포 연동을 해제", description = "깃허브 리포 연동을 해제합니다.")
+    @ApiResponses(value = {
+            @ApiResponse(responseCode = "200", description = "깃허브 리포 연동을 해제 성공"),
+            @ApiResponse(responseCode = "404", description = "사용자를 찾을 수 없음", content = @Content(schema = @Schema(implementation = ErrorResponse.class)))
+    })
+    public ResponseEntity<Void> disConnectGithubRepository(@AuthUser CustomOAuth2User authUser) {
+        userService.disConnectGithubRepository(authUser);
+        return new ResponseEntity<>(HttpStatus.NO_CONTENT);
+    }
+
     @GetMapping("/repo/import")
     @Operation(summary = "깃허브에서 모델 import", description = "깃허브에서 블록 json 파일을 import 합니다.")
     @ApiResponses(value = {
