@@ -5,7 +5,7 @@ import com.scv.domain.data.enums.DataSet;
 import lombok.Getter;
 
 @Getter
-public class CommitGithubRepositoryFileRequestDTO {
+public class CommitGithubRepoFileRequestDTO {
 
     @JsonProperty("dataName")
     private DataSet dataName;
