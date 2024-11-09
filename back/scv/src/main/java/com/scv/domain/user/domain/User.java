@@ -47,7 +47,6 @@ public class User {
     @Column(name = "user_is_deleted", nullable = false)
     private boolean userIsDeleted;
 
-    // Model과 양방향 매핑
     @OneToMany(mappedBy = "user", fetch = FetchType.LAZY)
     private List<Model> models;
 }

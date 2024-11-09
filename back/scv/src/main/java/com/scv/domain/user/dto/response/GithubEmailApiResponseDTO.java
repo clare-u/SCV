@@ -1,4 +1,4 @@
-package com.scv.domain.github.dto.response;
+package com.scv.domain.user.dto.response;
 
 import com.fasterxml.jackson.annotation.JsonProperty;
 import lombok.AllArgsConstructor;
@@ -13,12 +13,6 @@ public class GithubEmailApiResponseDTO {
     @JsonProperty("email")
     private String email;
 
-    @JsonProperty("verified")
-    private Boolean verified;
-
     @JsonProperty("primary")
     private Boolean primary;
-
-    @JsonProperty("visibility")
-    private String visibility;
 }

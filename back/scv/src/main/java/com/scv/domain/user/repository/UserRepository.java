@@ -4,6 +4,7 @@ import com.scv.domain.user.domain.User;
 import org.springframework.data.jpa.repository.JpaRepository;
 import org.springframework.data.jpa.repository.Modifying;
 import org.springframework.data.jpa.repository.Query;
+import org.springframework.data.repository.query.Param;
 import org.springframework.stereotype.Repository;
 
 import java.util.Optional;
@@ -15,5 +16,5 @@ public interface UserRepository extends JpaRepository<User, Long> {
 
     @Modifying
     @Query("UPDATE User u SET u.userRepo = :userRepo WHERE u.userId = :userId")
-    void updateUserRepoById(Long userId, String userRepo);
+    void updateUserRepoById(@Param("userId") Long userId, @Param("userRepo") String userRepo);
 }

@@ -1,4 +1,4 @@
-package com.scv.domain.github.dto.request;
+package com.scv.domain.user.dto.request;
 
 import com.fasterxml.jackson.annotation.JsonProperty;
 import lombok.Builder;
@@ -6,7 +6,7 @@ import lombok.Getter;
 
 @Builder
 @Getter
-public class CommitGithubRepositoryFileApiRequestDTO {
+public class CommitGithubRepoFileApiRequestDTO {
 
     @JsonProperty("message")
     private String message;
