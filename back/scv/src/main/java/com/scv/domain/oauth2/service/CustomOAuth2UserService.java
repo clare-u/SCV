@@ -7,7 +7,7 @@ import com.scv.domain.oauth2.user.OAuth2GithubResponse;
 import com.scv.domain.oauth2.user.OAuth2Response;
 import com.scv.domain.user.domain.User;
 import com.scv.domain.user.repository.UserRepository;
-import com.scv.domain.github.service.GithubService;
+import com.scv.domain.user.service.GithubService;
 import lombok.RequiredArgsConstructor;
 import org.springframework.security.oauth2.client.userinfo.DefaultOAuth2UserService;
 import org.springframework.security.oauth2.client.userinfo.OAuth2UserRequest;
