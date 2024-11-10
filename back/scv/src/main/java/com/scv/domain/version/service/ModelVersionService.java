@@ -10,7 +10,7 @@ import com.scv.domain.data.repository.DataRepository;
 import com.scv.domain.model.domain.Model;
 import com.scv.domain.model.exception.ModelNotFoundException;
 import com.scv.domain.model.repository.ModelRepository;
-import com.scv.domain.oauth2.CustomOAuth2User;
+import com.scv.global.oauth2.auth.CustomOAuth2User;
 import com.scv.domain.result.domain.Result;
 import com.scv.domain.result.dto.request.ResultRequest;
 import com.scv.domain.result.dto.response.ResultResponse;
