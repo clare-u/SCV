@@ -1,12 +1,12 @@
 package com.scv.global.config;
 
-import com.scv.domain.oauth2.handler.CustomAccessDeniedHandler;
-import com.scv.domain.oauth2.handler.CustomAuthenticationEntryPoint;
-import com.scv.domain.oauth2.handler.CustomLoginFailureHandler;
-import com.scv.domain.oauth2.handler.CustomLoginSuccessHandler;
-import com.scv.domain.oauth2.service.CustomOAuth2UserService;
-import com.scv.global.filter.CustomJwtLogoutFilter;
-import com.scv.global.filter.JwtFilter;
+import com.scv.global.oauth2.handler.CustomAccessDeniedHandler;
+import com.scv.global.oauth2.handler.CustomAuthenticationEntryPoint;
+import com.scv.global.oauth2.handler.CustomLoginFailureHandler;
+import com.scv.global.oauth2.handler.CustomLoginSuccessHandler;
+import com.scv.global.oauth2.service.CustomOAuth2UserService;
+import com.scv.global.jwt.filter.CustomJwtLogoutFilter;
+import com.scv.global.jwt.filter.JwtVerifyFilter;
 import lombok.RequiredArgsConstructor;
 import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Configuration;
@@ -27,7 +27,7 @@ import java.util.Collections;
 @RequiredArgsConstructor
 public class SecurityConfig {
 
-    private final JwtFilter jwtFilter;
+    private final JwtVerifyFilter jwtVerifyFilter;
     private final CustomJwtLogoutFilter customJwtLogoutFilter;
 
     private final CustomOAuth2UserService customOAuth2UserService;
@@ -60,9 +60,9 @@ public class SecurityConfig {
         http.formLogin(AbstractHttpConfigurer::disable);
         http.httpBasic(AbstractHttpConfigurer::disable);
 
-        // JwtFilter 추가
+        // JwtVerifyFilter 추가
         // 로그아웃 필터 추가
-        http.addFilterBefore(jwtFilter, UsernamePasswordAuthenticationFilter.class);
+        http.addFilterBefore(jwtVerifyFilter, UsernamePasswordAuthenticationFilter.class);
         http.addFilterBefore(customJwtLogoutFilter, LogoutFilter.class);
 
         // oauth2
