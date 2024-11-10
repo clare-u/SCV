@@ -1,7 +1,6 @@
-package com.scv.domain.oauth2.handler;
+package com.scv.global.oauth2.handler;
 
-import com.fasterxml.jackson.databind.ObjectMapper;
-import com.scv.global.error.ErrorResponse;
+import com.scv.global.jwt.exception.InvalidTokenException;
 import jakarta.servlet.http.HttpServletRequest;
 import jakarta.servlet.http.HttpServletResponse;
 import org.springframework.security.core.AuthenticationException;
@@ -10,12 +9,8 @@ import org.springframework.stereotype.Component;
 
 import java.io.IOException;
 
-import static com.scv.global.error.ErrorCode.INVALID_TOKEN;
-
 @Component
 public class CustomAuthenticationEntryPoint implements AuthenticationEntryPoint {
-
-    private final ObjectMapper objectMapper = new ObjectMapper();
 
     @Override
     public void commence(HttpServletRequest request, HttpServletResponse response, AuthenticationException authException) throws IOException {
@@ -26,9 +21,6 @@ public class CustomAuthenticationEntryPoint implements AuthenticationEntryPoint 
             return;
         }
 
-        ErrorResponse errorResponse = new ErrorResponse(INVALID_TOKEN);
-        response.setStatus(INVALID_TOKEN.getHttpStatus());
-        response.setCharacterEncoding("UTF-8");
-        response.getWriter().write(objectMapper.writeValueAsString(errorResponse));
+        throw InvalidTokenException.getInstance();
     }
 }
