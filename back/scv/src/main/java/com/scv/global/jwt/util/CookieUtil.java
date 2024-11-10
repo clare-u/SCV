@@ -1,14 +1,17 @@
-package com.scv.global.util;
+package com.scv.global.jwt.util;
 
 import jakarta.servlet.http.Cookie;
 import jakarta.servlet.http.HttpServletRequest;
 import jakarta.servlet.http.HttpServletResponse;
 
+import java.util.Arrays;
+import java.util.Optional;
+
 public class CookieUtil {
 
     public static Cookie createCookie(String key, String value, int maxAge) {
         Cookie cookie = new Cookie(key, value);
-        cookie.setMaxAge(maxAge * 2);
+        cookie.setMaxAge(maxAge);
         cookie.setSecure(true);
         cookie.setPath("/");
         cookie.setHttpOnly(true);
@@ -28,19 +31,11 @@ public class CookieUtil {
         response.addCookie(cookie);
     }
 
-    public static Cookie getCookie(HttpServletRequest request, String key) {
-        Cookie[] cookies = request.getCookies();
-
-        if(cookies == null) {
-            return null;
-        }
-
-        for (Cookie cookie : cookies) {
-            if (cookie.getName().equals(key)) {
-                return cookie;
-            }
-        }
-
-        return null;
+    public static Optional<Cookie> getCookie(HttpServletRequest request, String key) {
+        return Optional.ofNullable(request.getCookies())
+                .stream()
+                .flatMap(Arrays::stream)
+                .filter(cookie -> cookie.getName().equals(key))
+                .findFirst();
     }
 }
