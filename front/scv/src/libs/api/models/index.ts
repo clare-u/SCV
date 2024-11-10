@@ -77,3 +77,9 @@ export const fetchMyWorkingModels = async (
   console.log("API 요청 URL:", url);
   return handleApiRequest<MyModelList, "get">(url, "get");
 };
+
+// 모델 버전 삭제하는 함수
+export const deleteVersion = async (versionId: number) => {
+  const url = `/api/v1/models/versions/${versionId}`;
+  return handleApiRequest<void, "delete">(url, "delete");
+};
