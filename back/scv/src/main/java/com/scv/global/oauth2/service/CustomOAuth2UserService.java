@@ -1,10 +1,10 @@
-package com.scv.domain.oauth2.service;
+package com.scv.global.oauth2.service;
 
-import com.scv.domain.oauth2.CustomOAuth2User;
-import com.scv.domain.oauth2.OAuth2Provider;
-import com.scv.domain.oauth2.dto.OAuth2UserDTO;
-import com.scv.domain.oauth2.user.OAuth2GithubResponse;
-import com.scv.domain.oauth2.user.OAuth2Response;
+import com.scv.global.oauth2.auth.CustomOAuth2User;
+import com.scv.global.oauth2.enums.OAuth2Provider;
+import com.scv.global.oauth2.dto.OAuth2UserDTO;
+import com.scv.global.oauth2.user.OAuth2GithubResponse;
+import com.scv.global.oauth2.user.OAuth2Response;
 import com.scv.domain.user.domain.User;
 import com.scv.domain.user.repository.UserRepository;
 import com.scv.domain.user.service.GithubService;

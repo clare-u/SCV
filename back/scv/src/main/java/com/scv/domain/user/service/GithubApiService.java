@@ -9,14 +9,13 @@ import com.scv.domain.user.dto.response.GithubRepoApiResponseDTO;
 import com.scv.domain.user.dto.response.GithubRepoFileApiResponseDTO;
 import com.scv.domain.user.exception.GithubNotFoundException;
 import com.scv.domain.user.util.GithubUrlBuilder;
-import com.scv.domain.oauth2.CustomOAuth2User;
+import com.scv.global.oauth2.auth.CustomOAuth2User;
 import com.scv.domain.user.dto.request.CommitGithubRepoFileRequestDTO;
 import lombok.RequiredArgsConstructor;
 import org.springframework.core.ParameterizedTypeReference;
 import org.springframework.http.*;
 import org.springframework.security.oauth2.client.OAuth2AuthorizedClientService;
 import org.springframework.stereotype.Service;
-import org.springframework.web.client.RestClientException;
 import org.springframework.web.client.RestTemplate;
 
 import java.util.Base64;

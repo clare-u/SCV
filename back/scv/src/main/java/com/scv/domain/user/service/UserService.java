@@ -1,6 +1,6 @@
 package com.scv.domain.user.service;
 
-import com.scv.domain.oauth2.CustomOAuth2User;
+import com.scv.global.oauth2.auth.CustomOAuth2User;
 import com.scv.domain.user.domain.User;
 import com.scv.domain.user.dto.response.UserProfileResponseDTO;
 import com.scv.domain.user.exception.UserNotFoundException;

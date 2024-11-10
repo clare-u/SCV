@@ -1,4 +1,4 @@
-package com.scv.domain.oauth2.exception;
+package com.scv.global.jwt.exception;
 
 import com.scv.global.error.ErrorCode;
 import com.scv.global.error.ServiceException;

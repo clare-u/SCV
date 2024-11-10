@@ -1,8 +1,8 @@
 package com.scv.domain.user.controller;
 
 import com.scv.domain.data.enums.DataSet;
-import com.scv.domain.oauth2.AuthUser;
-import com.scv.domain.oauth2.CustomOAuth2User;
+import com.scv.global.oauth2.auth.AuthUser;
+import com.scv.global.oauth2.auth.CustomOAuth2User;
 import com.scv.domain.user.dto.request.CommitGithubRepoFileRequestDTO;
 import com.scv.domain.user.dto.request.LinkGithubRepoRequestDTO;
 import com.scv.domain.user.dto.response.GithubRepoFileResponseDTO;

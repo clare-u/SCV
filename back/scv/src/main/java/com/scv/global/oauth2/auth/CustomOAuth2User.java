@@ -1,6 +1,6 @@
-package com.scv.domain.oauth2;
+package com.scv.global.oauth2.auth;
 
-import com.scv.domain.oauth2.dto.OAuth2UserDTO;
+import com.scv.global.oauth2.dto.OAuth2UserDTO;
 import lombok.RequiredArgsConstructor;
 import org.springframework.security.core.GrantedAuthority;
 import org.springframework.security.oauth2.core.user.OAuth2User;

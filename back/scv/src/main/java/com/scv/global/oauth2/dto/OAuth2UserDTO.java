@@ -1,4 +1,4 @@
-package com.scv.domain.oauth2.dto;
+package com.scv.global.oauth2.dto;
 
 import lombok.Builder;
 import lombok.Getter;
