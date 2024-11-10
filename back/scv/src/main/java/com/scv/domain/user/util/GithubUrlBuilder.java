@@ -1,7 +1,7 @@
 package com.scv.domain.user.util;
 
 import com.scv.domain.data.enums.DataSet;
-import com.scv.domain.oauth2.CustomOAuth2User;
+import com.scv.global.oauth2.auth.CustomOAuth2User;
 import org.springframework.stereotype.Component;
 import org.springframework.web.util.UriComponentsBuilder;
 
