@@ -1,4 +1,4 @@
-package com.scv.domain.oauth2;
+package com.scv.global.oauth2.enums;
 
 import java.util.HashMap;
 import java.util.Map;
