@@ -1,4 +1,4 @@
-package com.scv.domain.oauth2.user;
+package com.scv.global.oauth2.user;
 
 import java.time.LocalDateTime;
 
