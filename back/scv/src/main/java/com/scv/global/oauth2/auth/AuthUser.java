@@ -1,4 +1,4 @@
-package com.scv.domain.oauth2;
+package com.scv.global.oauth2.auth;
 
 import org.springframework.security.core.annotation.AuthenticationPrincipal;
 
