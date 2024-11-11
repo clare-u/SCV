@@ -192,7 +192,7 @@ public class ModelVersionService {
         // Result 엔티티 생성 및 저장
         Result result = Result.builder()
                 .modelVersion(modelVersion)
-                .code(codeJson) // JSON으로 변환된 코드 저장
+                .code(codeJson)
                 .testAccuracy(finalTestAccuracy)
                 .testLoss(finalTestLoss)
                 .layerParams(layerParams)
@@ -234,7 +234,6 @@ public class ModelVersionService {
         JsonNode rootNode = ParsingUtil.parseJson(jsonResponse, JsonNode.class);
 
         result = result.toBuilder()
-                .code(ParsingUtil.getJsonFieldAsString(rootNode, "code"))
                 .confusionMatrix(ParsingUtil.getJsonFieldAsString(rootNode, "confusion_matrix"))
                 .exampleImg(ParsingUtil.getJsonFieldAsString(rootNode, "example_image"))
                 .featureActivation(ParsingUtil.getJsonFieldAsString(rootNode, "feature_activation"))
@@ -251,6 +250,7 @@ public class ModelVersionService {
         modelVersionRepository.save(modelVersion);
 
         model.setLatestVersion(latest + 1);
+        model.setAccuracy(result.getTestAccuracy());
         modelRepository.save(model);
 
         return new ResultResponseWithImages(result);

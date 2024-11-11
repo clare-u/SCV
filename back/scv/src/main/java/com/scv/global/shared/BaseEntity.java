@@ -15,7 +15,7 @@ import java.time.LocalDateTime;
 public class BaseEntity {
 
     @CreatedDate
-    private LocalDateTime createdAt;
+    private LocalDateTime createdAt ;
 
     @LastModifiedDate
     private LocalDateTime updatedAt;
@@ -26,13 +26,13 @@ public class BaseEntity {
      * 소프트 삭제
      */
     public void delete() {
-        this.deleted = true; // setter 없이 직접 필드 접근
+        this.deleted = true;
     }
 
     /**
      * 복원
      */
     public void restore() {
-        this.deleted = false; // setter 없이 직접 필드 접근
+        this.deleted = false;
     }
 }
