@@ -6,9 +6,15 @@ import com.scv.domain.data.exception.DataNotFoundException;
 import com.scv.domain.data.repository.DataRepository;
 import com.scv.domain.model.domain.Model;
 import com.scv.domain.model.dto.request.ModelCreateRequest;
+import com.scv.domain.model.dto.response.ModelDetailResponse;
 import com.scv.domain.model.dto.response.ModelResponse;
 import com.scv.domain.model.exception.ModelNotFoundException;
 import com.scv.domain.model.repository.ModelRepository;
+import com.scv.domain.result.domain.Result;
+import com.scv.domain.result.dto.response.ResultResponseWithImages;
+import com.scv.domain.result.repository.ResultRepository;
+import com.scv.domain.version.dto.response.ModelVersionDetail;
+import com.scv.domain.version.dto.response.ModelVersionDetailWithResult;
 import com.scv.global.oauth2.auth.CustomOAuth2User;
 import com.scv.domain.user.domain.User;
 import com.scv.domain.user.exception.UserNotFoundException;
@@ -24,7 +30,9 @@ import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
 import java.util.ArrayList;
+import java.util.Comparator;
 import java.util.List;
+import java.util.Optional;
 import java.util.stream.Collectors;
 
 @Service
@@ -36,6 +44,7 @@ public class ModelService {
     private final ModelVersionRepository modelVersionRepository;
     private final DataRepository dataRepository;
     private final UserRepository userRepository;
+    private final ResultRepository resultRepository;
 
     // 모델 생성
     @Transactional
@@ -86,14 +95,28 @@ public class ModelService {
         return models.map(ModelResponse::new);
     }
 
-
     // 모델 버전 조회
     @Transactional(readOnly = true)
-    public List<ModelVersionResponse> getModelVersions(Long modelId) {
+    public ModelDetailResponse getModelVersions(Long modelId) {
         List<ModelVersion> modelVersions = modelVersionRepository.findAllByModel_IdAndDeletedFalse(modelId);
-        return modelVersions.stream()
+
+        modelVersions.sort(Comparator.comparing(ModelVersion::getVersionNo).reversed());
+
+        ModelVersion latestVersion = modelVersions.get(0);
+        ModelVersionDetail latestVersionDetail;
+
+        if (latestVersion.getResult() != null) {
+            ResultResponseWithImages resultResponse = new ResultResponseWithImages(latestVersion.getResult());
+            latestVersionDetail = new ModelVersionDetailWithResult(latestVersion, resultResponse);
+        } else {
+            latestVersionDetail = new ModelVersionDetail(latestVersion);
+        }
+
+        List<ModelVersionResponse> modelVersionResponses = modelVersions.stream()
                 .map(ModelVersionResponse::new)
                 .collect(Collectors.toList());
+
+        return new ModelDetailResponse(modelVersionResponses, Optional.of(latestVersionDetail));
     }
 
 

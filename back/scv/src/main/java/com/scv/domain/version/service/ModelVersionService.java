@@ -150,7 +150,7 @@ public class ModelVersionService {
         modelRepository.save(model);
     }
 
-
+    // 모델 실행 및 저장
     @Transactional
     public ResultResponse runResult(Long modelVersionId) {
         ModelVersion modelVersion = modelVersionRepository.findById(modelVersionId)
@@ -215,12 +215,14 @@ public class ModelVersionService {
         ModelVersion modelVersion = modelVersionRepository.findById(modelVersionId)
                 .orElseThrow(ModelVersionNotFoundException::new);
         Result result = resultRepository.findById(modelVersionId).orElseThrow(ResultNotFoundException::new);
+        Long modelId = modelVersion.getModel().getId();
         String data = dataName.toString();
 
         if (data.equals("Fashion")) {
             data += "_MNIST";
         }
-        String url = "http://localhost:8002/fast/v1/model/test/analyze/" + modelVersionId + "/" + data.toLowerCase();
+
+        String url = "http://localhost:8002/fast/v1/model/test/analyze/" + modelId + "/" + modelVersionId + "/" + data.toLowerCase();
         RestTemplate restTemplate = new RestTemplate();
 
         HttpHeaders headers = new HttpHeaders();
