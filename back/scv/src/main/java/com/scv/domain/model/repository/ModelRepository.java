@@ -15,6 +15,7 @@ public interface ModelRepository extends JpaRepository<Model, Long> {
 
     @Query("SELECT m FROM Model m " +
             "WHERE m.deleted = false " +
+            "AND m.latestVersion != 0" +
             "AND (:modelName IS NULL OR m.name LIKE CONCAT('%', :modelName, '%')) " +
             "AND (:dataName IS NULL OR m.data.name = :dataName) " +
             "AND (:userId IS NULL OR m.user.userId = :userId)")
@@ -25,6 +26,7 @@ public interface ModelRepository extends JpaRepository<Model, Long> {
 
     @Query("SELECT m FROM Model m " +
             "WHERE m.deleted = false " +
+            "AND m.latestVersion != 0" +
             "AND (:modelName IS NULL OR m.name LIKE CONCAT('%', :modelName, '%')) " +
             "AND (:dataName IS NULL OR m.data.name = :dataName) ")
     Page<Model> searchModels(@Param("modelName") String modelName,

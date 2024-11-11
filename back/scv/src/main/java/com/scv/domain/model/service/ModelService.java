@@ -6,21 +6,16 @@ import com.scv.domain.data.exception.DataNotFoundException;
 import com.scv.domain.data.repository.DataRepository;
 import com.scv.domain.model.domain.Model;
 import com.scv.domain.model.dto.request.ModelCreateRequest;
+import com.scv.domain.model.dto.response.ModelCreateResponse;
 import com.scv.domain.model.dto.response.ModelDetailResponse;
 import com.scv.domain.model.dto.response.ModelResponse;
 import com.scv.domain.model.exception.ModelNotFoundException;
 import com.scv.domain.model.repository.ModelRepository;
-import com.scv.domain.result.domain.Result;
-import com.scv.domain.result.dto.response.ResultResponseWithImages;
-import com.scv.domain.result.repository.ResultRepository;
-import com.scv.domain.version.dto.response.ModelVersionDetail;
-import com.scv.domain.version.dto.response.ModelVersionDetailWithResult;
 import com.scv.global.oauth2.auth.CustomOAuth2User;
 import com.scv.domain.user.domain.User;
 import com.scv.domain.user.exception.UserNotFoundException;
 import com.scv.domain.user.repository.UserRepository;
 import com.scv.domain.version.domain.ModelVersion;
-import com.scv.domain.version.dto.response.ModelVersionResponse;
 import com.scv.domain.version.repository.ModelVersionRepository;
 import lombok.RequiredArgsConstructor;
 import org.apache.coyote.BadRequestException;
@@ -30,10 +25,7 @@ import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
 import java.util.ArrayList;
-import java.util.Comparator;
 import java.util.List;
-import java.util.Optional;
-import java.util.stream.Collectors;
 
 @Service
 @RequiredArgsConstructor
@@ -44,11 +36,10 @@ public class ModelService {
     private final ModelVersionRepository modelVersionRepository;
     private final DataRepository dataRepository;
     private final UserRepository userRepository;
-    private final ResultRepository resultRepository;
 
     // 모델 생성
     @Transactional
-    public void createModel(ModelCreateRequest request, CustomOAuth2User user) {
+    public ModelCreateResponse createModel(ModelCreateRequest request, CustomOAuth2User user) {
         Data data = dataRepository.findByName(request.dataName()).orElseThrow(DataNotFoundException::new);
         User existingUser = userRepository.findById(user.getUserId()).orElseThrow(UserNotFoundException::getInstance);
 
@@ -65,12 +56,13 @@ public class ModelService {
         ModelVersion firstVersion = ModelVersion.builder()
                 .model(savedModel)
                 .versionNo(0)
-                .layers("[]")
                 .build();
 
         savedModel.getModelVersions().add(firstVersion);
 
         modelVersionRepository.save(firstVersion);
+
+        return new ModelCreateResponse(savedModel.getId(), firstVersion.getId());
     }
 
 
