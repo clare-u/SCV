@@ -250,6 +250,7 @@ public class ModelVersionService {
         modelVersionRepository.save(modelVersion);
 
         model.setLatestVersion(latest + 1);
+        model.setAccuracy(result.getTestAccuracy());
         modelRepository.save(model);
 
         return new ResultResponseWithImages(result);
