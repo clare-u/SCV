@@ -1,4 +1,10 @@
-import { Content, ModelQueryParams, MyModelList, ModelVersions } from "@/types";
+import {
+  Content,
+  ModelQueryParams,
+  MyModelList,
+  ModelVersions,
+  VersionResponse,
+} from "@/types";
 import { handleApiRequest } from "../client";
 
 const DEFAULT_PARAMS: ModelQueryParams = {
@@ -89,4 +95,11 @@ export const fetchModelVersions = async (modelId: number) => {
   const url = `/api/v1/models/${modelId}`;
   console.log("API 요청 URL:", url);
   return handleApiRequest<ModelVersions, "get">(url, "get");
+};
+
+// 모델 버전 상세 조회
+export const fetchVersionDetails = async (versionId: number) => {
+  const url = `/api/v1/models/versions/${versionId}`;
+  console.log("API 요청 URL:", url);
+  return handleApiRequest<VersionResponse, "get">(url, "get");
 };

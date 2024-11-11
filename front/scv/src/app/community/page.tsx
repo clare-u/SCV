@@ -146,13 +146,13 @@ function Community() {
             <BoardCard
               key={model.modelId}
               modelId={model.modelId}
-              versionId={`${model.latestVersion}`}
+              versionId={model.latestVersionId}
               title={model.modelName}
               version={`v${model.latestVersion}`} // version 값 수정
               dataset={model.dataName}
               profileImg={model.userProfile.userImageUrl || "/profile.png"}
               nickname={model.userProfile.userNickname}
-              // accuracy={model.accuracy || "N/A"} // 기본값 설정
+              accuracy={model.accuracy}
               updatedAt={model.updatedAt}
             />
           ))
