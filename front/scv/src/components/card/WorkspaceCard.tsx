@@ -9,7 +9,7 @@ import DeleteDropdown from "../dropdown/DeleteDropdown";
 
 interface WorkspaceCardProps {
   modelId: number;
-  versionId: string;
+  versionId: number;
   title: string;
   version: string;
   dataset: string;
