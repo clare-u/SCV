@@ -52,9 +52,10 @@ public class JwtVerifyFilter extends OncePerRequestFilter {
             return;
         }
 
-        // 나머지 API 는 엑세스 토큰이 없으면 예외 발생
+        // 나머지 API 는 엑세스 토큰이 없으면 필터 스킵
         if (accessTokenCookie.isEmpty()) {
-            throw ExpiredTokenException.getInstance();
+            filterChain.doFilter(request, response);
+            return;
         }
 
         // 엑세스 토큰 및 상태 변수
