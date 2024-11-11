@@ -1,11 +1,13 @@
 import { BlockCategory, BlockParam, BlockDefinition } from "@/types";
 import { CustomBlockList } from "@/components/block/CustomBlockList";
 
+// 백엔드 레이어 타입 정의
 interface BackendLayer {
   name: string;
   [key: string]: any;
 }
 
+// 프론트엔드 블록 타입 정의
 interface FrontendBlock {
   category: BlockCategory;
   name: string;
@@ -37,7 +39,95 @@ const blockNameMapping: Record<string, string> = {
 // 렌더링하지 않을 레이어 이름들
 const excludedLayers = ["Flatten"];
 
-// 프론트엔드 블록 데이터를 백엔드 API 형식으로 변환
+// 블록 정의를 찾는 함수
+function findBlockDefinition(name: string): BlockDefinition | undefined {
+  // nn. 접두사가 있는 경우와 없는 경우 모두 처리
+  const searchName = name.startsWith("nn.") ? name : name;
+
+  // 각 카테고리를 순회하면서 블록 정의를 찾음
+  for (const category of Object.keys(CustomBlockList) as BlockCategory[]) {
+    const found = CustomBlockList[category].find(
+      (block) => block.name === searchName || block.name === `nn.${searchName}`,
+    );
+    if (found) return found;
+  }
+
+  // 블록 정의를 찾지 못한 경우 로그 출력
+  console.warn(`Block definition not found for: ${name}`);
+  return undefined;
+}
+
+// 블록의 카테고리를 찾는 함수
+function findBlockCategory(name: string): BlockCategory {
+  for (const category of Object.keys(CustomBlockList) as BlockCategory[]) {
+    if (
+      CustomBlockList[category].some(
+        (block) => block.name === name || block.name === `nn.${name}`,
+      )
+    ) {
+      return category;
+    }
+  }
+  // 카테고리를 찾지 못한 경우 기본값 반환
+  console.warn(`Category not found for block: ${name}, defaulting to Basic`);
+  return "Basic";
+}
+
+// API 응답을 프론트엔드 블록으로 변환하는 함수
+export function convertApiToBlocks(apiData: {
+  layers: BackendLayer[];
+}): FrontendBlock[] {
+  // 입력 데이터 로깅
+  console.log("Converting API data:", apiData);
+
+  // 제외할 레이어 필터링
+  const filteredLayers = apiData.layers.filter(
+    (layer) => !excludedLayers.includes(layer.name),
+  );
+
+  return filteredLayers.map((layer) => {
+    // 매핑된 이름 사용
+    const mappedName = blockNameMapping[layer.name] || layer.name;
+
+    // 블록 정의 찾기
+    const blockDef = findBlockDefinition(mappedName);
+    if (!blockDef) {
+      console.error(`Unknown block type: ${mappedName}`);
+      // 에러 대신 기본 블록 반환
+      return {
+        category: "Basic" as BlockCategory,
+        name: mappedName,
+        params: [],
+      };
+    }
+
+    // 파라미터 매핑
+    const params = blockDef.params.map((paramDef) => {
+      const paramValue = layer[paramDef.name];
+      return {
+        ...paramDef,
+        value: paramValue !== undefined ? paramValue : paramDef.value,
+      };
+    });
+
+    // 변환된 블록
+    const result = {
+      category: findBlockCategory(mappedName),
+      name: blockDef.name,
+      params: params.filter((param) => param.value !== undefined),
+    };
+
+    // 변환 결과 로깅
+    console.log("Converted block:", {
+      original: layer,
+      converted: result,
+    });
+
+    return result;
+  });
+}
+
+// 프론트엔드 블록을 API 형식으로 변환하는 함수
 export function convertBlocksToApiFormat(blocks: FrontendBlock[]): {
   layers: BackendLayer[];
 } {
@@ -59,58 +149,4 @@ export function convertBlocksToApiFormat(blocks: FrontendBlock[]): {
   });
 
   return { layers };
-}
-
-// 백엔드 API 응답을 프론트엔드 블록 형식으로 변환
-export function convertApiToBlocks(apiData: {
-  layers: BackendLayer[];
-}): FrontendBlock[] {
-  // 제외할 레이어 필터링
-  const filteredLayers = apiData.layers.filter(
-    (layer) => !excludedLayers.includes(layer.name),
-  );
-
-  return filteredLayers.map((layer) => {
-    // 매핑된 이름 또는 원래 이름 사용
-    const mappedName = blockNameMapping[layer.name] || layer.name;
-
-    // CustomBlockList에서 해당하는 블록 정의 찾기
-    const blockDef = findBlockDefinition(mappedName);
-    if (!blockDef) {
-      throw new Error(`Unknown block type: ${mappedName}`);
-    }
-
-    // 파라미터 값 설정
-    const params = blockDef.params.map((param) => ({
-      ...param,
-      value: layer[param.name],
-    }));
-
-    return {
-      category: findBlockCategory(mappedName),
-      name: blockDef.name,
-      params,
-    };
-  });
-}
-
-function findBlockDefinition(name: string): BlockDefinition | undefined {
-  const normalizedName = name.includes("nn.") ? name : name;
-
-  for (const category of Object.keys(CustomBlockList) as BlockCategory[]) {
-    const found = CustomBlockList[category].find(
-      (block) => block.name === normalizedName,
-    );
-    if (found) return found;
-  }
-  return undefined;
-}
-
-function findBlockCategory(name: string): BlockCategory {
-  for (const category of Object.keys(CustomBlockList) as BlockCategory[]) {
-    if (CustomBlockList[category].some((block) => block.name === name)) {
-      return category;
-    }
-  }
-  throw new Error(`Cannot find category for block: ${name}`);
 }

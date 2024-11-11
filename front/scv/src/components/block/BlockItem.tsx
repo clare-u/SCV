@@ -54,6 +54,14 @@ const BlockItem: React.FC<BlockItemProps> = ({
   isEditable = true,
 }) => {
   const [isOpen, setIsOpen] = useState(open);
+  const [paramValues, setParamValues] = useState<Record<string, number>>(() => {
+    // Initialize with existing values from block.params
+    const initialValues: Record<string, number> = {};
+    block.params.forEach((param) => {
+      initialValues[param.name] = param.value ?? 0; // Use 0 as default if value is undefined
+    });
+    return initialValues;
+  });
 
   const toggleOpen = () => {
     if (!small && isEditable) {
@@ -63,6 +71,37 @@ const BlockItem: React.FC<BlockItemProps> = ({
 
   const colorClasses = categoryColors[category];
   const widthClass = small ? "w-[300px]" : "w-[400px]";
+
+  const handleBlur = (
+    paramName: string,
+    paramIndex: number,
+    e: React.FocusEvent<HTMLInputElement>,
+  ) => {
+    if (!isEditable || block.name === "start") return;
+
+    if (e.target.value.trim().length === 0) {
+      setParamValues((prev) => ({ ...prev, [paramName]: 0 }));
+      return;
+    }
+
+    const value = parseFloat(e.target.value);
+    const param = block.params[paramIndex];
+
+    let finalValue = value;
+    if (param.min !== undefined && value < param.min) {
+      toast.error(`최솟값은 ${param.min}입니다.`);
+      finalValue = param.min;
+    }
+    if (param.max !== undefined && value > param.max) {
+      toast.error(`최댓값은 ${param.max}입니다.`);
+      finalValue = param.max;
+    }
+
+    setParamValues((prev) => ({ ...prev, [paramName]: finalValue }));
+    if (onBlurParam) {
+      onBlurParam(paramIndex, finalValue);
+    }
+  };
 
   return (
     <div className={`transition-all duration-300 ease-in-out ${widthClass}`}>
@@ -98,36 +137,20 @@ const BlockItem: React.FC<BlockItemProps> = ({
                   </label>
                   <input
                     type="number"
+                    value={paramValues[param.name]}
+                    onChange={(e) => {
+                      const value =
+                        e.target.value === "" ? 0 : parseFloat(e.target.value);
+                      setParamValues((prev) => ({
+                        ...prev,
+                        [param.name]: value,
+                      }));
+                    }}
                     className={`appearance-none rounded-[20px] border ${colorClasses.border} w-[60px] bg-white p-2 text-center text-sm placeholder-gray-500 transition-all duration-200 ease-in-out focus:shadow-md focus:ring-2 focus:ring-opacity-50 ${colorClasses.border.replace(
                       "border",
                       "ring",
                     )}`}
-                    onBlur={(e) => {
-                      if (!isEditable || block.name === "start") return;
-
-                      if (e.target.value.trim().length === 0) {
-                        e.target.value = "";
-                        param.value = undefined;
-                        return;
-                      }
-
-                      const value = parseFloat(e.target.value);
-                      param.value = value;
-
-                      if (param.min !== undefined && value < param.min) {
-                        toast.error(`최솟값은 ${param.min}입니다.`);
-                        e.target.value = String(param.min);
-                        param.value = param.min;
-                      }
-                      if (param.max !== undefined && value > param.max) {
-                        toast.error(`최댓값은 ${param.max}입니다.`);
-                        e.target.value = String(param.max);
-                        param.value = param.max;
-                      }
-                      if (param.value !== undefined && onBlurParam) {
-                        onBlurParam(idx, param.value); // 파라미터 값 업데이트
-                      }
-                    }}
+                    onBlur={(e) => handleBlur(param.name, idx, e)}
                     readOnly={!isEditable || block.name === "start"}
                   />
                 </li>

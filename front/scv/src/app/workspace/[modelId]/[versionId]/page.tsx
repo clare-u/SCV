@@ -100,6 +100,7 @@ export default function WorkspaceDetail({ params }: PageProps) {
       )?.versionNo ?? 1
     }`,
   };
+  console.log("versionData:", versionData);
 
   // 에러 및 로딩 상태 처리
   if (!params.versionId || params.versionId === null) {
@@ -177,14 +178,21 @@ export default function WorkspaceDetail({ params }: PageProps) {
   const renderModelArchitecture = () => {
     try {
       if (!versionData?.layers) return null;
+      console.log("Version data layers:", versionData.layers); // 입력 데이터 확인
+
       const blocks = convertApiToBlocks({ layers: versionData.layers });
+      console.log("Converted blocks:", blocks); // 변환된 블록 데이터 확인
 
       return blocks.map((block, index) => (
         <BlockItem
           key={`${block.name}-${index}`}
           block={{
             name: block.name,
-            params: block.params,
+            params: block.params.map((param) => ({
+              ...param,
+              // value 속성만 사용하고, 없는 경우 0으로 설정
+              value: param.value ?? 0,
+            })),
           }}
           category={block.category}
           open={true}
@@ -204,6 +212,20 @@ export default function WorkspaceDetail({ params }: PageProps) {
       );
     }
   };
+
+  // layerParams를 파싱하여 number[]로 변환
+  const layerParams: number[] = Array.isArray(
+    versionData!.resultResponseWithImages.layerParams,
+  )
+    ? versionData!.resultResponseWithImages.layerParams
+    : JSON.parse(versionData!.resultResponseWithImages.layerParams);
+
+  // Training History 데이터를 조건부로 파싱
+  const trainingHistory =
+    typeof versionData!.resultResponseWithImages.trainInfos === "string"
+      ? JSON.parse(versionData!.resultResponseWithImages.trainInfos)
+          .training_history
+      : versionData!.resultResponseWithImages.trainInfos.training_history;
 
   return (
     <div className="flex w-[1100px] flex-col gap-[30px] px-10 py-20">
@@ -256,28 +278,34 @@ export default function WorkspaceDetail({ params }: PageProps) {
 
         {/* Results and Visualizations */}
         {versionData?.resultResponseWithImages && (
-          <div className="mt-6">
-            ``
+          <>
+            <div className="border-b border-gray-500 text-24 font-bold text-indigo-900">
+              <div className="p-10">결과 열람</div>
+            </div>
             {/* Metrics */}
-            <div className="flex gap-10">
-              <p>
-                Test Accuracy:{" "}
+            <div className="flex flex-col gap-10 px-20">
+              <div className="text-24 font-bold text-indigo-900">
+                Test Accuracy
+              </div>
+              <div>
                 {versionData.resultResponseWithImages.testAccuracy.toFixed(2)}%
-              </p>
+              </div>
+              <div className="text-24 font-bold text-indigo-900">Test Loss</div>
+              <p>{versionData.resultResponseWithImages.testLoss.toFixed(2)}</p>
+              <div className="text-24 font-bold text-indigo-900">
+                Total Parameters
+              </div>
               <p>
-                Test Loss:{" "}
-                {versionData.resultResponseWithImages.testLoss.toFixed(2)}
-              </p>
-              <p>
-                Total Parameters:{" "}
                 {versionData.resultResponseWithImages.totalParams.toLocaleString()}
               </p>
             </div>
             {/* Feature Activation */}
             {versionData.resultResponseWithImages.featureActivation?.[0]
               ?.origin && (
-              <div className="mt-6">
-                <h3 className="mb-2 text-lg font-medium">Feature Activation</h3>
+              <div className="flex flex-col px-20">
+                <div className="text-24 font-bold text-indigo-900">
+                  Feature Activation
+                </div>
                 <div className="inline-block border-2 border-gray-500 p-4">
                   <CanvasComponent
                     data={
@@ -291,10 +319,10 @@ export default function WorkspaceDetail({ params }: PageProps) {
             {/* Activation Maximization */}
             {versionData.resultResponseWithImages.activationMaximization?.[0]
               ?.image && (
-              <div className="mt-6">
-                <h3 className="mb-2 text-lg font-medium">
+              <div className="flex flex-col px-20">
+                <div className="text-24 font-bold text-indigo-900">
                   Activation Maximization
-                </h3>
+                </div>
                 <div className="inline-block border-2 border-gray-500 p-4">
                   <CanvasComponent
                     data={
@@ -307,16 +335,69 @@ export default function WorkspaceDetail({ params }: PageProps) {
             )}
             {/* Confusion Matrix */}
             {versionData.resultResponseWithImages.confusionMatrix && (
-              <div className="mt-6">
-                <h3 className="mb-2 text-lg font-medium">Confusion Matrix</h3>
+              <div className="flex flex-col px-20">
+                <div className="text-24 font-bold text-indigo-900">
+                  Confusion Matrix
+                </div>
                 <div className="max-w-1100">
-                  <pre>
-                    {versionData.resultResponseWithImages.confusionMatrix}
-                  </pre>
+                  {versionData.resultResponseWithImages.confusionMatrix}
                 </div>
               </div>
             )}
-          </div>
+
+            {/* Training History */}
+            {versionData.resultResponseWithImages.trainInfos
+              ?.training_history && (
+              <div className="mt-6 flex flex-col px-20">
+                <div className="text-24 font-bold text-indigo-900">
+                  Training History
+                </div>
+                <div className="space-y-4">
+                  {versionData.resultResponseWithImages.trainInfos.training_history.map(
+                    (info, index) => (
+                      <div key={index} className="rounded-lg border p-4">
+                        <p className="font-semibold">Epoch: {info.epoch}</p>
+                        <p>Test Loss: {info.test_loss.toFixed(2)}</p>
+                        <p>Train Loss: {info.train_loss.toFixed(2)}</p>
+                        <p>Test Accuracy: {info.test_accuracy.toFixed(2)}%</p>
+                        <p>Train Accuracy: {info.train_accuracy.toFixed(2)}%</p>
+                      </div>
+                    ),
+                  )}
+                </div>
+              </div>
+            )}
+
+            <div className="flex flex-col px-20">
+              <div className="text-24 font-bold text-indigo-900">
+                Training History
+              </div>
+              <div className="space-y-4">
+                {trainingHistory.map((info: any, index: any) => (
+                  <div key={index} className="rounded-lg border p-4">
+                    <p className="font-semibold">Epoch: {info.epoch}</p>
+                    <p>Test Loss: {info.test_loss.toFixed(2)}</p>
+                    <p>Train Loss: {info.train_loss.toFixed(2)}</p>
+                    <p>Test Accuracy: {info.test_accuracy.toFixed(2)}%</p>
+                    <p>Train Accuracy: {info.train_accuracy.toFixed(2)}%</p>
+                  </div>
+                ))}
+              </div>
+            </div>
+
+            <div className="flex flex-col px-20">
+              <div className="text-24 font-bold text-indigo-900">
+                Layer Parameters
+              </div>
+              <ul className="mt-4 list-inside list-disc">
+                {layerParams.map((param, index) => (
+                  <li key={index}>
+                    Layer {index + 1}: {param.toLocaleString()} parameters
+                  </li>
+                ))}
+              </ul>
+            </div>
+          </>
         )}
       </div>
     </div>
