@@ -49,3 +49,11 @@ export interface MyModelList {
   content: MyModel[];
   pageable: Pageable;
 }
+
+// 모델의 버전들 조회
+export interface Version {
+  versionId: number;
+  versionNo: number;
+}
+
+export type ModelVersions = Version[];

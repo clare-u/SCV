@@ -1,4 +1,4 @@
-import { Content, ModelQueryParams, MyModelList } from "@/types";
+import { Content, ModelQueryParams, MyModelList, ModelVersions } from "@/types";
 import { handleApiRequest } from "../client";
 
 const DEFAULT_PARAMS: ModelQueryParams = {
@@ -82,4 +82,11 @@ export const fetchMyWorkingModels = async (
 export const deleteVersion = async (versionId: number) => {
   const url = `/api/v1/models/versions/${versionId}`;
   return handleApiRequest<void, "delete">(url, "delete");
+};
+
+// 모델의 버전들 조회
+export const fetchModelVersions = async (modelId: number) => {
+  const url = `/api/v1/models/${modelId}`;
+  console.log("API 요청 URL:", url);
+  return handleApiRequest<ModelVersions, "get">(url, "get");
 };

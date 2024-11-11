@@ -47,7 +47,11 @@ export default function BoardCard({
   updatedAt,
 }: BoardCardProps) {
   return (
-    <Link href={`/${modelId}/${versionId}`} passHref className="flex w-[325px]">
+    <Link
+      href={`/community/${modelId}/${versionId}`}
+      passHref
+      className="flex w-[325px]"
+    >
       <div className="flex w-full flex-col gap-20 rounded-12 bg-gray-100 p-[30px] shadow-md transition-shadow duration-200 hover:shadow-lg">
         <div className="flex items-center justify-between">
           <div className="flex items-center justify-center gap-10">

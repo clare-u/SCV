@@ -79,7 +79,8 @@ function Community() {
       : useFetchMyModels(queryParams);
 
   // URL 업데이트 함수
-  const updateURL = async (params: {
+  // 1. updateURL 함수에서 refetch 제거
+  const updateURL = (params: {
     [key: string]: string | number | undefined;
   }) => {
     const current = new URLSearchParams(Array.from(searchParams.entries()));
@@ -97,9 +98,7 @@ function Community() {
     }
 
     router.push(`/workspace?${current.toString()}`);
-    await refetch();
   };
-
   // 이벤트 핸들러
   const handleFilterChange = async (filter: string) => {
     setSelectedFilter(filter);
@@ -126,7 +125,7 @@ function Community() {
   // URL 파라미터가 변경될 때마다 데이터 리프레시
   useEffect(() => {
     refetch();
-  }, [searchParams, refetch]);
+  }, [searchParams]); // refetch 제거
 
   useEffect(() => {
     window.scrollTo(0, 0);
