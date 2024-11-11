@@ -4,6 +4,9 @@ import com.scv.domain.data.enums.DataSet;
 import com.scv.domain.user.dto.request.LinkGithubRepoRequestDTO;
 import com.scv.domain.user.dto.response.GithubEmailApiResponseDTO;
 import com.scv.domain.user.dto.response.GithubRepoApiResponseDTO;
+import com.scv.domain.user.exception.UserNotFoundException;
+import com.scv.global.jwt.service.RedisTokenService;
+import com.scv.global.jwt.util.JwtUtil;
 import com.scv.global.oauth2.auth.CustomOAuth2User;
 import com.scv.domain.user.dto.request.CommitGithubRepoFileRequestDTO;
 import com.scv.domain.user.dto.response.GithubRepoFileResponseDTO;
@@ -14,7 +17,7 @@ import lombok.RequiredArgsConstructor;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
-import java.util.*;
+import java.util.Set;
 import java.util.stream.Collectors;
 
 @Service
@@ -22,9 +25,10 @@ import java.util.stream.Collectors;
 @Transactional
 public class GithubService {
 
-    private final UserRepository userRepository;
-
     private final GithubApiService githubApiService;
+    private final RedisTokenService redisTokenService;
+
+    private final UserRepository userRepository;
 
     // 깃허브에서 primary email 을 조회하는 메서드
     public String getGithubPrimaryEmail(String accessToken) {
@@ -36,7 +40,7 @@ public class GithubService {
     }
 
     // 깃허브 새 리포를 메인 리포로 설정 서비스 로직
-    public void linkNewGithubRepo(CustomOAuth2User authUser, LinkGithubRepoRequestDTO requestDTO) {
+    public String linkNewGithubRepo(CustomOAuth2User authUser, LinkGithubRepoRequestDTO requestDTO, String accessToken) {
         if (getGithubRepoNames(authUser).contains(requestDTO.getRepoName())) {
             throw GithubConflictException.getInstance();
         }
@@ -44,15 +48,23 @@ public class GithubService {
         githubApiService.createGithubRepo(authUser, requestDTO);
 
         userRepository.updateUserRepoById(authUser.getUserId(), requestDTO.getRepoName());
+
+        redisTokenService.addToBlacklist(accessToken);
+
+        return JwtUtil.createAccessToken(userRepository.findById(authUser.getUserId()).orElseThrow(UserNotFoundException::getInstance));
     }
 
     // 깃허브 기존 리포를 메인 리포로 설정 서비스 로직
-    public void linkCurrentGithubRepo(CustomOAuth2User authUser, LinkGithubRepoRequestDTO requestDTO) {
+    public String linkCurrentGithubRepo(CustomOAuth2User authUser, LinkGithubRepoRequestDTO requestDTO, String accessToken) {
         if (!getGithubRepoNames(authUser).contains(requestDTO.getRepoName())) {
             throw GithubNotFoundException.getInstance();
         }
 
         userRepository.updateUserRepoById(authUser.getUserId(), requestDTO.getRepoName());
+
+        redisTokenService.addToBlacklist(accessToken);
+
+        return JwtUtil.createAccessToken(userRepository.findById(authUser.getUserId()).orElseThrow(UserNotFoundException::getInstance));
     }
 
     // 깃허브에서 Repository 리스트의 이름들을 Set 으로 반환
