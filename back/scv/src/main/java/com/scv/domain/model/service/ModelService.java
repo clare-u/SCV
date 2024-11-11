@@ -98,25 +98,9 @@ public class ModelService {
     // 모델 버전 조회
     @Transactional(readOnly = true)
     public ModelDetailResponse getModelVersions(Long modelId) {
-        List<ModelVersion> modelVersions = modelVersionRepository.findAllByModel_IdAndDeletedFalse(modelId);
+        Model model = modelRepository.findById(modelId).orElseThrow(ModelNotFoundException::new);
 
-        modelVersions.sort(Comparator.comparing(ModelVersion::getVersionNo).reversed());
-
-        ModelVersion latestVersion = modelVersions.get(0);
-        ModelVersionDetail latestVersionDetail;
-
-        if (latestVersion.getResult() != null) {
-            ResultResponseWithImages resultResponse = new ResultResponseWithImages(latestVersion.getResult());
-            latestVersionDetail = new ModelVersionDetailWithResult(latestVersion, resultResponse);
-        } else {
-            latestVersionDetail = new ModelVersionDetail(latestVersion);
-        }
-
-        List<ModelVersionResponse> modelVersionResponses = modelVersions.stream()
-                .map(ModelVersionResponse::new)
-                .collect(Collectors.toList());
-
-        return new ModelDetailResponse(modelVersionResponses, Optional.of(latestVersionDetail));
+        return new ModelDetailResponse(model);
     }
 
 

@@ -6,6 +6,7 @@ import com.scv.domain.version.domain.ModelVersion;
 import java.time.LocalDateTime;
 
 public record ModelVersionOnWorking(
+        Long modelId,
         String title,
         Long modelVersionId,
         int version,
@@ -16,6 +17,7 @@ public record ModelVersionOnWorking(
 ) {
     public ModelVersionOnWorking(ModelVersion modelVersion) {
         this(
+                modelVersion.getModel().getId(),
                 modelVersion.getModel().getName(),
                 modelVersion.getId(),
                 modelVersion.getVersionNo(),
