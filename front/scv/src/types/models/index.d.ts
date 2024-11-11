@@ -7,6 +7,7 @@ export interface Model {
   modelName: string;
   dataName: string;
   latestVersion: number;
+  latestVersionId: number;
   accuracy: number;
   createdAt: string;
   updatedAt: string;
@@ -67,4 +68,37 @@ export interface ModelVersions {
   modelVersions: ModelVersion[];
   createdAt: string;
   updatedAt: string;
+}
+
+// 모델 버전 상세 조회
+export interface TrainInfo {
+  trainLoss: number | null;
+  trainAccuracy: number | null;
+}
+
+export interface ResultAnalysisResponse {
+  codeView: string;
+  testAccuracy: number;
+  testLoss: number;
+  trainInfos: TrainInfo;
+  totalParams: number;
+  layerParams: string;
+  confusionMatrix: string;
+  exampleImg: string;
+}
+
+export interface Layer {
+  name: string;
+  in_channels?: number;
+  out_channels?: number;
+  kernel_size?: number;
+  stride?: number;
+  in_features?: number;
+  out_features?: number;
+}
+
+export interface VersionResponse {
+  modelVersionId: number;
+  layers: Layer[];
+  resultAnalysisResponse: ResultAnalysisResponse;
 }

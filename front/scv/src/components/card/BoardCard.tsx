@@ -9,7 +9,7 @@ import { BadgeProps } from "../badge/Badge";
 
 interface BoardCardProps {
   modelId: number;
-  versionId: string;
+  versionId: number;
   title: string;
   version: string;
   dataset: string;
@@ -79,7 +79,7 @@ export default function BoardCard({
             <p className="text-14 font-semibold">{nickname}</p>
           </div>
           <div className="flex flex-col items-end justify-center">
-            {accuracy ? (
+            {accuracy && accuracy !== -1 ? (
               <p className="text-12 font-semibold">{accuracy.toFixed(2)}%</p>
             ) : (
               <p></p>

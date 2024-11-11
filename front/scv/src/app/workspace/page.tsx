@@ -206,7 +206,7 @@ function Community() {
                 <WorkspaceCard
                   key={model.modelId}
                   modelId={model.modelId}
-                  versionId={model.latestVersion}
+                  versionId={model.latestVersionId}
                   title={model.modelName}
                   version={`v${model.latestVersion}`}
                   dataset={model.dataName}
