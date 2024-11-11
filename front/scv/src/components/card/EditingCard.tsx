@@ -8,6 +8,7 @@ import { BadgeProps } from "../badge/Badge";
 import DeleteDropdown from "../dropdown/DeleteDropdown";
 
 interface EditingCardProps {
+  modelId: number;
   versionId: number;
   title: string;
   version: string;
@@ -36,6 +37,7 @@ const badgeColors: Record<string, BadgeProps["color"]> = {
 };
 
 export default function EditingCard({
+  modelId,
   versionId,
   title,
   version,
@@ -46,7 +48,7 @@ export default function EditingCard({
 }: EditingCardProps) {
   const router = useRouter();
   // Link URL을 조건에 따라 설정
-  const href = `/edit/${versionId}`;
+  const href = `/edit/${modelId}/${versionId}`;
 
   const handleCardClick = (e: React.MouseEvent) => {
     // DeleteDropdown이 클릭된 경우 네비게이션을 막음

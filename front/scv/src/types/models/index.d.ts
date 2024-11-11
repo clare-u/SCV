@@ -1,4 +1,5 @@
 import { MemberResponse } from "../users";
+import { UserResponse } from "../users";
 
 // 단일 모델 객체에 대한 타입 정의
 export interface Model {
@@ -37,6 +38,7 @@ export interface ModelQueryParams {
 // myModel
 export interface MyModel {
   title: string; // 모델 이름
+  modelId: number;
   modelVersionId: number; // 모델 버전 ID
   version: number; // 버전 번호
   dataName: string; // 데이터셋 이름
@@ -51,9 +53,18 @@ export interface MyModelList {
 }
 
 // 모델의 버전들 조회
-export interface Version {
+export interface ModelVersion {
   versionId: number;
   versionNo: number;
 }
 
-export type ModelVersions = Version[];
+export interface ModelVersions {
+  userInfo: UserResponse;
+  modelId: number;
+  modelName: string;
+  DataName: string;
+  latestVersion: number;
+  modelVersions: ModelVersion[];
+  createdAt: string;
+  updatedAt: string;
+}

@@ -15,6 +15,7 @@ import java.util.stream.Collectors;
 public record ModelDetailResponse(
         UserProfileResponseDTO userInfo,
         Long modelId,
+        String modelName,
         String DataName,
         int latestVersion,
         List<ModelVersionResponse> modelVersions,
@@ -25,6 +26,7 @@ public record ModelDetailResponse(
         this(
                 new UserProfileResponseDTO(model.getUser()),
                 model.getId(),
+                model.getName(),
                 model.getData().getName().toString(),
                 model.getLatestVersion(),
                 model.getModelVersions().stream()

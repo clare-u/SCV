@@ -122,6 +122,10 @@ function Community() {
     });
   };
 
+  if (data) {
+    console.log(data); // 데이터가 로드되었을 때만 출력
+  }
+
   // URL 파라미터가 변경될 때마다 데이터 리프레시
   useEffect(() => {
     refetch();
@@ -179,32 +183,32 @@ function Community() {
         </div>
 
         <div
-          className={`grid w-full grid-cols-3 gap-10 rounded-b-10 px-10 py-20 ${
-            viewMode === "완료목록" ? "bg-blue-50" : "bg-yellow-50"
-          }`}
+          className={`grid w-full grid-cols-3 gap-10 rounded-b-10 px-10 py-20 ${viewMode === "완료목록" ? "bg-blue-50" : "bg-yellow-50"}`}
         >
           {data?.content.length === 0 ? (
             <div>모델이 없습니다.</div>
           ) : (
             data?.content.map((model) =>
-              "modelId" in model ? (
-                <WorkspaceCard
-                  key={model.modelId}
+              "title" in model ? ( // model.title이 있는 경우
+                <EditingCard
+                  key={model.modelVersionId}
                   modelId={model.modelId}
-                  versionId={`${model.latestVersion}`}
-                  title={model.modelName}
-                  version={`v${model.latestVersion}`}
+                  versionId={model.modelVersionId}
+                  title={model.title}
+                  version={`v${model.version}`}
                   dataset={model.dataName}
                   accuracy={model.accuracy}
                   updatedAt={model.updatedAt}
                   createdAt={model.createdAt}
                 />
               ) : (
-                <EditingCard
-                  key={model.modelVersionId}
-                  versionId={model.modelVersionId}
-                  title={model.title}
-                  version={`v${model.version}`}
+                // model.modelName이 있는 경우
+                <WorkspaceCard
+                  key={model.modelId}
+                  modelId={model.modelId}
+                  versionId={`${model.latestVersion}`}
+                  title={model.modelName}
+                  version={`v${model.latestVersion}`}
                   dataset={model.dataName}
                   accuracy={model.accuracy}
                   updatedAt={model.updatedAt}
