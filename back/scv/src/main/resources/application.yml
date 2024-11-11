@@ -39,9 +39,26 @@ spring:
 
   data:
     redis:
-      host: ${REDIS_HOST}
-      port: ${REDIS_PORT}
-      password: ${REDIS_PASSWORD}
+      token:
+        access:
+          master:
+            host: ${REDIS_ACCESS_MASTER_HOST}
+            port: ${REDIS_ACCESS_MASTER_PORT}
+            password: ${REDIS_ACCESS_MASTER_PASSWORD}
+          slaves:
+            - host: ${REDIS_ACCESS_SLAVE1_HOST}
+              port: ${REDIS_ACCESS_SLAVE1_PORT}
+              password: ${REDIS_ACCESS_SLAVE1_PASSWORD}
+            - host: ${REDIS_ACCESS_SLAVE2_HOST}
+              port: ${REDIS_ACCESS_SLAVE2_PORT}
+              password: ${REDIS_ACCESS_SLAVE2_PASSWORD}
+            - host: ${REDIS_ACCESS_SLAVE3_HOST}
+              port: ${REDIS_ACCESS_SLAVE3_PORT}
+              password: ${REDIS_ACCESS_SLAVE3_PASSWORD}
+        refresh:
+          host: ${REDIS_REFRESH_MASTER_HOST}
+          port: ${REDIS_REFRESH_MASTER_PORT}
+          password: ${REDIS_REFRESH_MASTER_PASSWORD}
 
 # actuator health 체크 설정
 management:
