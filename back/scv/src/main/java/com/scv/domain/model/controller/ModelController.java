@@ -2,6 +2,7 @@ package com.scv.domain.model.controller;
 
 import com.scv.domain.data.enums.DataSet;
 import com.scv.domain.model.dto.request.ModelCreateRequest;
+import com.scv.domain.model.dto.response.ModelDetailResponse;
 import com.scv.domain.model.dto.response.ModelResponse;
 import com.scv.domain.model.service.ModelService;
 import com.scv.global.oauth2.auth.AuthUser;
@@ -73,15 +74,16 @@ public class ModelController {
     }
 
     @GetMapping("/{modelId}")
-    @Operation(summary = "모델의 버전들 조회", description = "모델 버전들을 조회합니다.")
+    @Operation(summary = "모델의 버전들 조회", description = "모델 버전들과 최신 버전의 세부 정보를 조회합니다.")
     @ApiResponses(value = {
             @ApiResponse(responseCode = "200", description = "모델버전 조회 성공"),
             @ApiResponse(responseCode = "400", description = "잘못된 요청", content = @Content(schema = @Schema(implementation = ErrorResponse.class))),
     })
-    public ResponseEntity<List<ModelVersionResponse>> getModelVersion(@PathVariable("modelId") Long modelId) {
-        List<ModelVersionResponse> modelVersions = modelService.getModelVersions(modelId);
-        return ResponseEntity.ok(modelVersions);
+    public ResponseEntity<ModelDetailResponse> getModelVersion(@PathVariable("modelId") Long modelId) {
+        ModelDetailResponse modelDetail = modelService.getModelVersions(modelId);
+        return ResponseEntity.ok(modelDetail);
     }
+
 
     @GetMapping("/")
     @Operation(summary = "전체 모델 조회", description = "전체 모델을 조회합니다. orderBy = createdAt or updatedAt, direction = asc or desc. 미입력시 정렬 안함.")
