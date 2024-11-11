@@ -14,19 +14,6 @@ interface Version {
   name: string;
 }
 
-interface ModelVersions {
-  modelName: string;
-  DataName: string;
-  modelVersions: Array<{
-    versionId: number;
-    versionNo: number;
-  }>;
-  userInfo: {
-    userImageUrl: string;
-    userNickname: string;
-  };
-}
-
 interface PageProps {
   params: {
     modelId: number;
