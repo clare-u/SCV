@@ -76,7 +76,7 @@ export interface TrainInfo {
   trainAccuracy: number | null;
 }
 
-export interface ResultAnalysisResponse {
+export interface resultResponseWithImages {
   codeView: string;
   testAccuracy: number;
   testLoss: number;
@@ -95,10 +95,50 @@ export interface Layer {
   stride?: number;
   in_features?: number;
   out_features?: number;
+  dim?: number;
 }
-
 export interface VersionResponse {
   modelVersionId: number;
   layers: Layer[];
-  resultAnalysisResponse: ResultAnalysisResponse;
+  resultResponseWithImages: ResultResponseWithImages;
+}
+
+// Define the ResultResponseWithImages interface, which includes various detailed fields
+export interface ResultResponseWithImages {
+  modelId: number;
+  modelVersionId: number;
+  codeView: string;
+  testAccuracy: number;
+  testLoss: number;
+  totalParams: number;
+  trainInfos: TrainingInfo;
+  layerParams: number[];
+  confusionMatrix: number[][];
+  exampleImg: ExampleImage;
+  featureActivation: FeatureActivation[];
+  activationMaximization: ActivationMaximization[];
+}
+
+// Define nested types for clarity
+
+export interface TrainingInfo {
+  training_history: Array<{
+    epoch: number;
+    test_loss: number;
+    train_loss: number;
+    test_accuracy: number;
+    train_accuracy: number;
+  }>;
+}
+
+export interface ExampleImage {
+  example_image: string;
+}
+
+export interface FeatureActivation {
+  origin: string;
+}
+
+export interface ActivationMaximization {
+  image: string;
 }
