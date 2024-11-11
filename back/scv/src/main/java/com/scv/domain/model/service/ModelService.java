@@ -55,6 +55,7 @@ public class ModelService {
 
         ModelVersion firstVersion = ModelVersion.builder()
                 .model(savedModel)
+                .layers("[]")
                 .versionNo(0)
                 .build();
 

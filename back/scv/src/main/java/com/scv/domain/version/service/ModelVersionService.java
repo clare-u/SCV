@@ -112,7 +112,6 @@ public class ModelVersionService {
         Optional<Result> result = resultRepository.findById(modelVersionId);
 
         result.ifPresent(resultRepository::delete);
-        modelVersionRepository.save(modelVersion);
     }
 
 
@@ -147,7 +146,7 @@ public class ModelVersionService {
                 model.setAccuracy(-1.0);
             }
         }
-        modelRepository.save(model);
+        modelVersionRepository.save(modelVersion);
     }
 
     // 모델 실행 및 저장
@@ -169,27 +168,22 @@ public class ModelVersionService {
         JsonNode rootNode = ParsingUtil.parseJsonToNode(jsonResponse);
         JsonNode testResults = rootNode.path("test_results").path("results");
 
-        // 필요한 데이터 추출
         double finalTestAccuracy = testResults.path("final_test_accuracy").asDouble(0.0);
         double finalTestLoss = testResults.path("final_test_loss").asDouble(0.0);
 
-        // model_code를 JSON 형식으로 저장
         String modelCode = testResults.path("model_code").asText();
-        String codeJson = ParsingUtil.toJson(modelCode); // JSON 형식으로 변환된 코드
+        String codeJson = ParsingUtil.toJson(modelCode);
 
         String layerParams = ParsingUtil.toJson(testResults.path("layer_parameters"));
 
-        // train_result_per_epoch와 training_history를 병합하여 train_info로 저장
         ObjectNode trainInfoNode = new ObjectMapper().createObjectNode();
         trainInfoNode.set("train_result_per_epoch", testResults.path("train_result_per_epoch"));
         trainInfoNode.set("training_history", testResults.path("training_history"));
 
         String trainInfo = trainInfoNode.toString();
 
-        // 총 파라미터 수 계산
         int totalParams = calculateTotalParams(testResults.path("layer_parameters"));
 
-        // Result 엔티티 생성 및 저장
         Result result = Result.builder()
                 .modelVersion(modelVersion)
                 .code(codeJson)
@@ -200,16 +194,16 @@ public class ModelVersionService {
                 .totalParams(totalParams)
                 .build();
 
-        if (resultRepository.findById(modelVersionId).isPresent()) {
-            resultRepository.delete(resultRepository.findById(modelVersionId).get());
+        Optional<Result> existingResult = resultRepository.findById(modelVersionId);
+        if (existingResult.isPresent()) {
+            resultRepository.delete(existingResult.get());
         }
         resultRepository.save(result);
 
         return new ResultResponse(result);
     }
 
-
-    // 결과 저장 및 반환
+    // 결과 및 분석 저장
     @Transactional
     public ResultResponseWithImages saveResult(Long modelVersionId, DataSet dataName) {
         ModelVersion modelVersion = modelVersionRepository.findById(modelVersionId)
@@ -233,28 +227,39 @@ public class ModelVersionService {
 
         JsonNode rootNode = ParsingUtil.parseJson(jsonResponse, JsonNode.class);
 
-        result = result.toBuilder()
-                .confusionMatrix(ParsingUtil.getJsonFieldAsString(rootNode, "confusion_matrix"))
-                .exampleImg(ParsingUtil.getJsonFieldAsString(rootNode, "example_image"))
-                .featureActivation(ParsingUtil.getJsonFieldAsString(rootNode, "feature_activation"))
-                .activationMaximization(ParsingUtil.getJsonFieldAsString(rootNode, "activation_maximization"))
-                .build();
-
+        result.updateAnalysis(
+                ParsingUtil.getJsonFieldAsString(rootNode, "confusion_matrix"),
+                ParsingUtil.getJsonFieldAsString(rootNode, "example_image"),
+                ParsingUtil.getJsonFieldAsString(rootNode, "feature_activation"),
+                ParsingUtil.getJsonFieldAsString(rootNode, "activation_maximization")
+        );
         resultRepository.save(result);
 
         Model model = modelVersion.getModel();
         int latest = model.getLatestVersion();
+        double accuarcy = result.getTestAccuracy();
 
-        modelVersion.updateVersionNo(latest + 1);
-        modelVersion.toggleWork();
+        if (latest == 0) {
+            modelVersion.updateVersionNo(1);
+            model.setLatestVersion(1);
+            model.setAccuracy(accuarcy);
+        } else {
+            if (modelVersion.getVersionNo() == latest) {
+                model.setAccuracy(accuarcy);
+            } else if (modelVersion.getVersionNo() == 0) {
+                modelVersion.updateVersionNo(latest + 1);
+                model.setLatestVersion(latest + 1);
+                model.setAccuracy(accuarcy);
+            }
+        }
+        modelVersion.workingDone();
+
         modelVersionRepository.save(modelVersion);
-
-        model.setLatestVersion(latest + 1);
-        model.setAccuracy(result.getTestAccuracy());
         modelRepository.save(model);
 
         return new ResultResponseWithImages(result);
     }
+
 
     private int calculateTotalParams(JsonNode layerParameters) {
         int totalParams = 0;
