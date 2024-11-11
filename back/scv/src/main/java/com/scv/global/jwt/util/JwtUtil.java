@@ -1,5 +1,6 @@
 package com.scv.global.jwt.util;
 
+import com.scv.domain.user.domain.User;
 import com.scv.global.jwt.enums.TokenStatus;
 import com.scv.global.oauth2.auth.CustomOAuth2User;
 import io.jsonwebtoken.*;
@@ -32,6 +33,18 @@ public class JwtUtil {
                 .claim("userUuid", authUser.getUserUuid())
                 .claim("userNickname", authUser.getUserNickname())
                 .claim("userRepo", authUser.getUserRepo())
+                .setIssuedAt(Date.from(ZonedDateTime.now(ZoneOffset.UTC).toInstant()))
+                .setExpiration(getExpirationDate(ACCESS_TOKEN_EXPIRATION))
+                .signWith(Keys.hmacShaKeyFor(ACCESS_TOKEN_SECRET_KEY_BYTES), SignatureAlgorithm.HS256)
+                .compact();
+    }
+
+    public static String createAccessToken(User user) {
+        return Jwts.builder()
+                .setSubject(user.getUserId().toString())
+                .claim("userUuid", user.getUserUuid())
+                .claim("userNickname", user.getUserNickname())
+                .claim("userRepo", user.getUserRepo())
                 .setIssuedAt(Date.from(ZonedDateTime.now(ZoneOffset.UTC).toInstant()))
                 .setExpiration(getExpirationDate(ACCESS_TOKEN_EXPIRATION))
                 .signWith(Keys.hmacShaKeyFor(ACCESS_TOKEN_SECRET_KEY_BYTES), SignatureAlgorithm.HS256)

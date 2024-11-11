@@ -1,6 +1,8 @@
 package com.scv.domain.user.controller;
 
 import com.scv.domain.data.enums.DataSet;
+import com.scv.global.jwt.exception.InvalidTokenException;
+import com.scv.global.jwt.util.CookieUtil;
 import com.scv.global.oauth2.auth.AuthUser;
 import com.scv.global.oauth2.auth.CustomOAuth2User;
 import com.scv.domain.user.dto.request.CommitGithubRepoFileRequestDTO;
@@ -16,10 +18,16 @@ import io.swagger.v3.oas.annotations.media.Schema;
 import io.swagger.v3.oas.annotations.responses.ApiResponse;
 import io.swagger.v3.oas.annotations.responses.ApiResponses;
 import io.swagger.v3.oas.annotations.tags.Tag;
+import jakarta.servlet.http.Cookie;
+import jakarta.servlet.http.HttpServletRequest;
+import jakarta.servlet.http.HttpServletResponse;
 import lombok.RequiredArgsConstructor;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.*;
+
+import static com.scv.global.jwt.util.JwtUtil.ACCESS_TOKEN_EXPIRATION;
+import static com.scv.global.jwt.util.JwtUtil.ACCESS_TOKEN_NAME;
 
 @RestController
 @CrossOrigin
@@ -47,8 +55,17 @@ public class UserController {
     @ApiResponses(value = {
             @ApiResponse(responseCode = "200", description = "깃허브 리포 연동 해제 성공"),
     })
-    public ResponseEntity<Void> unLinkGithubRepo(@AuthUser CustomOAuth2User authUser) {
-        userService.unLinkGithubRepo(authUser);
+    public ResponseEntity<Void> unLinkGithubRepo(@AuthUser CustomOAuth2User authUser,
+                                                 HttpServletRequest request,
+                                                 HttpServletResponse response) {
+        String accessToken = CookieUtil.getCookie(request, ACCESS_TOKEN_NAME)
+                .orElseThrow(InvalidTokenException::getInstance)
+                .getValue();
+
+        String newAccessToken = userService.unLinkGithubRepo(authUser, accessToken);
+
+        Cookie newAccessTokenCookie = CookieUtil.createCookie(ACCESS_TOKEN_NAME, newAccessToken, ACCESS_TOKEN_EXPIRATION * 3);
+        response.addCookie(newAccessTokenCookie);
         return ResponseEntity.ok().build();
     }
 
@@ -64,8 +81,17 @@ public class UserController {
             @ApiResponse(responseCode = "422", description = "GITHUB_API_UNPROCESSABLE_ENTITY", content = @Content(schema = @Schema(implementation = ErrorResponse.class))),
     })
     public ResponseEntity<Void> linkNewGithubRepo(@AuthUser CustomOAuth2User authUser,
-                                                  @RequestBody LinkGithubRepoRequestDTO requestDTO) {
-        githubService.linkNewGithubRepo(authUser, requestDTO);
+                                                  @RequestBody LinkGithubRepoRequestDTO requestDTO,
+                                                  HttpServletRequest request,
+                                                  HttpServletResponse response) {
+        String accessToken = CookieUtil.getCookie(request, ACCESS_TOKEN_NAME)
+                .orElseThrow(InvalidTokenException::getInstance)
+                .getValue();
+
+        String newAccessToken = githubService.linkNewGithubRepo(authUser, requestDTO, accessToken);
+
+        Cookie newAccessTokenCookie = CookieUtil.createCookie(ACCESS_TOKEN_NAME, newAccessToken, ACCESS_TOKEN_EXPIRATION * 3);
+        response.addCookie(newAccessTokenCookie);
         return ResponseEntity.status(HttpStatus.CREATED).build();
     }
 
@@ -76,8 +102,17 @@ public class UserController {
             @ApiResponse(responseCode = "404", description = "GITHUB_API_NOT_FOUND", content = @Content(schema = @Schema(implementation = ErrorResponse.class))),
     })
     public ResponseEntity<Void> linkCurrentGithubRepo(@AuthUser CustomOAuth2User authUser,
-                                                      @RequestBody LinkGithubRepoRequestDTO requestDTO) {
-        githubService.linkCurrentGithubRepo(authUser, requestDTO);
+                                                      @RequestBody LinkGithubRepoRequestDTO requestDTO,
+                                                      HttpServletRequest request,
+                                                      HttpServletResponse response) {
+        String accessToken = CookieUtil.getCookie(request, ACCESS_TOKEN_NAME)
+                .orElseThrow(InvalidTokenException::getInstance)
+                .getValue();
+
+        String newAccessToken = githubService.linkCurrentGithubRepo(authUser, requestDTO, accessToken);
+
+        Cookie newAccessTokenCookie = CookieUtil.createCookie(ACCESS_TOKEN_NAME, newAccessToken, ACCESS_TOKEN_EXPIRATION * 3);
+        response.addCookie(newAccessTokenCookie);
         return ResponseEntity.ok().build();
     }
 

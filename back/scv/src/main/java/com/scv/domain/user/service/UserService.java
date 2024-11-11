@@ -1,5 +1,7 @@
 package com.scv.domain.user.service;
 
+import com.scv.global.jwt.service.RedisTokenService;
+import com.scv.global.jwt.util.JwtUtil;
 import com.scv.global.oauth2.auth.CustomOAuth2User;
 import com.scv.domain.user.domain.User;
 import com.scv.domain.user.dto.response.UserProfileResponseDTO;
@@ -13,6 +15,8 @@ import org.springframework.transaction.annotation.Transactional;
 @RequiredArgsConstructor
 @Transactional(readOnly = true)
 public class UserService {
+
+    private final RedisTokenService redisTokenService;
 
     private final UserRepository userRepository;
 
@@ -30,8 +34,12 @@ public class UserService {
 
     // 깃허브 리포 연동 해제 서비스 로직
     @Transactional
-    public void unLinkGithubRepo(CustomOAuth2User authUser) {
+    public String unLinkGithubRepo(CustomOAuth2User authUser, String accessToken) {
         userRepository.updateUserRepoById(authUser.getUserId(), null);
+
+        redisTokenService.addToBlacklist(accessToken);
+
+        return JwtUtil.createAccessToken(userRepository.findById(authUser.getUserId()).orElseThrow(UserNotFoundException::getInstance));
     }
 
 }
