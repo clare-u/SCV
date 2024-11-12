@@ -57,6 +57,8 @@ def get_example_image(outputs, dataset) -> str:
 
     for actual in data_labels:
         for pred in data_labels:
+            if dataset == "emnist":
+                actual = actual - 1
             example_images[(actual,pred)] = {
                 "conf" : 0.0,
                 "image" : "null"
@@ -67,6 +69,8 @@ def get_example_image(outputs, dataset) -> str:
         label = outputs[i]["label"]
         output = outputs[i]["output"]
         label = label.item()
+        if dataset == "emnist":
+            label = label - 1
 
         conf, preds = torch.max(torch.softmax(output, dim=1),dim=1)
         conf = conf.item()
