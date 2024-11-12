@@ -3,13 +3,14 @@ import { useState, useEffect } from "react";
 import { Tab, TabPanel, TabGroup, TabList, TabPanels } from "@headlessui/react";
 import { DragDropContext, Draggable, Droppable } from "@hello-pangea/dnd";
 import { CustomBlockList } from "./CustomBlockList";
-import { BlockDefinition, BlockCategory, Dataset } from "@/types";
+import { BlockDefinition, BlockCategory, Dataset, Layer } from "@/types";
 import BlockItem from "./BlockItem";
 import {
   datasetChannels,
   datasetSizes,
   useBlockStore,
 } from "@/store/blockStore";
+import { convertApiToBlocks } from "@/utils/block-converter";
 
 // 카테고리 표시 이름 매핑
 const categoryDisplayNames: Record<BlockCategory, string> = {
@@ -38,15 +39,16 @@ interface DroppedBlock extends BlockDefinition {
 
 interface BlockListProps {
   dataset: Dataset;
+  layers: Layer[];
 }
 
-const BlockList: React.FC<BlockListProps> = (props) => {
+const BlockList: React.FC<BlockListProps> = ({ dataset, layers }) => {
   const categories = Object.entries(CustomBlockList).filter(
     ([category]) => category !== "Basic",
   ) as [BlockCategory, BlockDefinition[]][];
 
   // 기본 블록 정의: start와 end를 고정된 위치로 추가
-  const initialBlocks: DroppedBlock[] = [
+  const createInitialBlocks = (): DroppedBlock[] => [
     {
       id: "start",
       name: "start",
@@ -55,17 +57,17 @@ const BlockList: React.FC<BlockListProps> = (props) => {
         {
           name: "input_channels",
           type: "int",
-          value: datasetChannels[props.dataset],
+          value: datasetChannels[dataset],
         },
         {
           name: "input_width",
           type: "int",
-          value: datasetSizes[props.dataset],
+          value: datasetSizes[dataset],
         },
         {
           name: "input_height",
           type: "int",
-          value: datasetSizes[props.dataset],
+          value: datasetSizes[dataset],
         },
       ] as { name: string; type: "int" | "float"; value: 0 }[],
     },
@@ -77,8 +79,9 @@ const BlockList: React.FC<BlockListProps> = (props) => {
     },
   ];
 
-  const [droppedBlocks, setDroppedBlocks] =
-    useState<DroppedBlock[]>(initialBlocks);
+  const [droppedBlocks, setDroppedBlocks] = useState<DroppedBlock[]>(
+    createInitialBlocks(),
+  );
 
   const handleDragEnd = (result: any) => {
     const { source, destination } = result;
@@ -169,10 +172,32 @@ const BlockList: React.FC<BlockListProps> = (props) => {
     }
   };
 
+  // layers prop이 변경될 때 블록 목록 업데이트
+  useEffect(() => {
+    if (layers && layers.length > 0) {
+      // API 응답 형식으로 변환
+      const apiFormat = { layers };
+
+      // 프론트엔드 블록 형식으로 변환
+      const convertedBlocks = convertApiToBlocks(apiFormat);
+
+      // DroppedBlock 형식으로 변환하고 고유 ID 추가
+      const newBlocks = convertedBlocks.map((block) => ({
+        ...block,
+        id: `${block.name}-${Date.now()}-${Math.random().toString(36).substr(2, 9)}`,
+      })) as DroppedBlock[];
+
+      // start와 end 블록 사이에 새로운 블록들 추가
+      const initialBlocks = createInitialBlocks();
+      setDroppedBlocks([initialBlocks[0], ...newBlocks, initialBlocks[1]]);
+    }
+  }, [layers, dataset]);
+
+  // BlockStore 상태 업데이트
   const { setBlockList } = useBlockStore();
   useEffect(() => {
     setBlockList(droppedBlocks);
-  }, [droppedBlocks]);
+  }, [droppedBlocks, setBlockList]);
   const handleBlur = (
     blockIndex: number,
     paramIndex: number,
@@ -190,6 +215,7 @@ const BlockList: React.FC<BlockListProps> = (props) => {
       return updatedBlocks;
     });
   };
+
   return (
     <DragDropContext onDragEnd={handleDragEnd}>
       <div className="flex flex-1">

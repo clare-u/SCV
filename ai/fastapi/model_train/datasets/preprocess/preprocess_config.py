@@ -1,7 +1,7 @@
 import logging
 from typing import Dict, Any
 
-from model_test.neural_network_builder.config.project_config import project_config  # 기존 ProjectConfig 임포트
+from neural_network_builder.config.project_config import project_config  # 기존 ProjectConfig 임포트
 
 logger = logging.getLogger(__name__)
 

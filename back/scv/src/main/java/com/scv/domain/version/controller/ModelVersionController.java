@@ -1,7 +1,10 @@
 package com.scv.domain.version.controller;
 
-import com.scv.domain.oauth2.AuthUser;
-import com.scv.domain.oauth2.CustomOAuth2User;
+import com.scv.domain.model.dto.response.ModelCreateResponse;
+import com.scv.global.oauth2.auth.AuthUser;
+import com.scv.global.oauth2.auth.CustomOAuth2User;
+import com.scv.domain.result.dto.response.ResultResponse;
+import com.scv.domain.result.dto.response.ResultResponseWithImages;
 import com.scv.domain.version.dto.request.ModelVersionRequest;
 import com.scv.domain.version.dto.response.ModelVersionDetail;
 import com.scv.domain.version.dto.response.ModelVersionOnWorking;
@@ -38,10 +41,10 @@ public class ModelVersionController {
             @ApiResponse(responseCode = "400", description = "잘못된 요청", content = @Content(schema = @Schema(implementation = ErrorResponse.class))),
             @ApiResponse(responseCode = "404", description = "존재하지 않는 모델", content = @Content(schema = @Schema(implementation = ErrorResponse.class)))
     })
-    public ResponseEntity<Void> createModelVersion(@PathVariable Long modelId, @RequestBody ModelVersionRequest request, @AuthUser CustomOAuth2User user) throws BadRequestException {
-        modelVersionService.createModelVersion(modelId, request, user);
+    public ResponseEntity<ModelCreateResponse> createModelVersion(@PathVariable Long modelId, @RequestParam Long modelVersionId, @AuthUser CustomOAuth2User user) throws BadRequestException {
+        ModelCreateResponse modelResponse = modelVersionService.createModelVersion(modelId, modelVersionId, user);
 
-        return ResponseEntity.status(201).build();
+        return ResponseEntity.status(201).body(modelResponse);
     }
 
     // 모델 버전 상세 조회
@@ -91,10 +94,10 @@ public class ModelVersionController {
             @ApiResponse(responseCode = "404", description = "존재하지 않는 모델버전", content = @Content(schema = @Schema(implementation = ErrorResponse.class)))
     })
     public ResponseEntity<Page<ModelVersionOnWorking>> getModelVersionsOnWorking(@RequestParam(defaultValue = "0") int page,
-                                                                                @RequestParam(defaultValue = "12") int size,
-                                                                                @RequestParam(defaultValue = "") String orderBy,
-                                                                                @RequestParam(defaultValue = "") String direction,
-                                                                                @AuthUser CustomOAuth2User user) {
+                                                                                 @RequestParam(defaultValue = "12") int size,
+                                                                                 @RequestParam(defaultValue = "") String orderBy,
+                                                                                 @RequestParam(defaultValue = "") String direction,
+                                                                                 @AuthUser CustomOAuth2User user) {
 
         Pageable pageable = pageableUtil.createPageable(page, size, orderBy, direction);
 
@@ -103,19 +106,21 @@ public class ModelVersionController {
         return ResponseEntity.ok(modelVersions);
     }
 
-//    @PostMapping("/{versionId}/result/save")
-//    @Operation(summary = "결과 저장", description = "학습 결과(이미지들)를 저장합니다.")
-//    public ResponseEntity<Void> saveResult(@PathVariable Long versionId, DataSet dataName, @AuthUser CustomOAuth2User user) throws BadRequestException, JsonProcessingException {
-//        modelVersionService.saveResult(versionId, dataName);
-//        return ResponseEntity.status(201).build();
-//    }
-//
-//    @PostMapping("/{versionId}/result/run")
-//    @Operation(summary = "실행 저장", description = "실행 결과를 저장합니다.")
-//    public ResponseEntity<Void> saveAnalysis(@PathVariable Long versionId, DataSet dataName, @RequestBody ResultRequest request, @AuthUser CustomOAuth2User user) throws BadRequestException {
-//        modelVersionService.runResult();
-//        return ResponseEntity.status(201).build();
-//    }
+
+    @PostMapping("/{versionId}/result/run")
+    @Operation(summary = "실행 저장", description = "실행 결과를 저장하고 반환합니다.")
+    public ResponseEntity<ResultResponse> saveAnalysis(@PathVariable Long versionId) {
+        ResultResponse resultResponse = modelVersionService.runResult(versionId);
+        return ResponseEntity.status(201).body(resultResponse);
+    }
+
+
+    @PostMapping("/{versionId}/result/save")
+    @Operation(summary = "결과 저장", description = "학습 결과(이미지들)를 저장하고 반환합니다.")
+    public ResponseEntity<ResultResponseWithImages> saveResult(@PathVariable Long versionId) {
+        ResultResponseWithImages resultResponseWithImages = modelVersionService.saveResult(versionId);
+        return ResponseEntity.status(201).body(resultResponseWithImages);
+    }
 
 
 }

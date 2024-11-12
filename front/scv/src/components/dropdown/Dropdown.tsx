@@ -1,29 +1,69 @@
 "use client";
 import { useState } from "react";
-import { useDeleteModel } from "@/hooks";
+import { useDeleteModel, useDeleteVersion, useCreateVersion } from "@/hooks";
+import { ModelResponse } from "@/types";
 import { toast } from "sonner";
+import { useRouter } from "next/navigation";
 
 interface DropdownProps {
   modelId: number;
   versionId: number;
 }
 
-const Dropdown: React.FC<DropdownProps> = ({ modelId }) => {
+const Dropdown: React.FC<DropdownProps> = ({ modelId, versionId }) => {
+  const router = useRouter();
+
   const [isDropboxOpen, setIsDropboxOpen] = useState(false);
-  const { mutate: deleteModelMutation, isPending } = useDeleteModel();
+  const { mutate: deleteModelMutation, isPending: isModelPending } =
+    useDeleteModel();
+  const { mutate: deleteVersionMutation, isPending: isVersionPending } =
+    useDeleteVersion();
+  const { mutate: createVersion, isPending: isVersionCreatePending } =
+    useCreateVersion();
 
   const toggleDropbox = () => {
     setIsDropboxOpen(!isDropboxOpen);
   };
 
   // 편집하기
-  const handleEditClick = () => {};
+  const handleEditClick = () => {
+    router.push(`/edit/${modelId}/${versionId}`);
+  };
 
   // 새로운 버전 만들기
-  const handleCreateVersionClick = () => {};
+  const handleCreateVersionClick = () => {
+    createVersion(
+      {
+        modelId,
+        modelVersionId: versionId,
+      },
+      {
+        onSuccess: (data: ModelResponse) => {
+          router.push(`/edit/${data.modelId}/${data.modelVersionId}`);
+        },
+        onError: (error) => {
+          console.error("Create version error:", error);
+        },
+      },
+    );
+  };
 
   // 버전 삭제하기
-  const handleVersionDeleteClick = () => {};
+  const handleVersionDeleteClick = () => {
+    const confirmVersionDelete = confirm("현재 버전을 삭제하시겠습니까?");
+    if (confirmVersionDelete) {
+      deleteVersionMutation(versionId, {
+        onSuccess: () => {
+          toast.success("버전이 성공적으로 삭제되었습니다.");
+          setIsDropboxOpen(false);
+        },
+        onError: (error) => {
+          toast.error("버전 삭제 중 오류가 발생했습니다.");
+          console.error("Delete error:", error);
+        },
+      });
+    }
+  };
 
   // 모델 삭제하기
   const handleDeleteClick = () => {
@@ -57,9 +97,7 @@ const Dropdown: React.FC<DropdownProps> = ({ modelId }) => {
           <div className="inline-flex flex-col gap-4 rounded-4 bg-white p-6 shadow-s">
             <div
               onClick={handleEditClick}
-              className={`flex cursor-pointer items-center gap-10 whitespace-nowrap rounded-4 bg-white px-16 py-10 text-14 hover:bg-gray-100 ${
-                isPending ? "opacity-50" : ""
-              }`}
+              className={`flex cursor-pointer items-center gap-10 whitespace-nowrap rounded-4 bg-white px-16 py-10 text-14 hover:bg-gray-100`}
               // TODO: isPending 말고 다른 변수 할당 필요
             >
               <span className="material-symbols-outlined">edit</span>
@@ -67,7 +105,9 @@ const Dropdown: React.FC<DropdownProps> = ({ modelId }) => {
             </div>
             <div
               onClick={handleCreateVersionClick}
-              className={`flex cursor-pointer items-center gap-10 whitespace-nowrap rounded-4 bg-white px-16 py-10 text-14 hover:bg-gray-100`}
+              className={`flex cursor-pointer items-center gap-10 whitespace-nowrap rounded-4 bg-white px-16 py-10 text-14 hover:bg-gray-100 ${
+                isVersionCreatePending ? "opacity-50" : ""
+              }`}
             >
               <span className="material-symbols-outlined">add_circle</span>
               새로운 버전 만들기
@@ -75,7 +115,7 @@ const Dropdown: React.FC<DropdownProps> = ({ modelId }) => {
             <div
               onClick={handleVersionDeleteClick}
               className={`flex cursor-pointer items-center gap-10 whitespace-nowrap rounded-4 bg-white px-16 py-10 text-14 hover:bg-gray-100 ${
-                isPending ? "opacity-50" : ""
+                isVersionPending ? "opacity-50" : ""
               }`}
             >
               <span className="material-symbols-outlined">delete</span>
@@ -84,7 +124,7 @@ const Dropdown: React.FC<DropdownProps> = ({ modelId }) => {
             <div
               onClick={handleDeleteClick}
               className={`flex cursor-pointer items-center gap-10 whitespace-nowrap rounded-4 bg-white px-16 py-10 text-14 hover:bg-gray-100 ${
-                isPending ? "opacity-50" : ""
+                isModelPending ? "opacity-50" : ""
               }`}
             >
               <span className="material-symbols-outlined">delete</span>

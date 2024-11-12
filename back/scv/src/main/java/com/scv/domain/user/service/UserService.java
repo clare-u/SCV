@@ -1,15 +1,10 @@
 package com.scv.domain.user.service;
 
-import com.scv.domain.github.service.GithubService;
-import com.scv.domain.oauth2.CustomOAuth2User;
+import com.scv.global.jwt.service.RedisTokenService;
+import com.scv.global.jwt.util.JwtUtil;
+import com.scv.global.oauth2.auth.CustomOAuth2User;
 import com.scv.domain.user.domain.User;
-import com.scv.domain.user.dto.request.CommitGithubRepositoryFileRequestDTO;
-import com.scv.domain.user.dto.request.GithubRepositoryNameRequestDTO;
-import com.scv.domain.user.dto.response.GithubRepositoryNameResponseDTO;
 import com.scv.domain.user.dto.response.UserProfileResponseDTO;
-import com.scv.domain.user.exception.DuplicateRepositoryException;
-import com.scv.domain.user.exception.InternalServerErrorException;
-import com.scv.domain.user.exception.RepositoryNotFoundException;
 import com.scv.domain.user.exception.UserNotFoundException;
 import com.scv.domain.user.repository.UserRepository;
 import lombok.RequiredArgsConstructor;
@@ -18,13 +13,14 @@ import org.springframework.transaction.annotation.Transactional;
 
 @Service
 @RequiredArgsConstructor
-@Transactional
+@Transactional(readOnly = true)
 public class UserService {
 
-    private final GithubService githubService;
+    private final RedisTokenService redisTokenService;
 
     private final UserRepository userRepository;
 
+    // 유저 프로필 조회 서비스 로직
     public UserProfileResponseDTO getUserProfile(CustomOAuth2User authUser) {
         User user = userRepository.findById(authUser.getUserId()).orElseThrow(UserNotFoundException::getInstance);
         return UserProfileResponseDTO.builder()
@@ -36,46 +32,14 @@ public class UserService {
                 .build();
     }
 
-    public GithubRepositoryNameResponseDTO setNewGithubRepository(CustomOAuth2User authUser, GithubRepositoryNameRequestDTO requestDTO) {
-        if (githubService.getGithubRepositoryNames(authUser).contains(requestDTO.getRepoName())) {
-            throw DuplicateRepositoryException.getInstance();
-        }
-
-        String newRepoName = githubService.createGithubRepository(authUser, requestDTO);
-
-        if (newRepoName == null) {
-            throw InternalServerErrorException.getInstance();
-        }
-
-        userRepository.updateUserRepoById(authUser.getUserId(), requestDTO.getRepoName());
-
-        return GithubRepositoryNameResponseDTO.builder()
-                .repoName(requestDTO.getRepoName())
-                .build();
-    }
-
-    public GithubRepositoryNameResponseDTO setCurrentGithubRepository(CustomOAuth2User authUser, GithubRepositoryNameRequestDTO requestDTO) {
-        if (!githubService.getGithubRepositoryNames(authUser).contains(requestDTO.getRepoName())) {
-            throw RepositoryNotFoundException.getInstance();
-        }
-
-        userRepository.updateUserRepoById(authUser.getUserId(), requestDTO.getRepoName());
-
-        return GithubRepositoryNameResponseDTO.builder()
-                .repoName(requestDTO.getRepoName())
-                .build();
-    }
-
-    public void disConnectGithubRepository(CustomOAuth2User authUser) {
+    // 깃허브 리포 연동 해제 서비스 로직
+    @Transactional
+    public String unLinkGithubRepo(CustomOAuth2User authUser, String accessToken) {
         userRepository.updateUserRepoById(authUser.getUserId(), null);
-    }
 
-    public String importModel(CustomOAuth2User auth2User, String modelName) {
-        return githubService.getGithubRepositoryFile(auth2User, modelName);
-    }
+        redisTokenService.addToBlacklist(accessToken);
 
-    public String exportModel(CustomOAuth2User auth2User, CommitGithubRepositoryFileRequestDTO requestDTO) {
-        return githubService.commitGithubRepositoryFile(auth2User, requestDTO);
+        return JwtUtil.createAccessToken(userRepository.findById(authUser.getUserId()).orElseThrow(UserNotFoundException::getInstance));
     }
 
 }

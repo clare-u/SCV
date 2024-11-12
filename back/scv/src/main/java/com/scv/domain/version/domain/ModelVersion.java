@@ -41,7 +41,7 @@ public class ModelVersion extends BaseEntity {
      *
      */
     public void updateVersionNo(int versionNo) {
-        this.versionNo = ++versionNo;
+        this.versionNo = versionNo;
     }
 
     /**
@@ -52,5 +52,13 @@ public class ModelVersion extends BaseEntity {
     public void updateLayers(String layers) {
         this.layers = layers;
     }
+
+    /**
+     * 작업 상태 반전 (진행 중 또는 완료 상태 전환)
+     */
+    public void workingDone() {
+        this.isWorkingOn = false;
+    }
+
 }
 

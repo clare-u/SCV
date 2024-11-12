@@ -6,8 +6,8 @@ from typing import Dict, Any
 
 from fastapi import FastAPI, HTTPException, Path
 
-from .api.routes import inference_routes
-from .utils.model_utils import generate_model_name
+from api.routes import inference_routes
+from utils.model_utils import generate_model_name
 
 logging.basicConfig(
     level=logging.INFO,
@@ -23,11 +23,11 @@ root_dir = os.path.dirname(current_dir)
 sys.path.append(root_dir)
 
 from neural_network_builder.parsers.validators import ModelConfig, ModelLayerConfig, layer_classes
-from model_test.neural_network_builder.parsers.validators import ModelConfig, layer_classes
+from neural_network_builder.parsers.validators import ModelConfig, layer_classes
 
 try:
-    from .model_run import ModelTrainer
-    from .save_minio import save_model_to_minio
+    from model_run import ModelTrainer
+    from save_minio import save_model_to_minio
 except ImportError:
     from model_train import ModelTrainer
     from save_minio import save_model_to_minio

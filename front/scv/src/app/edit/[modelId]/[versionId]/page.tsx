@@ -1,5 +1,5 @@
 "use client";
-import { useState } from "react";
+import { useState, useEffect, useCallback } from "react";
 import BlockList from "@/components/block/BlockList";
 import CodeViewer from "@/components/code/CodeViewer";
 import Button from "@/components/button/Button";
@@ -7,22 +7,55 @@ import Chips from "@/components/chips/Chips";
 import { ChipsProps } from "@/components/chips/Chips";
 import Badge from "@/components/badge/Badge";
 import { BadgeProps } from "@/components/badge/Badge";
-import { useCallback } from "react";
 import { useDropzone } from "react-dropzone";
 import { useBlockStore } from "@/store/blockStore";
-import { Dataset } from "@/types";
+import { Dataset, ModelVersionRequest, RunResponse } from "@/types";
+import {
+  useFetchModelVersions,
+  useFetchVersionDetails,
+  useSaveModelVersion,
+  useRunModelVersion,
+} from "@/hooks";
+import Loading from "@/components/loading/Loading";
+import { useRouter } from "next/navigation";
 
-export default function Edit() {
-  // 더미 데이터 정의
-  const [title, setTitle] = useState("Model Title");
-  const [version] = useState("v1");
-  const [dataset] = useState<Dataset>("MNIST");
+interface EditProps {
+  params: {
+    modelId: number;
+    versionId: number;
+  };
+}
 
+export default function Edit({ params }: EditProps) {
+  const router = useRouter();
+  const {
+    data: modelData,
+    isLoading: modelLoading,
+    error: modelError,
+  } = useFetchModelVersions(params.modelId);
+
+  const {
+    data: versionData,
+    isLoading: versionLoading,
+    error: versionError,
+  } = useFetchVersionDetails(params.versionId);
+
+  // 실제 제목과 수정용 제목을 분리
+  const [title, setTitle] = useState("");
+  const [editedTitle, setEditedTitle] = useState("");
   const [isEditing, setIsEditing] = useState(false);
   const [isHovered, setIsHovered] = useState(false);
-  const [editedTitle, setEditedTitle] = useState(title);
+  const [filePreviews, setFilePreviews] = useState<string[]>([]);
+  const [testResult, setTestResult] = useState<string | null>(null);
 
-  const { blockListValidation } = useBlockStore();
+  const { getLayerData, blockListValidation } = useBlockStore();
+
+  // modelData가 로드되면 title 초기화
+  useEffect(() => {
+    if (modelData?.modelName) {
+      setTitle(modelData.modelName);
+    }
+  }, [modelData?.modelName]);
 
   const datasetColors: Record<string, ChipsProps["color"]> = {
     Editing: "gray",
@@ -42,38 +75,174 @@ export default function Edit() {
     EMNIST: "red",
   };
 
+  // 편집 모드 시작 시 editedTitle을 현재 title로 설정
+  const handleStartEditing = () => {
+    setEditedTitle(title);
+    setIsEditing(true);
+  };
+
   const handleSaveTitle = () => {
+    // TODO: API 연동 시 제목 업데이트 로직 추가
     setTitle(editedTitle);
     setIsEditing(false);
   };
 
   const handleCancelEdit = () => {
-    setEditedTitle(title);
+    setEditedTitle(title); // 현재 title로 복원
     setIsEditing(false);
   };
 
-  // 파일 드래그앤드롭
-  // acceptedFiles를 File[] 타입으로 지정
-  const [filePreviews, setFilePreviews] = useState<string[]>([]);
   const onDrop = useCallback((acceptedFiles: File[]) => {
     const previews = acceptedFiles.map((file) => URL.createObjectURL(file));
     setFilePreviews(previews);
   }, []);
-  const [testResult, setTestResult] = useState<string | null>(null);
 
   const { getRootProps, getInputProps, isDragActive } = useDropzone({ onDrop });
 
-  // 테스트 버튼 클릭 시 결과 생성
   const handleTest = () => {
     setTestResult("출력: 6");
   };
 
+  const [isVersionValid, setIsVersionValid] = useState<boolean | null>(null);
+
+  useEffect(() => {
+    if (modelData?.modelVersions) {
+      const currentVersionId = Number(params.versionId);
+      const isValid = modelData.modelVersions.some(
+        (version) => Number(version.versionId) === currentVersionId,
+      );
+      console.log("Version validation:", {
+        currentVersionId,
+        availableVersions: modelData.modelVersions.map((v) => v.versionId),
+        isValid,
+      });
+      setIsVersionValid(isValid);
+    }
+  }, [modelData, params.versionId]);
+
+  // 버전 저장 함수 (patch)
+  const { mutate: saveVersion, isPending, isError } = useSaveModelVersion();
+
+  const handleSaveVersion = () => {
+    const layerData = getLayerData(); // Layer 데이터를 가져옴
+
+    const versionData: ModelVersionRequest = {
+      model_version_id: params.versionId,
+      layers: layerData,
+    };
+
+    saveVersion({ versionId: params.versionId, versionData });
+  };
+
+  // 실행
+  // 실행 결과 상태 추가
+  const [runResult, setRunResult] = useState<RunResponse | null>(null);
+  const { mutate: runModel, isPending: isRunning } = useRunModelVersion();
+
+  // 실행 버튼 핸들러 수정
+  // 실행 핸들러 수정
+  const handleRunModel = () => {
+    // 먼저 저장 작업 수행
+    handleSaveVersion();
+
+    // `modelData`와 유효성 검사를 수행합니다.
+    if (modelData && modelData.DataName) {
+      try {
+        blockListValidation(modelData.DataName as Dataset); // 유효성 검사 수행
+      } catch (error) {
+        console.log("블록 리스트가 유효하지 않습니다.");
+        return; // 유효하지 않으면 실행을 중단
+      }
+    } else {
+      console.log("모델 데이터가 유효하지 않습니다.");
+      return; // modelData가 없으면 실행을 중단
+    }
+
+    // 저장과 검사가 완료되면 실행 수행
+    runModel(params.versionId, {
+      onSuccess: (data) => {
+        setRunResult(data); // 실행 결과를 상태에 저장
+      },
+    });
+  };
+  /////////////////////
+
+  if (modelLoading || versionLoading) return <Loading />;
+  if (!modelData || !versionData) return <div>데이터를 찾을 수 없습니다.</div>;
+
+  const currentVersionNo = modelData.modelVersions.find(
+    (version) => Number(version.versionId) === Number(params.versionId),
+  )?.versionNo;
+
+  // versionId가 null인지 확인하는 함수
+  const isNullVersion = () => {
+    return (
+      params.versionId === null ||
+      params.versionId === undefined ||
+      Number.isNaN(Number(params.versionId))
+    );
+  };
+
+  // null 체크를 먼저 수행
+  if (isNullVersion()) {
+    return (
+      <div className="flex flex-col items-center justify-center">
+        <div className="text-center">
+          <h1 className="mb-4 text-2xl font-bold text-gray-900">
+            유효하지 않은 접근입니다
+          </h1>
+          <p className="mb-8 text-gray-600">
+            버전 정보가 필요합니다. 커뮤니티 목록으로 돌아가주세요.
+          </p>
+          <button
+            onClick={() => router.push("/community")}
+            className="rounded-md bg-indigo-600 px-4 py-2 text-white hover:bg-indigo-700"
+          >
+            커뮤니티로 돌아가기
+          </button>
+        </div>
+      </div>
+    );
+  }
+
+  if (!isVersionValid) {
+    return (
+      <div className="flex flex-col items-center justify-center">
+        <div className="text-center">
+          <h1 className="mb-4 text-2xl font-bold text-gray-900">
+            잘못된 버전 정보입니다
+          </h1>
+          <p className="mb-8 text-gray-600">
+            해당 모델에 존재하지 않는 버전입니다.
+          </p>
+          <div className="space-x-4">
+            <button
+              onClick={() => router.push("/workspace")}
+              className="rounded-md bg-gray-600 px-4 py-2 text-white hover:bg-gray-700"
+            >
+              워크스페이스로 돌아가기
+            </button>
+            <button
+              onClick={() =>
+                router.push(
+                  `/edit/${params.modelId}/${modelData.modelVersions[0].versionId}`,
+                )
+              }
+              className="rounded-md bg-indigo-600 px-4 py-2 text-white hover:bg-indigo-700"
+            >
+              첫 번째 버전으로 이동
+            </button>
+          </div>
+        </div>
+      </div>
+    );
+  }
+  if (modelError || versionError) return <div>에러가 발생했습니다.</div>;
   return (
     <div className="flex h-screen w-full flex-1 flex-col">
       <div className="flex h-[8vh] w-full items-center justify-between border-b border-gray-500 px-10">
         <div className="flex items-center justify-between">
           <div className="flex items-center justify-center gap-10">
-            {/* 제목 영역 */}
             <div
               className="relative flex items-center gap-2"
               onMouseEnter={() => setIsHovered(true)}
@@ -110,14 +279,14 @@ export default function Edit() {
                 <div className="flex items-center gap-1">
                   <h3
                     className="cursor-pointer text-20 font-semibold hover:underline"
-                    onClick={() => setIsEditing(true)}
+                    onClick={handleStartEditing}
                   >
                     {title}
                   </h3>
                   {isHovered && (
                     <span
                       className="material-symbols-outlined cursor-pointer"
-                      onClick={() => setIsEditing(true)}
+                      onClick={handleStartEditing}
                     >
                       edit
                     </span>
@@ -125,14 +294,23 @@ export default function Edit() {
                 </div>
               )}
             </div>
-            <Badge color={badgeColors[dataset]}>{version}</Badge>
-            <Chips color={datasetColors[dataset]} design="fill">
-              {dataset}
+            <Badge
+              color={badgeColors[modelData.DataName]}
+            >{`v${currentVersionNo}`}</Badge>
+            <Chips color={datasetColors[modelData.DataName]} design="fill">
+              {modelData.DataName}
             </Chips>
           </div>
         </div>
         <div className="flex items-center gap-10 px-10">
-          <Button size="m" design="fill" color="indigo" icon="save">
+          <Button
+            size="m"
+            design="fill"
+            color="indigo"
+            icon="save"
+            onClick={handleSaveVersion}
+            disabled={isPending}
+          >
             저장
           </Button>
           <Button
@@ -140,22 +318,40 @@ export default function Edit() {
             design="fill"
             color="green"
             icon="play_arrow"
-            onClick={() => blockListValidation(dataset)}
+            onClick={handleRunModel} // 실행 핸들러 적용
+            disabled={isRunning || isPending}
           >
             실행
           </Button>
         </div>
       </div>
       <div className="flex h-[92vh]">
-        <BlockList dataset={dataset} />
+        <BlockList
+          dataset={modelData.DataName as Dataset}
+          layers={versionData.layers}
+        />
         <div className="flex w-[600px] flex-col border-l border-gray-500">
           <div className="flex max-h-[450px] w-full flex-1 overflow-y-auto overflow-x-hidden border-b border-gray-500">
-            <CodeViewer></CodeViewer>
+            <CodeViewer
+              codeString={
+                runResult?.codeView || "# 실행 후 이곳에 코드가 나타납니다." // 실행 결과 코드 렌더링
+              }
+            ></CodeViewer>
           </div>
           <div className="flex items-center gap-10 border-b border-gray-500 p-10">
             <div className="text-20 font-semibold">실행 결과 : </div>
-            <div className="text-20 font-semibold">98.50%</div>
-            <div className="text-20">(9583/10000)</div>
+            <div className="text-20 font-semibold">
+              {runResult?.testAccuracy
+                ? `${runResult.testAccuracy}%`
+                : "실행 후 나타납니다"}
+            </div>
+            <div className="text-20">
+              (
+              {runResult?.totalParams
+                ? runResult.totalParams.toLocaleString()
+                : "실행 후 나타납니다"}
+              /1000000)
+            </div>
           </div>
           <div className="flex flex-col justify-center p-10">
             <div className="flex flex-1 border-b border-gray-300 text-20 font-semibold">
@@ -176,7 +372,6 @@ export default function Edit() {
                 )}
               </div>
 
-              {/* 파일 미리보기 */}
               <div className="flex items-center gap-4">
                 {filePreviews.map((preview, index) => (
                   <div
@@ -192,7 +387,6 @@ export default function Edit() {
                 ))}
               </div>
 
-              {/* 파일이 업로드되면 테스트 버튼 표시 */}
               {filePreviews.length > 0 && (
                 <Button
                   size="m"
@@ -204,7 +398,6 @@ export default function Edit() {
                 </Button>
               )}
 
-              {/* 테스트 결과 표시 */}
               {testResult && (
                 <div className="rounded border border-green-300 p-3 text-18 font-semibold text-green-600">
                   {testResult}

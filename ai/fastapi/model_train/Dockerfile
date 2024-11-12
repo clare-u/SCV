@@ -1,5 +1,5 @@
 # 베이스 이미지
-FROM python:3.12.4-slim
+FROM bley1217/scv-fast:latest
 
 # 작업 디렉토리 설정
 WORKDIR /app

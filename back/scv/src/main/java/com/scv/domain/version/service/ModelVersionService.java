@@ -1,21 +1,24 @@
 package com.scv.domain.version.service;
 
 import com.fasterxml.jackson.databind.JsonNode;
+import com.fasterxml.jackson.databind.ObjectMapper;
+import com.fasterxml.jackson.databind.node.ObjectNode;
 import com.scv.domain.data.domain.Data;
-import com.scv.domain.data.dto.DataDTO;
-import com.scv.domain.data.enums.DataSet;
 import com.scv.domain.data.exception.DataNotFoundException;
 import com.scv.domain.data.repository.DataRepository;
 import com.scv.domain.model.domain.Model;
+import com.scv.domain.model.dto.response.ModelCreateResponse;
 import com.scv.domain.model.exception.ModelNotFoundException;
 import com.scv.domain.model.repository.ModelRepository;
-import com.scv.domain.oauth2.CustomOAuth2User;
+import com.scv.global.oauth2.auth.CustomOAuth2User;
 import com.scv.domain.result.domain.Result;
 import com.scv.domain.result.dto.request.ResultRequest;
-import com.scv.domain.result.dto.response.ResultAnalysisResponse;
+import com.scv.domain.result.dto.response.ResultResponse;
+import com.scv.domain.result.dto.response.ResultResponseWithImages;
 import com.scv.domain.result.exception.ResultNotFoundException;
 import com.scv.domain.result.repository.ResultRepository;
 import com.scv.domain.version.domain.ModelVersion;
+import com.scv.domain.version.dto.layer.LayerDTO;
 import com.scv.domain.version.dto.request.ModelVersionRequest;
 import com.scv.domain.version.dto.response.ModelVersionDetail;
 import com.scv.domain.version.dto.response.ModelVersionDetailWithResult;
@@ -27,7 +30,6 @@ import lombok.RequiredArgsConstructor;
 import org.apache.coyote.BadRequestException;
 import org.springframework.data.domain.Page;
 import org.springframework.data.domain.Pageable;
-import org.springframework.http.HttpEntity;
 import org.springframework.http.HttpHeaders;
 import org.springframework.http.MediaType;
 import org.springframework.http.ResponseEntity;
@@ -49,22 +51,21 @@ public class ModelVersionService {
 
     // 모델 버전 생성
     @Transactional
-    public void createModelVersion(Long modelId, ModelVersionRequest request, CustomOAuth2User user) throws BadRequestException {
+    public ModelCreateResponse createModelVersion(Long modelId, Long modelVersionId, CustomOAuth2User user) throws BadRequestException {
         Model model = modelRepository.findById(modelId).orElseThrow(ModelNotFoundException::new);
-
+        ModelVersion modelVersion = modelVersionRepository.findById(modelVersionId).orElseThrow(ModelNotFoundException::new);
         if (user.getUserId() != model.getUser().getUserId()) {
             throw new BadRequestException("모델의 제작자만 생성할 수 있습니다.");
         }
 
-        String layersJson = ParsingUtil.toJson(request.layers());
-
-        ModelVersion modelVersion = ModelVersion.builder()
+        ModelVersion newModelVersion = ModelVersion.builder()
                 .model(model)
                 .versionNo(0)
-                .layers(layersJson)
+                .layers(modelVersion.getLayers())
                 .build();
 
-        modelVersionRepository.save(modelVersion);
+        modelVersionRepository.save(newModelVersion);
+        return new ModelCreateResponse(newModelVersion);
     }
 
 
@@ -75,12 +76,13 @@ public class ModelVersionService {
 
         Optional<Result> result = resultRepository.findById(versionId);
         if (result.isPresent()) {
-            ResultAnalysisResponse resultAnalysisResponse = new ResultAnalysisResponse(result.get());
-            return new ModelVersionDetailWithResult(version, resultAnalysisResponse);
+            ResultResponseWithImages resultResponseWithImages = new ResultResponseWithImages(result.get());
+            return new ModelVersionDetailWithResult(version, resultResponseWithImages);
         }
 
         return new ModelVersionDetail(version);
     }
+
 
     // 개발중인 모델 조회
     @Transactional(readOnly = true)
@@ -89,6 +91,7 @@ public class ModelVersionService {
 
         return modelVersions.map(ModelVersionOnWorking::new);
     }
+
 
     // 모델 버전 수정
     @Transactional
@@ -108,7 +111,6 @@ public class ModelVersionService {
         Optional<Result> result = resultRepository.findById(modelVersionId);
 
         result.ifPresent(resultRepository::delete);
-        modelVersionRepository.save(modelVersion);
     }
 
 
@@ -124,6 +126,12 @@ public class ModelVersionService {
         Model model = modelVersion.getModel();
         modelVersion.delete();
         modelVersionRepository.save(modelVersion);
+        Optional<Result> result = resultRepository.findById(modelVersionId);
+        if (result.isPresent()) {
+            Result existingResult = result.get();
+            existingResult.delete();
+            resultRepository.save(existingResult);
+        }
 
         // 버전, 정확도관리
         if (model.getLatestVersion() != 0) {
@@ -143,109 +151,125 @@ public class ModelVersionService {
                 model.setAccuracy(-1.0);
             }
         }
-        modelRepository.save(model);
+        modelVersionRepository.save(modelVersion);
     }
 
-    //    실행하기
+    // 모델 실행 및 저장
     @Transactional
-    public String runResult(Long modelVersionId) {
+    public ResultResponse runResult(Long modelVersionId) {
         ModelVersion modelVersion = modelVersionRepository.findById(modelVersionId)
                 .orElseThrow(ModelVersionNotFoundException::new);
-        Data data = dataRepository.findById(modelVersion.getModel().getData().getId()).orElseThrow(DataNotFoundException::new);
+        Data data = dataRepository.findById(modelVersion.getModel().getData().getId())
+                .orElseThrow(DataNotFoundException::new);
 
-        ResultRequest request = new ResultRequest(modelVersion.getLayers(), new DataDTO(data));
-
-        String url = "http://localhost:8002/fast/v1/models/" + modelVersionId + "/versions/0";
+        List<LayerDTO> layers = ParsingUtil.parseJsonToList(modelVersion.getLayers(), LayerDTO.class);
+        ResultRequest request = new ResultRequest(layers, data);
+        String url = "http://localhost:8003/fast/v1/models/" + modelVersion.getModel().getId() + "/versions/" + modelVersionId;
 
         RestTemplate restTemplate = new RestTemplate();
         ResponseEntity<String> response = restTemplate.postForEntity(url, request, String.class);
         String jsonResponse = response.getBody();
 
-        JsonNode rootNode = ParsingUtil.parseJson(jsonResponse, JsonNode.class);
+        JsonNode rootNode = ParsingUtil.parseJsonToNode(jsonResponse);
         JsonNode testResults = rootNode.path("test_results").path("results");
 
         double finalTestAccuracy = testResults.path("final_test_accuracy").asDouble(0.0);
         double finalTestLoss = testResults.path("final_test_loss").asDouble(0.0);
-        String modelCode = testResults.path("model_code").asText("");
 
-        // 레이어 파라미터의 합계 계산
-        int totalParams = 0;
-        for (JsonNode paramNode : testResults.path("layer_parameters")) {
-            totalParams += paramNode.asInt(0);
-        }
+        String modelCode = testResults.path("model_code").asText();
+        String codeJson = ParsingUtil.toJson(modelCode);
 
-        // Result 객체 생성
+        String layerParams = ParsingUtil.toJson(testResults.path("layer_parameters"));
+
+        ObjectNode trainInfoNode = new ObjectMapper().createObjectNode();
+        trainInfoNode.set("train_result_per_epoch", testResults.path("train_result_per_epoch"));
+        trainInfoNode.set("training_history", testResults.path("training_history"));
+
+        String trainInfo = trainInfoNode.toString();
+
+        int totalParams = calculateTotalParams(testResults.path("layer_parameters"));
+
         Result result = Result.builder()
                 .modelVersion(modelVersion)
-                .code(modelCode)
+                .code(codeJson)
                 .testAccuracy(finalTestAccuracy)
                 .testLoss(finalTestLoss)
-                .trainInfo(testResults.path("train_result_per_epoch").toString())
-                .params(testResults.path("layer_parameters").toString())
+                .layerParams(layerParams)
+                .trainInfo(trainInfo)
                 .totalParams(totalParams)
                 .build();
 
-        // 데이터베이스에 저장
+        Optional<Result> existingResult = resultRepository.findById(modelVersionId);
+        if (existingResult.isPresent()) {
+            resultRepository.delete(existingResult.get());
+        }
         resultRepository.save(result);
 
-        return jsonResponse;
+        return new ResultResponse(result);
     }
 
-    // TODO 저장하면 버전 생기게, 모델 업데이트, isWorking = false
-    // 결과저장
+    // 결과 및 분석 저장
     @Transactional
-    public void saveResult(Long modelVersionId, DataSet dataName) {
+    public ResultResponseWithImages saveResult(Long modelVersionId) {
         ModelVersion modelVersion = modelVersionRepository.findById(modelVersionId)
                 .orElseThrow(ModelVersionNotFoundException::new);
-        Data data = dataRepository.findByName(dataName).orElseThrow(DataNotFoundException::new);
         Result result = resultRepository.findById(modelVersionId).orElseThrow(ResultNotFoundException::new);
+        Model model = modelVersion.getModel();
+        Long modelId = model.getId();
+        String data = model.getData().getName().toString();
+        if ("Fashion".equals(data)) {
+            data += "_MNIST";
+        }
 
-        String url = "http://localhost:8002/fast/v1/model/test/analyze/" + 0 + "/" + dataName.toString().toLowerCase();
+        String url = "http://localhost:8002/fast/v1/model/test/analyze/" + modelId + "/" + modelVersionId + "/" + data.toLowerCase();
         RestTemplate restTemplate = new RestTemplate();
-
-        Map<String, Object> jsonMap = new HashMap<>();
-        jsonMap.put("layers", ParsingUtil.toJson(modelVersion.getLayers()));
-        jsonMap.put("dataName", dataName.toString());
-        jsonMap.put("dataTrainCnt", data.getTrainCnt());
-        jsonMap.put("dataTestCnt", data.getTestCnt());
-        jsonMap.put("dataLabelCnt", data.getLabelCnt());
-        jsonMap.put("dataEpochCnt", data.getEpochCnt());
-
-        String jsonData = ParsingUtil.toJson(jsonMap);
 
         HttpHeaders headers = new HttpHeaders();
         headers.setContentType(MediaType.APPLICATION_JSON);
-        HttpEntity<String> entity = new HttpEntity<>(jsonData, headers);
 
-        ResponseEntity<String> response = restTemplate.postForEntity(url, entity, String.class);
+        ResponseEntity<String> response = restTemplate.getForEntity(url, String.class);
         String jsonResponse = response.getBody();
 
         JsonNode rootNode = ParsingUtil.parseJson(jsonResponse, JsonNode.class);
 
-        String codeView = ParsingUtil.getJsonFieldAsString(rootNode, "code");
-        String confusionMatrix = ParsingUtil.getJsonFieldAsString(rootNode, "confusion_matrix");
-        String activationMaximization = ParsingUtil.getJsonFieldAsString(rootNode, "activation_maximization");
-        String featureActivation = ParsingUtil.getJsonFieldAsString(rootNode, "feature_activation");
-        String exampleImage = ParsingUtil.getJsonFieldAsString(rootNode, "example_image");
-        String trainInfoJson = ParsingUtil.getJsonFieldAsString(rootNode, "train_info");
-        String params = ParsingUtil.getJsonFieldAsString(rootNode, "params");
-
-        result = result.toBuilder()
-//                .modelVersion(modelVersion)
-//                .code(codeView)
-//                .testAccuracy(rootNode.path("test_accuracy").asDouble())
-//                .testLoss(rootNode.path("test_loss").asDouble())
-//                .trainInfo(trainInfoJson)
-                .confusionMatrix(confusionMatrix)
-                .exampleImg(exampleImage)
-//                .totalParams(rootNode.path("totalParams").asInt())
-//                .params(params)
-                .featureActivation(featureActivation)
-                .activationMaximization(activationMaximization)
-                .build();
-
+        result.updateAnalysis(
+                ParsingUtil.getJsonFieldAsString(rootNode, "confusion_matrix"),
+                ParsingUtil.getJsonFieldAsString(rootNode, "example_image"),
+                ParsingUtil.getJsonFieldAsString(rootNode, "feature_activation"),
+                ParsingUtil.getJsonFieldAsString(rootNode, "activation_maximization")
+        );
         resultRepository.save(result);
+
+        int latest = model.getLatestVersion();
+        double accuarcy = result.getTestAccuracy();
+
+        if (latest == 0) {
+            modelVersion.updateVersionNo(1);
+            model.setLatestVersion(1);
+            model.setAccuracy(accuarcy);
+        } else {
+            if (modelVersion.getVersionNo() == latest) {
+                model.setAccuracy(accuarcy);
+            } else if (modelVersion.getVersionNo() == 0) {
+                modelVersion.updateVersionNo(latest + 1);
+                model.setLatestVersion(latest + 1);
+                model.setAccuracy(accuarcy);
+            }
+        }
+        modelVersion.workingDone();
+
+        modelVersionRepository.save(modelVersion);
+        modelRepository.save(model);
+
+        return new ResultResponseWithImages(result);
     }
 
 
+    private int calculateTotalParams(JsonNode layerParameters) {
+        int totalParams = 0;
+        for (JsonNode paramNode : layerParameters) {
+            totalParams += paramNode.asInt();
+        }
+        return totalParams;
+    }
 }

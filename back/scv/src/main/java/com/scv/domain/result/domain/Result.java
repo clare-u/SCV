@@ -43,11 +43,8 @@ public class Result extends BaseEntity {
     @Column(name = "total_params")
     private int totalParams;
 
-    @Column(name = "params", columnDefinition = "JSON")
-    private String params;
-//
-//    @Column(name = "layer_params", columnDefinition = "JSON")
-//    private String layerParams;
+    @Column(name = "layer_params", columnDefinition = "JSON")
+    private String layerParams;
 
     @Column(name = "feature_activation", columnDefinition = "JSON")
     private String featureActivation;
@@ -56,4 +53,20 @@ public class Result extends BaseEntity {
     private String activationMaximization;
 
 
+    /**
+     * 결과 분석 저장 메서드
+     * @param confusionMatrix
+     * @param exampleImg
+     * @param featureActivation
+     * @param activationMaximization
+     */
+    public void updateAnalysis(String confusionMatrix, String exampleImg, String featureActivation, String activationMaximization) {
+        this.confusionMatrix = confusionMatrix;
+        this.exampleImg = exampleImg;
+        this.featureActivation = featureActivation;
+        this.activationMaximization = activationMaximization;
+    }
+
+
 }
+

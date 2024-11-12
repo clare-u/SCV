@@ -12,8 +12,13 @@ import Button from "../button/Button";
 import ModalInput from "../input/ModalInput";
 import DatasetRadio from "../input/DatasetRadio";
 import { toast } from "sonner";
+import { useCreateModel } from "@/hooks";
+import { ModelRequest, Dataset } from "@/types";
+import { useRouter } from "next/navigation";
 
 const NewModal = () => {
+  const router = useRouter();
+
   const [isOpen, setIsOpen] = useState(false);
 
   // 인풋
@@ -28,11 +33,24 @@ const NewModal = () => {
   const [selected, setSelected] = useState(dataset[0]);
 
   // 새로 만들기
+  const { mutate: createModel, isPending } = useCreateModel({
+    onSuccess: (data) => {
+      // 응답에서 modelId와 versionId를 추출하여 라우팅
+      const modelId = data.modelId;
+      const versionId = data.modelVersionId;
+      router.push(`/edit/${modelId}/${versionId}`);
+    },
+  });
+
   const handleCreate = () => {
     if (!inputValue.trim()) {
       toast.error("모델명을 입력해주세요.");
     } else {
-      alert(`모델명: ${inputValue}\n데이터셋: ${selected}`);
+      const data: ModelRequest = {
+        dataName: selected as Dataset,
+        modelName: inputValue,
+      };
+      createModel(data); // 단순 호출만 수행
     }
   };
 
@@ -88,8 +106,9 @@ const NewModal = () => {
                   color="indigo"
                   icon="add_box"
                   onClick={handleCreate}
+                  disabled={isPending}
                 >
-                  새로 만들기
+                  {isPending ? "로딩 중..." : "새로 만들기"}
                 </Button>
               </div>
             </Description>

@@ -35,14 +35,14 @@ client.load_collection(
 redis = redis.Redis(host=redis_host_name, port= redis_port, db=0)
 
 # vectordb에서 한 레이어 조회
-@app.get("/{model_version_id}/{layer_id}", response_model=Model_Read_Response)
-def read_model(model_version_id: str, layer_id: str):
+@app.get("/{model_id}/{version_id}/{layer_id}", response_model=Model_Read_Response)
+def read_model(model_id: str, version_id: str, layer_id: str):
 
-    print("{}_{} id 의 vector를 조회합니다.".format(model_version_id, layer_id))
+    print("{}_{} id 의 vector를 조회합니다.".format(f"model_{model_id}_v{version_id}", layer_id))
 
     res = client.get(
         collection_name=collection_name,
-        ids=["{}_{}".format(model_version_id, layer_id)]
+        ids=["{}_{}".format(f"model_{model_id}_v{version_id}", layer_id)]
     )
     
     if len(res) == 0:
@@ -55,15 +55,15 @@ def read_model(model_version_id: str, layer_id: str):
     return res[0]
 
 # vectordb에 한 레이어 추가
-@app.post("/{model_version_id}/{layer_id}", response_model=Model_Insert_Response)
-def insert_model(model_version_id: str, layer_id: str, req: Model_Insert_Request):
+@app.post("/{model_id}/{version_id}/{layer_id}", response_model=Model_Insert_Response)
+def insert_model(model_id: str,version_id:str, layer_id: str, req: Model_Insert_Request):
 
     res = client.insert(
         collection_name=collection_name,
         data=[
             {
-                "model_version_layer_id" : model_version_id + "_" + layer_id,
-                "model_version_id" : int(model_version_id),
+                "model_version_layer_id" : f"model_{model_id}_v{version_id}_{layer_id}",
+                "model_version_id" : f"model_{model_id}_v{version_id}",
                 "test_accuracy" : req.test_accuracy,
                 "layers" : req.layers,
                 "cka_vec" : req.cka_vec
@@ -71,24 +71,24 @@ def insert_model(model_version_id: str, layer_id: str, req: Model_Insert_Request
         ]
     )
 
-    print("{}_{} id로 vector를 insert 합니다. : {}".format(model_version_id, layer_id, res))
+    print("{}_{} id로 vector를 insert 합니다. : {}".format(f"model_{model_id}_v{version_id}", layer_id, res))
 
     res = dict(res)
 
     if res["insert_count"] == 1 :
-        return {"model_version_layer_id" : model_version_id + "_" + layer_id, "success": True}
+        return {"model_version_layer_id" : f"model_{model_id}_v{version_id}" + "_" + layer_id, "success": True}
 
-    return {"model_version_layer_id" : model_version_id + "_" + layer_id, "success": False}
+    return {"model_version_layer_id" : f"model_{model_id}_v{version_id}" + "_" + layer_id, "success": False}
 
 # vectordb에서 모델 삭제
-@app.delete("/{model_version_id}")
-def delete_model(model_version_id: str):
+@app.delete("/{model_id}/{version_id}")
+def delete_model(model_id: str, version_id: str):
     
-    print(f"{model_version_id} 의 model_version_id를 가진 레이어를 지웁니다.")
+    print(f"{f"model_{model_id}_v{version_id}"} 의 model_version_id를 가진 레이어를 지웁니다.")
 
     res = client.delete(
         collection_name=collection_name,
-        filter="model_version_id == {}".format(model_version_id)
+        filter="model_version_id == {}".format(f"model_{model_id}_v{version_id}")
     )
 
     res = dict(res)
@@ -101,10 +101,10 @@ def delete_model(model_version_id: str):
     )
 
 # 유사 모델 검색
-@app.get("/{model_version_id}/{layer_id}/search", response_model=Model_Search_Response)
-async def search_model(model_version_id: str, layer_id: str):
+@app.get("/{model_id}/{version_id}/{layer_id}/search", response_model=Model_Search_Response)
+async def search_model(model_id: str, version_id: str, layer_id: str):
     
-    model_version_layer_id = "{}_{}".format(model_version_id, layer_id)
+    model_version_layer_id = "{}_{}".format(f"model_{model_id}_v{version_id}", layer_id)
 
     cached = redis.get(model_version_layer_id)
     if cached:
@@ -145,7 +145,7 @@ async def search_model(model_version_id: str, layer_id: str):
     results = dict(results[0][0])
 
     id_parse = results["id"].split("_")
-    searched_model_version_id = id_parse[0]
+    searched_model_version_id = id_parse[0] + id_parse[1] + id_parse[2]
     searched_layer_id = id_parse[1]
     searched_test_accuracy = results["entity"]["test_accuracy"]
     

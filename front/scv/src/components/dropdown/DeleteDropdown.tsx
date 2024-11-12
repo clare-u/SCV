@@ -1,19 +1,23 @@
 "use client";
 import { useState } from "react";
-import { useDeleteModel } from "@/hooks";
-import { toast } from "sonner";
+import { useDeleteModel, useDeleteVersion } from "@/hooks";
 
 interface DeleteDropdownProps {
-  modelId: number;
+  modelId?: number;
+  versionId?: number;
   onClick?: (event: React.MouseEvent) => void;
 }
 
 const DeleteDropdown: React.FC<DeleteDropdownProps> = ({
   modelId,
+  versionId,
   onClick,
 }) => {
   const [isDropboxOpen, setIsDropboxOpen] = useState(false);
-  const { mutate: deleteModelMutation, isPending } = useDeleteModel();
+  const { mutate: deleteModelMutation, isPending: isDeletingModel } =
+    useDeleteModel();
+  const { mutate: deleteVersionMutation, isPending: isDeletingVersion } =
+    useDeleteVersion();
 
   const toggleDropbox = (event: React.MouseEvent) => {
     event.stopPropagation();
@@ -22,20 +26,29 @@ const DeleteDropdown: React.FC<DeleteDropdownProps> = ({
 
   const handleDeleteClick = (event: React.MouseEvent) => {
     event.stopPropagation();
-    const confirmDelete = confirm(
-      "해당 모델과 하위 버전 전체를 삭제하시겠습니까?",
-    );
-    if (confirmDelete) {
-      deleteModelMutation(modelId, {
-        onSuccess: () => {
-          toast.success("모델이 성공적으로 삭제되었습니다.");
-          setIsDropboxOpen(false);
-        },
-        onError: (error) => {
-          toast.error("모델 삭제 중 오류가 발생했습니다.");
-          console.error("Delete error:", error);
-        },
-      });
+
+    if (modelId) {
+      // 모델 삭제 로직
+      const confirmDelete = confirm(
+        "해당 모델과 하위 버전 전체를 삭제하시겠습니까?",
+      );
+      if (confirmDelete) {
+        deleteModelMutation(modelId, {
+          onSuccess: () => {
+            setIsDropboxOpen(false);
+          },
+        });
+      }
+    } else if (versionId) {
+      // 버전 삭제 로직
+      const confirmDelete = confirm("해당 버전을 삭제하시겠습니까?");
+      if (confirmDelete) {
+        deleteVersionMutation(versionId, {
+          onSuccess: () => {
+            setIsDropboxOpen(false);
+          },
+        });
+      }
     }
   };
 
@@ -53,7 +66,7 @@ const DeleteDropdown: React.FC<DeleteDropdownProps> = ({
             <div
               onClick={handleDeleteClick}
               className={`flex cursor-pointer items-center gap-10 whitespace-nowrap rounded-4 bg-white px-16 py-10 text-14 hover:bg-gray-100 ${
-                isPending ? "opacity-50" : ""
+                isDeletingModel || isDeletingVersion ? "opacity-50" : ""
               }`}
             >
               삭제하기

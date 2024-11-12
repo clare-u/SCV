@@ -9,7 +9,7 @@ import { BadgeProps } from "../badge/Badge";
 
 interface BoardCardProps {
   modelId: number;
-  versionId: string;
+  versionId: number;
   title: string;
   version: string;
   dataset: string;
@@ -47,7 +47,11 @@ export default function BoardCard({
   updatedAt,
 }: BoardCardProps) {
   return (
-    <Link href={`/${modelId}/${versionId}`} passHref className="flex w-[325px]">
+    <Link
+      href={`/community/${modelId}/${versionId}`}
+      passHref
+      className="flex w-[325px]"
+    >
       <div className="flex w-full flex-col gap-20 rounded-12 bg-gray-100 p-[30px] shadow-md transition-shadow duration-200 hover:shadow-lg">
         <div className="flex items-center justify-between">
           <div className="flex items-center justify-center gap-10">
@@ -75,7 +79,7 @@ export default function BoardCard({
             <p className="text-14 font-semibold">{nickname}</p>
           </div>
           <div className="flex flex-col items-end justify-center">
-            {accuracy ? (
+            {accuracy && accuracy !== -1 ? (
               <p className="text-12 font-semibold">{accuracy.toFixed(2)}%</p>
             ) : (
               <p></p>

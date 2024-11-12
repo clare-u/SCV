@@ -30,7 +30,8 @@ id_field = FieldSchema(
 
 model_version_field = FieldSchema(
     name="model_version_id", 
-    dtype=DataType.INT64, 
+    dtype=DataType.VARCHAR, 
+    max_length=30,
     description="model, version를 concat함. delete 요청에 사용")
 
 accuracy_field = FieldSchema(

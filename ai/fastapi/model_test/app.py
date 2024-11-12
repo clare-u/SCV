@@ -16,11 +16,11 @@ load_dotenv(verbose=True)
 app = FastAPI(root_path="/fast/v1/model/test")
 
 # 모델이 확정되어 결과 분석, CKA 저장 하는 함수
-@app.get("/analyze/{model_version_id}/{dataset}", response_model=Model_Analyze_Response)
-async def analyze_model(model_version_id: str, dataset: Literal["mnist", "fashion_mnist", "cifar10", "svhn", "emnist"]):
+@app.get("/analyze/{model_id}/{version_id}/{dataset}", response_model=Model_Analyze_Response)
+async def analyze_model(model_id: str, version_id:str, dataset: Literal["mnist", "fashion_mnist", "cifar10", "svhn", "emnist"]):
 
     # model 가져오기
-    model = load_model_from_minio(model_version_id)
+    model = load_model_from_minio(f"model_{model_id}_v{version_id}")
     layers = model.layers
     # 데이터 셋 가져오기
     test_dataset = load_dataset_from_minio(dataset, "test")
@@ -53,7 +53,10 @@ async def analyze_model(model_version_id: str, dataset: Literal["mnist", "fashio
             x = input
 
             # confusion matrix를 위한 true label 저장
-            true_label.extend(label.numpy())
+            if (dataset =="emnist"):
+                true_label.extend((label-1).numpy())
+            else:
+                true_label.extend(label.numpy())
 
             for i in range(0, len(model)):
                 x = model[i](x)
@@ -84,12 +87,12 @@ async def analyze_model(model_version_id: str, dataset: Literal["mnist", "fashio
     total_params = get_total_params() # 현재
     params = get_params() # 현재
     feature_activation = get_feature_activation(maximization_input, activation_map) # 나
-    activation_maximization = get_activation_maximization(model) # 나
+    activation_maximization = get_activation_maximization(model, dataset) # 나
 
-    _ = await save_cka_to_milvus(model, dataset, model_version_id, conv_idx, test_accuracy, layers)
+    _ = await save_cka_to_milvus(model, dataset, f"model_{model_id}_v{version_id}", conv_idx, test_accuracy, layers)
 
     return {
-        "model_version_id": model_version_id,
+        "model_version_id": f"model_{model_id}_v{version_id}",
         "code": code,
         "dataset": dataset,
         "test_accuracy":test_accuracy,

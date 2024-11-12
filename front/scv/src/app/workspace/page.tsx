@@ -8,8 +8,9 @@ import Pagination from "@/components/pagination/Pagination";
 import DatasetRadio from "@/components/input/DatasetRadio";
 import SearchInput from "@/components/input/SearchInput";
 import Loading from "@/components/loading/Loading";
-import { useFetchMyModels } from "@/hooks";
+import { useFetchMyModels, useFetchMyWorkingModels } from "@/hooks";
 import { ModelQueryParams } from "@/types";
+import EditingCard from "@/components/card/EditingCard";
 
 function Community() {
   const router = useRouter();
@@ -29,12 +30,13 @@ function Community() {
     : 1;
   const currentDataName = searchParams.get("dataName") || "전체";
   const currentOrder = searchParams.get("order") || "수정일 최신순";
+  const currentViewMode = searchParams.get("viewMode") || "완료목록";
 
   // 상태 관리
   const dataName = ["전체", "MNIST", "Fashion", "CIFAR10", "SVHN", "EMNIST"];
   const [selected, setSelected] = useState(currentDataName);
   const [selectedFilter, setSelectedFilter] = useState(currentOrder);
-  const [viewMode, setViewMode] = useState("완료목록"); // "완료목록" 또는 "임시저장"
+  const [viewMode, setViewMode] = useState(currentViewMode);
   const filterOptions = [
     "수정일 최신순",
     "수정일 오래된순",
@@ -42,7 +44,7 @@ function Community() {
     "생성일 오래된순",
   ];
 
-  // Query 파라미터 변환 함수
+  // Query 파라미터 변환 함수를 먼저 선언
   const getSortParams = (
     filter: string,
   ): Partial<Pick<ModelQueryParams, "orderBy" | "direction">> => {
@@ -60,16 +62,24 @@ function Community() {
     }
   };
 
-  // 모델 데이터 fetch
-  const { data, isLoading, error } = useFetchMyModels({
+  // 그 다음 queryParams 정의
+  const queryParams = {
     page: currentPage - 1,
     size: 12,
     ...getSortParams(selectedFilter),
-    modelName: currentKeyword || undefined, // 검색어가 없을 때는 undefined
+    modelName: currentKeyword || undefined,
     dataName: selected !== "전체" ? selected : undefined,
-  });
+    viewMode,
+  };
+
+  // 모델 데이터 fetch
+  const { data, isLoading, error, refetch } =
+    viewMode === "임시저장"
+      ? useFetchMyWorkingModels(queryParams)
+      : useFetchMyModels(queryParams);
 
   // URL 업데이트 함수
+  // 1. updateURL 함수에서 refetch 제거
   const updateURL = (params: {
     [key: string]: string | number | undefined;
   }) => {
@@ -83,44 +93,51 @@ function Community() {
       }
     });
 
-    // 검색어가 빈 문자열이면 keyword 파라미터 삭제
     if (params.modelName === "") {
       current.delete("modelName");
     }
 
     router.push(`/workspace?${current.toString()}`);
   };
-
   // 이벤트 핸들러
-  const handleFilterChange = (filter: string) => {
+  const handleFilterChange = async (filter: string) => {
     setSelectedFilter(filter);
-    updateURL({ order: filter, page: 1 });
+    await updateURL({ order: filter, page: 1 });
   };
 
-  const handleDataNameChange = (dataName: string) => {
+  const handleDataNameChange = async (dataName: string) => {
     setSelected(dataName);
-    updateURL({ dataName, page: 1 });
+    await updateURL({ dataName, page: 1 });
   };
 
-  const handleSearchSubmit = (value: string) => {
-    // 검색어가 빈 문자열이면 keyword 파라미터 삭제
-    updateURL({
+  const handleViewModeChange = async (mode: string) => {
+    setViewMode(mode);
+    await updateURL({ viewMode: mode, page: 1 });
+  };
+
+  const handleSearchSubmit = async (value: string) => {
+    await updateURL({
       modelName: value || undefined,
       page: 1,
     });
   };
 
-  useEffect(() => {
-    window.scrollTo(0, 0);
-  }, [currentPage]);
-
-  // data 로드 시 콘솔에 출력
   if (data) {
     console.log(data); // 데이터가 로드되었을 때만 출력
   }
 
+  // URL 파라미터가 변경될 때마다 데이터 리프레시
+  useEffect(() => {
+    refetch();
+  }, [searchParams]); // refetch 제거
+
+  useEffect(() => {
+    window.scrollTo(0, 0);
+  }, [currentPage]);
+
   if (isLoading) return <Loading />;
   if (error) return <div>에러 발생: {error.message}</div>;
+
   return (
     <div className="flex flex-col gap-10 py-10">
       {/* 필터, 검색 버튼 */}
@@ -145,48 +162,63 @@ function Community() {
         </div>
       </div>
 
-      {/* TODO: 상태관리로 완료목록, 임시저장 나누기(working api) */}
       <div className="flex flex-col items-center justify-center px-10">
         <div className="flex w-full gap-10">
           <button
-            onClick={() => setViewMode("완료목록")}
-            className="flex rounded-t-10 bg-blue-50 px-40 py-20"
+            onClick={() => handleViewModeChange("완료목록")}
+            className={`flex rounded-t-10 px-40 py-20 ${
+              viewMode === "완료목록" ? "bg-blue-50" : "bg-gray-50"
+            }`}
           >
             완료목록
           </button>
           <button
-            onClick={() => setViewMode("임시저장")}
-            className="flex rounded-t-10 bg-yellow-50 px-40 py-20"
+            onClick={() => handleViewModeChange("임시저장")}
+            className={`flex rounded-t-10 px-40 py-20 ${
+              viewMode === "임시저장" ? "bg-yellow-50" : "bg-gray-50"
+            }`}
           >
             임시저장
           </button>
         </div>
-        {/* boardCard */}
+
         <div
-          className={`grid w-full grid-cols-3 gap-10 rounded-b-10 px-10 py-20 ${
-            viewMode === "완료목록" ? "bg-blue-50" : "bg-yellow-50"
-          }`}
+          className={`grid w-full grid-cols-3 gap-10 rounded-b-10 px-10 py-20 ${viewMode === "완료목록" ? "bg-blue-50" : "bg-yellow-50"}`}
         >
           {data?.content.length === 0 ? (
-            <div>모델이 없습니다.</div> // 데이터가 없을 경우 메시지 출력
+            <div>모델이 없습니다.</div>
           ) : (
-            data?.content.map((model) => (
-              <WorkspaceCard
-                key={model.modelId}
-                modelId={model.modelId}
-                versionId={`${model.latestVersion}`}
-                title={model.modelName}
-                version={`v${model.latestVersion}`} // version 값 수정
-                dataset={model.dataName}
-                // accuracy={model.accuracy || "N/A"} // 기본값 설정
-                updatedAt={model.updatedAt}
-                createdAt={model.createdAt}
-              />
-            ))
+            data?.content.map((model) =>
+              "title" in model ? ( // model.title이 있는 경우
+                <EditingCard
+                  key={model.modelVersionId}
+                  modelId={model.modelId}
+                  versionId={model.modelVersionId}
+                  title={model.title}
+                  version={`v${model.version}`}
+                  dataset={model.dataName}
+                  accuracy={model.accuracy}
+                  updatedAt={model.updatedAt}
+                  createdAt={model.createdAt}
+                />
+              ) : (
+                // model.modelName이 있는 경우
+                <WorkspaceCard
+                  key={model.modelId}
+                  modelId={model.modelId}
+                  versionId={model.latestVersionId}
+                  title={model.modelName}
+                  version={`v${model.latestVersion}`}
+                  dataset={model.dataName}
+                  accuracy={model.accuracy}
+                  updatedAt={model.updatedAt}
+                  createdAt={model.createdAt}
+                />
+              ),
+            )
           )}
         </div>
 
-        {/* 페이지네이션 */}
         <Pagination
           totalItems={data!.content.length || 0}
           currentPage={currentPage}

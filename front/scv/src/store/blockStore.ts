@@ -1,7 +1,8 @@
 import { Dataset } from "@/types";
 import { create } from "zustand";
-import { BlockDefinition } from "@/types";
+import { BlockDefinition, Layer } from "@/types";
 import { toast } from "sonner";
+import { convertBlocksToApiFormat } from "@/utils/block-converter";
 
 // 데이터셋별 레이블 개수 매핑
 export const datasetLabels: Record<Dataset, number> = {
@@ -21,7 +22,7 @@ export const datasetChannels: Record<Dataset, number> = {
   EMNIST: 1,
 };
 
-// 데이터셋별 size 매핑
+// 데이터셋별 크기 매핑
 export const datasetSizes: Record<Dataset, number> = {
   MNIST: 28,
   Fashion: 28,
@@ -30,18 +31,22 @@ export const datasetSizes: Record<Dataset, number> = {
   EMNIST: 28,
 };
 
-interface BlockState {
-  blockList: BlockDefinition[] | null;
-  setBlockList: (blockList: BlockDefinition[]) => void;
-  blockListValidation: (dataset: Dataset) => void;
-}
-
+// 텐서 형상 정의
 interface tensorShape {
   channels: number;
   height: number;
   width: number;
 }
 
+// 상태 관리 인터페이스 정의
+interface BlockState {
+  blockList: BlockDefinition[] | null;
+  setBlockList: (blockList: BlockDefinition[]) => void;
+  blockListValidation: (dataset: Dataset) => void;
+  getLayerData: () => Layer[]; // 레이어 데이터를 가져오는 함수
+}
+
+// 블록 유효성 검사 함수
 const validateBlock = (
   input: tensorShape | undefined,
   block: BlockDefinition,
@@ -85,8 +90,8 @@ const validateBlock = (
 
     return {
       channels: out_channels,
-      height: Math.floor(input.height - kernel_size - 1 - 1 + 1),
-      width: Math.floor(input.width - kernel_size - 1 - 1 + 1),
+      height: Math.floor(input.height - (kernel_size - 1) - 1 + 1),
+      width: Math.floor(input.width - (kernel_size - 1) - 1 + 1),
     };
   }
   if (block.name === "nn.ConvTranspose2d") {
@@ -170,9 +175,9 @@ const validateBlock = (
   if (block.name === "Linear") {
     const in_channels = block.params[0].value;
 
-    if (input.channels != in_channels) {
+    if (input.channels * input.height * input.width != in_channels) {
       toast.error(
-        `${block.name}의 input_channel : ${in_channels} 과 이전 레이어의 output_channel : ${input.channels}이 맞지 않습니다.`,
+        `${block.name}의 input_channel : ${in_channels} 과 이전 레이어의 output_channel : ${input.channels * input.height * input.width}이 맞지 않습니다.`,
       );
       return;
     }
@@ -188,22 +193,21 @@ const validateBlock = (
   return input;
 };
 
+// Zustand 스토어 정의
 export const useBlockStore = create<BlockState>((set, get) => ({
   blockList: null,
+
   setBlockList: (blockList: BlockDefinition[]) => {
-    // 각 블록의 각 param에 기본 value 속성을 추가
     const updatedBlockList = blockList.map((block) => ({
       ...block,
-      params: block.params
-        .filter((param) => param.name && param.type) // name과 type이 있는 항목만 필터링
-        .map((param) => ({
-          ...param,
-          value: param.value,
-        })),
+      params: block.params.map((param) => ({
+        ...param,
+        value: param.value,
+      })),
     }));
-
     set({ blockList: updatedBlockList });
   },
+
   blockListValidation: (dataset: Dataset) => {
     // input의 channels 와 레이어의 in_channels 를 검사
     // input의 width, height와 레이어의 kernel_size 를 검사
@@ -213,11 +217,9 @@ export const useBlockStore = create<BlockState>((set, get) => ({
       width: datasetSizes[dataset],
       height: datasetSizes[dataset],
     };
-    blockList?.map((block) => {
-      if (!dataShape) return;
-      if (block.name === "start" || block.name === "end") {
-        dataShape = dataShape;
-      } else {
+
+    blockList?.forEach((block) => {
+      if (block.name !== "start" && block.name !== "end") {
         dataShape = validateBlock(dataShape, block);
       }
     });
@@ -227,5 +229,19 @@ export const useBlockStore = create<BlockState>((set, get) => ({
         `마지막 출력은 ${datasetLabels[dataset]} 개의 channel로 이루어져 있어야 합니다.`,
       );
     }
+    if (dataShape && (dataShape.width != 1 || dataShape.height != 1)) {
+      toast.error(
+        `마지막 출력 전에 width와 height을 1로 만들어 주세요. (힌트: Linear 레이어)`,
+      );
+    }
+  },
+
+  getLayerData: () => {
+    const blockList = get().blockList;
+    if (!blockList) return [];
+
+    // convertBlocksToApiFormat 함수를 사용하여 변환
+    const { layers } = convertBlocksToApiFormat(blockList);
+    return layers;
   },
 }));

@@ -1,5 +1,6 @@
 import { useMutation, useQueryClient } from "@tanstack/react-query";
-import { deleteModel } from "@/libs/api/models";
+import { deleteModel } from "@/libs";
+import { toast } from "sonner";
 
 const DEFAULT_QUERY_KEY = "models";
 
@@ -13,6 +14,7 @@ export const useDeleteModel = () => {
       queryClient.invalidateQueries({
         queryKey: [DEFAULT_QUERY_KEY],
       });
+      toast.success("성공적으로 삭제되었습니다.");
     },
   });
 };
