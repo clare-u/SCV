@@ -6,6 +6,7 @@ import {
   VersionResponse,
   ModelRequest,
   ModelResponse,
+  ModelVersionRequest,
 } from "@/types";
 import { handleApiRequest } from "../client";
 
@@ -114,5 +115,21 @@ export const createModel = async (modelData: ModelRequest) => {
     url,
     "post",
     modelData,
+  );
+};
+
+// 모델 버전 저장 함수
+export const saveModelVersion = async (
+  versionId: number,
+  versionData: ModelVersionRequest,
+) => {
+  const url = `/api/v1/models/versions/${versionId}`;
+  console.log("API 요청 URL:", url);
+
+  // PATCH 요청을 통해 모델 버전 업데이트
+  return handleApiRequest<void, "patch", ModelVersionRequest>(
+    url,
+    "patch",
+    versionData,
   );
 };

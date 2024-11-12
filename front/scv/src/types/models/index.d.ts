@@ -154,3 +154,9 @@ export interface ModelResponse {
   modelId: number;
   modelVersionId: number;
 }
+
+// 모델 버전 저장
+export interface ModelVersionRequest {
+  model_version_id: number;
+  layers: Layer[];
+}

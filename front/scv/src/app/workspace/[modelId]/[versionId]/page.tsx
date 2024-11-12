@@ -12,7 +12,7 @@ import Dropdown from "@/components/dropdown/Dropdown";
 import CanvasComponent from "@/components/canvas/CanvasComponent";
 import CodeViewer from "@/components/code/CodeViewer";
 import BlockItem from "@/components/block/BlockItem";
-import { convertApiToBlocks } from "@/utils/block-converter";
+import { convertApiToBlocks, findBlockCategory } from "@/utils/block-converter";
 
 interface Version {
   id: number;
@@ -178,10 +178,8 @@ export default function WorkspaceDetail({ params }: PageProps) {
   const renderModelArchitecture = () => {
     try {
       if (!versionData?.layers) return null;
-      console.log("Version data layers:", versionData.layers); // 입력 데이터 확인
 
       const blocks = convertApiToBlocks({ layers: versionData.layers });
-      console.log("Converted blocks:", blocks); // 변환된 블록 데이터 확인
 
       return blocks.map((block, index) => (
         <BlockItem
@@ -190,11 +188,10 @@ export default function WorkspaceDetail({ params }: PageProps) {
             name: block.name,
             params: block.params.map((param) => ({
               ...param,
-              // value 속성만 사용하고, 없는 경우 0으로 설정
               value: param.value ?? 0,
             })),
           }}
-          category={block.category}
+          category={findBlockCategory(block.name) || "Basic"} // 기본값 설정
           open={true}
           isEditable={false}
           onBlurParam={(paramIndex, value) => {

@@ -6,3 +6,4 @@ export * from "./useDeleteVersion";
 export * from "./useFetchModelVersions";
 export * from "./useFetchVersionDetails";
 export * from "./useCreateModel";
+export * from "./useSaveModelVersion";
