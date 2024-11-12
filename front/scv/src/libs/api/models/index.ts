@@ -7,6 +7,7 @@ import {
   ModelRequest,
   ModelResponse,
   ModelVersionRequest,
+  RunResponse,
 } from "@/types";
 import { handleApiRequest } from "../client";
 
@@ -131,5 +132,18 @@ export const saveModelVersion = async (
     url,
     "patch",
     versionData,
+  );
+};
+
+// 모델 실행
+// 모델 실행 함수
+export const runModelVersion = async (versionId: number) => {
+  const url = `/api/v1/models/versions/${versionId}/result/run`;
+  console.log("API 요청 URL:", url);
+
+  return handleApiRequest<RunResponse, "post", { versionId: number }>(
+    url,
+    "post",
+    { versionId },
   );
 };
