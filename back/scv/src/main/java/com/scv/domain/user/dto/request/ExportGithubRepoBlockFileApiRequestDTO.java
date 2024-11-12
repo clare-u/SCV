@@ -6,13 +6,13 @@ import lombok.Getter;
 
 @Builder
 @Getter
-public class CommitGithubRepoFileApiRequestDTO {
-
-    @JsonProperty("message")
-    private String message;
+public class ExportGithubRepoBlockFileApiRequestDTO {
 
     @JsonProperty("content")
     private String content;
+
+    @JsonProperty("message")
+    private String message;
 
     @JsonProperty("sha")
     private String sha;
