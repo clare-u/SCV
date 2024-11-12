@@ -117,8 +117,8 @@ public class ModelVersionController {
 
     @PostMapping("/{versionId}/result/save")
     @Operation(summary = "결과 저장", description = "학습 결과(이미지들)를 저장하고 반환합니다.")
-    public ResponseEntity<ResultResponseWithImages> saveResult(@PathVariable Long versionId, DataSet dataName) {
-        ResultResponseWithImages resultResponseWithImages = modelVersionService.saveResult(versionId, dataName);
+    public ResponseEntity<ResultResponseWithImages> saveResult(@PathVariable Long versionId) {
+        ResultResponseWithImages resultResponseWithImages = modelVersionService.saveResult(versionId);
         return ResponseEntity.status(201).body(resultResponseWithImages);
     }
 

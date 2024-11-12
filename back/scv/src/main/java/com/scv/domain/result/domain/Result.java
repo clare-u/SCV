@@ -53,4 +53,20 @@ public class Result extends BaseEntity {
     private String activationMaximization;
 
 
+    /**
+     * 결과 분석 저장 메서드
+     * @param confusionMatrix
+     * @param exampleImg
+     * @param featureActivation
+     * @param activationMaximization
+     */
+    public void updateAnalysis(String confusionMatrix, String exampleImg, String featureActivation, String activationMaximization) {
+        this.confusionMatrix = confusionMatrix;
+        this.exampleImg = exampleImg;
+        this.featureActivation = featureActivation;
+        this.activationMaximization = activationMaximization;
+    }
+
+
 }
+

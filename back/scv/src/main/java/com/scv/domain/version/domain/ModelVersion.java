@@ -56,8 +56,9 @@ public class ModelVersion extends BaseEntity {
     /**
      * 작업 상태 반전 (진행 중 또는 완료 상태 전환)
      */
-    public void toggleWork() {
-        this.isWorkingOn = !this.isWorkingOn;
+    public void workingDone() {
+        this.isWorkingOn = false;
     }
+
 }
 
