@@ -14,7 +14,12 @@ public record ResultRequest(
         int dataEpochCnt
 ) {
     public ResultRequest(List<LayerDTO> layers, Data data) {
-        this(new ModelLayerConfig(layers), String.valueOf(data.getName()), data.getTrainCnt(), data.getTestCnt(), data.getLabelCnt(), data.getEpochCnt());
+        this(new ModelLayerConfig(layers),
+                "Fashion".equals(data.getName().toString()) ? "FASHION_MNIST" : data.getName().toString(),
+                data.getTrainCnt(),
+                data.getTestCnt(),
+                data.getLabelCnt(),
+                data.getEpochCnt());
     }
 
     public record ModelLayerConfig(List<LayerDTO> layers) {
