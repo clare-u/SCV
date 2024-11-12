@@ -53,7 +53,10 @@ async def analyze_model(model_id: str, version_id:str, dataset: Literal["mnist",
             x = input
 
             # confusion matrix를 위한 true label 저장
-            true_label.extend(label.numpy())
+            if (dataset =="emnist"):
+                true_label.extend((label-1).numpy())
+            else:
+                true_label.extend(label.numpy())
 
             for i in range(0, len(model)):
                 x = model[i](x)
