@@ -1,13 +1,13 @@
 package com.scv.domain.user.controller;
 
 import com.scv.domain.data.enums.DataSet;
+import com.scv.domain.user.dto.request.ExportGithubRepoBlockFileRequestDTO;
 import com.scv.global.jwt.exception.InvalidTokenException;
 import com.scv.global.jwt.util.CookieUtil;
 import com.scv.global.oauth2.auth.AuthUser;
 import com.scv.global.oauth2.auth.CustomOAuth2User;
-import com.scv.domain.user.dto.request.CommitGithubRepoFileRequestDTO;
 import com.scv.domain.user.dto.request.LinkGithubRepoRequestDTO;
-import com.scv.domain.user.dto.response.GithubRepoFileResponseDTO;
+import com.scv.domain.user.dto.response.GithubRepoBlockFileResponseDTO;
 import com.scv.domain.user.dto.response.UserProfileResponseDTO;
 import com.scv.domain.user.service.GithubService;
 import com.scv.domain.user.service.UserService;
@@ -61,7 +61,6 @@ public class UserController {
         String accessToken = CookieUtil.getCookie(request, ACCESS_TOKEN_NAME)
                 .orElseThrow(InvalidTokenException::getInstance)
                 .getValue();
-
         String newAccessToken = userService.unLinkGithubRepo(authUser, accessToken);
 
         Cookie newAccessTokenCookie = CookieUtil.createCookie(ACCESS_TOKEN_NAME, newAccessToken, ACCESS_TOKEN_EXPIRATION * 3);
@@ -87,7 +86,6 @@ public class UserController {
         String accessToken = CookieUtil.getCookie(request, ACCESS_TOKEN_NAME)
                 .orElseThrow(InvalidTokenException::getInstance)
                 .getValue();
-
         String newAccessToken = githubService.linkNewGithubRepo(authUser, requestDTO, accessToken);
 
         Cookie newAccessTokenCookie = CookieUtil.createCookie(ACCESS_TOKEN_NAME, newAccessToken, ACCESS_TOKEN_EXPIRATION * 3);
@@ -108,7 +106,6 @@ public class UserController {
         String accessToken = CookieUtil.getCookie(request, ACCESS_TOKEN_NAME)
                 .orElseThrow(InvalidTokenException::getInstance)
                 .getValue();
-
         String newAccessToken = githubService.linkCurrentGithubRepo(authUser, requestDTO, accessToken);
 
         Cookie newAccessTokenCookie = CookieUtil.createCookie(ACCESS_TOKEN_NAME, newAccessToken, ACCESS_TOKEN_EXPIRATION * 3);
@@ -123,10 +120,10 @@ public class UserController {
             @ApiResponse(responseCode = "403", description = "GITHUB_API_FORBIDDEN", content = @Content(schema = @Schema(implementation = ErrorResponse.class))),
             @ApiResponse(responseCode = "404", description = "GITHUB_API_NOT_FOUND", content = @Content(schema = @Schema(implementation = ErrorResponse.class))),
     })
-    public ResponseEntity<GithubRepoFileResponseDTO> importGithubRepoFile(@AuthUser CustomOAuth2User auth2User,
-                                                                          @RequestParam DataSet dataName,
-                                                                          @RequestParam String modelName) {
-        GithubRepoFileResponseDTO responseDTO = githubService.importGithubRepoFile(auth2User, dataName, modelName);
+    public ResponseEntity<GithubRepoBlockFileResponseDTO> importGithubRepoFile(@AuthUser CustomOAuth2User auth2User,
+                                                                               @RequestParam DataSet dataName,
+                                                                               @RequestParam String modelName) {
+        GithubRepoBlockFileResponseDTO responseDTO = githubService.importGithubRepoBlockFile(auth2User, dataName, modelName);
         return new ResponseEntity<>(responseDTO, HttpStatus.OK);
     }
 
@@ -140,8 +137,8 @@ public class UserController {
             @ApiResponse(responseCode = "422", description = "GITHUB_API_UNPROCESSABLE_ENTITY", content = @Content(schema = @Schema(implementation = ErrorResponse.class))),
     })
     public ResponseEntity<Void> exportGithubRepoFile(@AuthUser CustomOAuth2User auth2User,
-                                                     @RequestBody CommitGithubRepoFileRequestDTO requestDTO) {
-        githubService.exportGithubRepoFile(auth2User, requestDTO);
+                                                     @RequestBody ExportGithubRepoBlockFileRequestDTO requestDTO) {
+        githubService.exportGithubRepoBlockFile(auth2User, requestDTO);
         return ResponseEntity.ok().build();
     }
 
