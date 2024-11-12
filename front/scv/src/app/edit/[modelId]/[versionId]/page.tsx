@@ -9,11 +9,12 @@ import Badge from "@/components/badge/Badge";
 import { BadgeProps } from "@/components/badge/Badge";
 import { useDropzone } from "react-dropzone";
 import { useBlockStore } from "@/store/blockStore";
-import { Dataset, ModelVersionRequest } from "@/types";
+import { Dataset, ModelVersionRequest, RunResponse } from "@/types";
 import {
   useFetchModelVersions,
   useFetchVersionDetails,
   useSaveModelVersion,
+  useRunModelVersion,
 } from "@/hooks";
 import Loading from "@/components/loading/Loading";
 import { useRouter } from "next/navigation";
@@ -132,6 +133,39 @@ export default function Edit({ params }: EditProps) {
 
     saveVersion({ versionId: params.versionId, versionData });
   };
+
+  // 실행
+  // 실행 결과 상태 추가
+  const [runResult, setRunResult] = useState<RunResponse | null>(null);
+  const { mutate: runModel, isPending: isRunning } = useRunModelVersion();
+
+  // 실행 버튼 핸들러 수정
+  // 실행 핸들러 수정
+  const handleRunModel = () => {
+    // 먼저 저장 작업 수행
+    handleSaveVersion();
+
+    // `modelData`와 유효성 검사를 수행합니다.
+    if (modelData && modelData.DataName) {
+      try {
+        blockListValidation(modelData.DataName as Dataset); // 유효성 검사 수행
+      } catch (error) {
+        console.log("블록 리스트가 유효하지 않습니다.");
+        return; // 유효하지 않으면 실행을 중단
+      }
+    } else {
+      console.log("모델 데이터가 유효하지 않습니다.");
+      return; // modelData가 없으면 실행을 중단
+    }
+
+    // 저장과 검사가 완료되면 실행 수행
+    runModel(params.versionId, {
+      onSuccess: (data) => {
+        setRunResult(data); // 실행 결과를 상태에 저장
+      },
+    });
+  };
+  /////////////////////
 
   if (modelLoading || versionLoading) return <Loading />;
   if (!modelData || !versionData) return <div>데이터를 찾을 수 없습니다.</div>;
@@ -284,7 +318,8 @@ export default function Edit({ params }: EditProps) {
             design="fill"
             color="green"
             icon="play_arrow"
-            onClick={() => blockListValidation(modelData.DataName as Dataset)}
+            onClick={handleRunModel} // 실행 핸들러 적용
+            disabled={isRunning || isPending}
           >
             실행
           </Button>
@@ -297,15 +332,24 @@ export default function Edit({ params }: EditProps) {
         />
         <div className="flex w-[600px] flex-col border-l border-gray-500">
           <div className="flex max-h-[450px] w-full flex-1 overflow-y-auto overflow-x-hidden border-b border-gray-500">
-            <CodeViewer codeString="# 실행 후 이곳에 코드가 나타납니다."></CodeViewer>
+            <CodeViewer
+              codeString={
+                runResult?.codeView || "# 실행 후 이곳에 코드가 나타납니다." // 실행 결과 코드 렌더링
+              }
+            ></CodeViewer>
           </div>
           <div className="flex items-center gap-10 border-b border-gray-500 p-10">
             <div className="text-20 font-semibold">실행 결과 : </div>
             <div className="text-20 font-semibold">
-              {versionData.resultResponseWithImages?.testAccuracy ?? "N/A"}%
+              {runResult?.testAccuracy
+                ? `${runResult.testAccuracy}%`
+                : "실행 후 나타납니다"}
             </div>
             <div className="text-20">
-              ({versionData.resultResponseWithImages?.totalParams ?? "N/A"}
+              (
+              {runResult?.totalParams
+                ? runResult.totalParams.toLocaleString()
+                : "실행 후 나타납니다"}
               /1000000)
             </div>
           </div>

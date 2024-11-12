@@ -160,3 +160,15 @@ export interface ModelVersionRequest {
   model_version_id: number;
   layers: Layer[];
 }
+
+// 모델 실행
+export interface RunResponse {
+  modelId: number;
+  modelVersionId: number;
+  codeView: string;
+  testAccuracy: number;
+  testLoss: number;
+  totalParams: number;
+  trainInfos: string; // JSON 문자열 형식
+  layerParams: string; // JSON 문자열 형식
+}
