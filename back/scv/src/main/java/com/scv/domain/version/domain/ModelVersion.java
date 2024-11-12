@@ -59,5 +59,6 @@ public class ModelVersion extends BaseEntity {
     public void workingDone() {
         this.isWorkingOn = false;
     }
+
 }
 

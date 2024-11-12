@@ -127,6 +127,12 @@ public class ModelVersionService {
         Model model = modelVersion.getModel();
         modelVersion.delete();
         modelVersionRepository.save(modelVersion);
+        Optional<Result> result = resultRepository.findById(modelVersionId);
+        if (result.isPresent()) {
+            Result existingResult = result.get();
+            existingResult.delete();
+            resultRepository.save(existingResult);
+        }
 
         // 버전, 정확도관리
         if (model.getLatestVersion() != 0) {
@@ -205,14 +211,14 @@ public class ModelVersionService {
 
     // 결과 및 분석 저장
     @Transactional
-    public ResultResponseWithImages saveResult(Long modelVersionId, DataSet dataName) {
+    public ResultResponseWithImages saveResult(Long modelVersionId) {
         ModelVersion modelVersion = modelVersionRepository.findById(modelVersionId)
                 .orElseThrow(ModelVersionNotFoundException::new);
         Result result = resultRepository.findById(modelVersionId).orElseThrow(ResultNotFoundException::new);
-        Long modelId = modelVersion.getModel().getId();
-        String data = dataName.toString();
-
-        if (data.equals("Fashion")) {
+        Model model = modelVersion.getModel();
+        Long modelId = model.getId();
+        String data = model.getData().getName().toString();
+        if ("Fashion".equals(data)) {
             data += "_MNIST";
         }
 
@@ -235,7 +241,6 @@ public class ModelVersionService {
         );
         resultRepository.save(result);
 
-        Model model = modelVersion.getModel();
         int latest = model.getLatestVersion();
         double accuarcy = result.getTestAccuracy();
 

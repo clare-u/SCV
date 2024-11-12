@@ -69,3 +69,4 @@ public class Result extends BaseEntity {
 
 
 }
+
