@@ -9,8 +9,12 @@ import Badge from "@/components/badge/Badge";
 import { BadgeProps } from "@/components/badge/Badge";
 import { useDropzone } from "react-dropzone";
 import { useBlockStore } from "@/store/blockStore";
-import { Dataset } from "@/types";
-import { useFetchModelVersions, useFetchVersionDetails } from "@/hooks";
+import { Dataset, ModelVersionRequest } from "@/types";
+import {
+  useFetchModelVersions,
+  useFetchVersionDetails,
+  useSaveModelVersion,
+} from "@/hooks";
 import Loading from "@/components/loading/Loading";
 import { useRouter } from "next/navigation";
 
@@ -43,7 +47,7 @@ export default function Edit({ params }: EditProps) {
   const [filePreviews, setFilePreviews] = useState<string[]>([]);
   const [testResult, setTestResult] = useState<string | null>(null);
 
-  const { blockListValidation } = useBlockStore();
+  const { getLayerData, blockListValidation } = useBlockStore();
 
   // modelData가 로드되면 title 초기화
   useEffect(() => {
@@ -114,6 +118,20 @@ export default function Edit({ params }: EditProps) {
       setIsVersionValid(isValid);
     }
   }, [modelData, params.versionId]);
+
+  // 버전 저장 함수 (patch)
+  const { mutate: saveVersion, isPending, isError } = useSaveModelVersion();
+
+  const handleSaveVersion = () => {
+    const layerData = getLayerData(); // Layer 데이터를 가져옴
+
+    const versionData: ModelVersionRequest = {
+      model_version_id: params.versionId,
+      layers: layerData,
+    };
+
+    saveVersion({ versionId: params.versionId, versionData });
+  };
 
   if (modelLoading || versionLoading) return <Loading />;
   if (!modelData || !versionData) return <div>데이터를 찾을 수 없습니다.</div>;
@@ -251,7 +269,14 @@ export default function Edit({ params }: EditProps) {
           </div>
         </div>
         <div className="flex items-center gap-10 px-10">
-          <Button size="m" design="fill" color="indigo" icon="save">
+          <Button
+            size="m"
+            design="fill"
+            color="indigo"
+            icon="save"
+            onClick={handleSaveVersion}
+            disabled={isPending}
+          >
             저장
           </Button>
           <Button
@@ -266,7 +291,10 @@ export default function Edit({ params }: EditProps) {
         </div>
       </div>
       <div className="flex h-[92vh]">
-        <BlockList dataset={modelData.DataName as Dataset} />
+        <BlockList
+          dataset={modelData.DataName as Dataset}
+          layers={versionData.layers}
+        />
         <div className="flex w-[600px] flex-col border-l border-gray-500">
           <div className="flex max-h-[450px] w-full flex-1 overflow-y-auto overflow-x-hidden border-b border-gray-500">
             <CodeViewer codeString="# 실행 후 이곳에 코드가 나타납니다."></CodeViewer>

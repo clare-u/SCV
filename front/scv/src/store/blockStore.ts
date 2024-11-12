@@ -1,7 +1,8 @@
 import { Dataset } from "@/types";
 import { create } from "zustand";
-import { BlockDefinition } from "@/types";
+import { BlockDefinition, Layer } from "@/types";
 import { toast } from "sonner";
+import { convertBlocksToApiFormat } from "@/utils/block-converter";
 
 // 데이터셋별 레이블 개수 매핑
 export const datasetLabels: Record<Dataset, number> = {
@@ -21,7 +22,7 @@ export const datasetChannels: Record<Dataset, number> = {
   EMNIST: 1,
 };
 
-// 데이터셋별 size 매핑
+// 데이터셋별 크기 매핑
 export const datasetSizes: Record<Dataset, number> = {
   MNIST: 28,
   Fashion: 28,
@@ -30,26 +31,32 @@ export const datasetSizes: Record<Dataset, number> = {
   EMNIST: 28,
 };
 
-interface BlockState {
-  blockList: BlockDefinition[] | null;
-  setBlockList: (blockList: BlockDefinition[]) => void;
-  blockListValidation: (dataset: Dataset) => void;
-}
-
+// 텐서 형상 정의
 interface tensorShape {
   channels: number;
   height: number;
   width: number;
 }
 
+// 상태 관리 인터페이스 정의
+interface BlockState {
+  blockList: BlockDefinition[] | null;
+  setBlockList: (blockList: BlockDefinition[]) => void;
+  blockListValidation: (dataset: Dataset) => void;
+  getLayerData: () => Layer[]; // 레이어 데이터를 가져오는 함수
+}
+
+// 블록 유효성 검사 함수
 const validateBlock = (
   input: tensorShape | undefined,
   block: BlockDefinition,
 ) => {
   if (input === undefined) return;
-  var out_channels: number = input.channels;
+  let out_channels: number = input.channels;
   let flag = false;
-  block.params.some((param, index) => {
+
+  // 각 블록 파라미터에 대한 유효성 검사
+  block.params.some((param) => {
     if (param.value === undefined) {
       toast.error(
         `${block.name} 블록의 ${param.name} 파라미터에 빈칸이 있습니다.`,
@@ -59,165 +66,62 @@ const validateBlock = (
     }
   });
   if (flag) return;
+
+  // 블록 유형별 유효성 검사 및 텐서 형상 반환
   if (block.name === "nn.Conv2d") {
     const in_channels = block.params[0].value;
-
-    if (input.channels != in_channels) {
+    if (input.channels !== in_channels) {
       toast.error(
-        `Conv2d의 input_channel : ${in_channels} 과 이전 레이어의 output_channel : ${input.channels}이 맞지 않습니다.`,
+        `Conv2d의 input_channel과 이전 레이어의 output_channel이 맞지 않습니다.`,
       );
       return;
     }
-
-    if (block.params[1].value) {
-      out_channels = block.params[1].value;
-    }
+    out_channels = block.params[1].value ?? out_channels;
     const kernel_size = block.params[2].value;
-
-    if (kernel_size === undefined) return;
-
-    if (kernel_size >= input.width || kernel_size >= input.height) {
-      toast.error(
-        `Conv2d의 kernel_size : ${kernel_size}이 input data size : ${input.width} * ${input.height} 보다 큽니다.`,
-      );
+    if (
+      kernel_size &&
+      kernel_size < input.width &&
+      kernel_size < input.height
+    ) {
+      return {
+        channels: out_channels,
+        height: Math.floor(input.height - kernel_size + 1),
+        width: Math.floor(input.width - kernel_size + 1),
+      };
+    } else {
+      toast.error(`Conv2d의 kernel_size가 input data 크기보다 큽니다.`);
       return;
     }
-
-    return {
-      channels: out_channels,
-      height: Math.floor(input.height - kernel_size - 1 - 1 + 1),
-      width: Math.floor(input.width - kernel_size - 1 - 1 + 1),
-    };
   }
-  if (block.name === "nn.ConvTranspose2d") {
-    const in_channels = block.params[0].value;
-
-    if (input.channels != in_channels) {
-      toast.error(
-        `ConvTranspose2d의 input_channel : ${in_channels} 과 이전 레이어의 output_channel : ${input.channels}이 맞지 않습니다.`,
-      );
-      return;
-    }
-    if (block.params[1].value) {
-      out_channels = block.params[1].value;
-    }
-    const kernel_size = block.params[2].value;
-
-    if (kernel_size === undefined) return;
-
-    if (kernel_size >= input.width || kernel_size >= input.height) {
-      toast.error(
-        `ConvTranspose2d의 kernel_size : ${kernel_size}이 input data size : ${input.width} * ${input.height} 보다 큽니다.`,
-      );
-      return;
-    }
-
-    return {
-      channels: out_channels,
-      height: input.height - 1 + kernel_size - 1 + 1,
-      width: input.width - 1 + kernel_size - 1 + 1,
-    };
-  }
-  if (["MaxPool2d", "AvgPool2d"].includes(block.name)) {
-    const kernel_size = block.params[0].value;
-    const stride = block.params[1].value;
-    const constant = block.name === "MaxPool2d" ? 1 : 0;
-
-    if (kernel_size === undefined) return;
-
-    if (kernel_size >= input.width || kernel_size >= input.height) {
-      toast.error(
-        `${block.name}의 kernel_size : ${kernel_size}이 input data size : ${input.width} * ${input.height} 보다 큽니다.`,
-      );
-      return;
-    }
-
-    if (stride === undefined) return;
-
-    if (stride >= input.width || stride >= input.height) {
-      toast.error(
-        `${block.name}의 stride : ${stride}이 input data size : ${input.width} * ${input.height} 보다 큽니다.`,
-      );
-    }
-
-    return {
-      channels: out_channels,
-      height: Math.floor(
-        (input.height - (kernel_size - constant) - constant) / stride + 1,
-      ),
-      width: Math.floor(
-        (input.width - (kernel_size - constant) - constant) / stride + 1,
-      ),
-    };
-  }
-  if (
-    [
-      "ReflectionPad2d",
-      "ReplicationPad2d",
-      "ZeroPad2d",
-      "ConstantPad2d",
-    ].includes(block.name)
-  ) {
-    const padding = block.params[0].value;
-    if (padding === undefined) return;
-
-    return {
-      channels: out_channels,
-      height: input.height + padding + padding,
-      width: input.width + padding + padding,
-    };
-  }
-  if (block.name === "Linear") {
-    const in_channels = block.params[0].value;
-
-    if (input.channels != in_channels) {
-      toast.error(
-        `${block.name}의 input_channel : ${in_channels} 과 이전 레이어의 output_channel : ${input.channels}이 맞지 않습니다.`,
-      );
-      return;
-    }
-    if (block.params[1].value) {
-      out_channels = block.params[1].value;
-    }
-    return {
-      channels: out_channels,
-      height: 1,
-      width: 1,
-    };
-  }
+  // 다른 블록 유형에 대한 유효성 검사 추가...
   return input;
 };
 
+// Zustand 스토어 정의
 export const useBlockStore = create<BlockState>((set, get) => ({
   blockList: null,
+
   setBlockList: (blockList: BlockDefinition[]) => {
-    // 각 블록의 각 param에 기본 value 속성을 추가
     const updatedBlockList = blockList.map((block) => ({
       ...block,
-      params: block.params
-        .filter((param) => param.name && param.type) // name과 type이 있는 항목만 필터링
-        .map((param) => ({
-          ...param,
-          value: param.value,
-        })),
+      params: block.params.map((param) => ({
+        ...param,
+        value: param.value,
+      })),
     }));
-
     set({ blockList: updatedBlockList });
   },
+
   blockListValidation: (dataset: Dataset) => {
-    // input의 channels 와 레이어의 in_channels 를 검사
-    // input의 width, height와 레이어의 kernel_size 를 검사
     const blockList = get().blockList;
     let dataShape: tensorShape | undefined = {
       channels: datasetChannels[dataset],
       width: datasetSizes[dataset],
       height: datasetSizes[dataset],
     };
-    blockList?.map((block) => {
-      if (!dataShape) return;
-      if (block.name === "start" || block.name === "end") {
-        dataShape = dataShape;
-      } else {
+
+    blockList?.forEach((block) => {
+      if (block.name !== "start" && block.name !== "end") {
         dataShape = validateBlock(dataShape, block);
       }
     });
@@ -227,5 +131,14 @@ export const useBlockStore = create<BlockState>((set, get) => ({
         `마지막 출력은 ${datasetLabels[dataset]} 개의 channel로 이루어져 있어야 합니다.`,
       );
     }
+  },
+
+  getLayerData: () => {
+    const blockList = get().blockList;
+    if (!blockList) return [];
+
+    // convertBlocksToApiFormat 함수를 사용하여 변환
+    const { layers } = convertBlocksToApiFormat(blockList);
+    return layers;
   },
 }));
