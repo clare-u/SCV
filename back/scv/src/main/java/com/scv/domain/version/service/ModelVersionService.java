@@ -4,10 +4,10 @@ import com.fasterxml.jackson.databind.JsonNode;
 import com.fasterxml.jackson.databind.ObjectMapper;
 import com.fasterxml.jackson.databind.node.ObjectNode;
 import com.scv.domain.data.domain.Data;
-import com.scv.domain.data.enums.DataSet;
 import com.scv.domain.data.exception.DataNotFoundException;
 import com.scv.domain.data.repository.DataRepository;
 import com.scv.domain.model.domain.Model;
+import com.scv.domain.model.dto.response.ModelCreateResponse;
 import com.scv.domain.model.exception.ModelNotFoundException;
 import com.scv.domain.model.repository.ModelRepository;
 import com.scv.global.oauth2.auth.CustomOAuth2User;
@@ -51,22 +51,21 @@ public class ModelVersionService {
 
     // 모델 버전 생성
     @Transactional
-    public void createModelVersion(Long modelId, ModelVersionRequest request, CustomOAuth2User user) throws BadRequestException {
+    public ModelCreateResponse createModelVersion(Long modelId, Long modelVersionId, CustomOAuth2User user) throws BadRequestException {
         Model model = modelRepository.findById(modelId).orElseThrow(ModelNotFoundException::new);
-
+        ModelVersion modelVersion = modelVersionRepository.findById(modelVersionId).orElseThrow(ModelNotFoundException::new);
         if (user.getUserId() != model.getUser().getUserId()) {
             throw new BadRequestException("모델의 제작자만 생성할 수 있습니다.");
         }
 
-        String layersJson = ParsingUtil.toJson(request.layers());
-
-        ModelVersion modelVersion = ModelVersion.builder()
+        ModelVersion newModelVersion = ModelVersion.builder()
                 .model(model)
                 .versionNo(0)
-                .layers(layersJson)
+                .layers(modelVersion.getLayers())
                 .build();
 
-        modelVersionRepository.save(modelVersion);
+        modelVersionRepository.save(newModelVersion);
+        return new ModelCreateResponse(newModelVersion);
     }
 
 
