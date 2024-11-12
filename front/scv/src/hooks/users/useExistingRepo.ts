@@ -10,7 +10,7 @@ export const useUpdateRepo = () => {
     mutationFn: existingRepo,
 
     onSuccess: (data: CreateRepo) => {
-      toast.success(`기존 "${data.repoName}" 레포지토리에 연동되었습니다`);
+      toast.success(`기존 레포지토리에 연동되었습니다`);
       refetch();
     },
 

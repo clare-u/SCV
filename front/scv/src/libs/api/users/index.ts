@@ -1,4 +1,4 @@
-import { UserResponse, CreateRepo } from "@/types";
+import { UserResponse, CreateRepo, ExportRequest } from "@/types";
 import { handleApiRequest } from "../client";
 
 // member
@@ -28,4 +28,12 @@ export const existingRepo = async (data: CreateRepo) => {
 
 export const deleteRepo = async () => {
   return handleApiRequest<void, "delete">("/api/v1/users/repo", "delete");
+};
+
+// 모델 내보내기 함수
+export const exportModel = async (exportData: ExportRequest) => {
+  const url = `/api/v1/users/repo/export`;
+  console.log("API 요청 URL:", url);
+
+  return handleApiRequest<void, "post", ExportRequest>(url, "post", exportData);
 };
