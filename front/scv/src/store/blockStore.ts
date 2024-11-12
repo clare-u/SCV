@@ -90,8 +90,8 @@ const validateBlock = (
 
     return {
       channels: out_channels,
-      height: Math.floor(input.height - kernel_size - 1 - 1 + 1),
-      width: Math.floor(input.width - kernel_size - 1 - 1 + 1),
+      height: Math.floor(input.height - (kernel_size - 1) - 1 + 1),
+      width: Math.floor(input.width - (kernel_size - 1) - 1 + 1),
     };
   }
   if (block.name === "nn.ConvTranspose2d") {
@@ -175,9 +175,9 @@ const validateBlock = (
   if (block.name === "Linear") {
     const in_channels = block.params[0].value;
 
-    if (input.channels != in_channels) {
+    if (input.channels * input.height * input.width != in_channels) {
       toast.error(
-        `${block.name}의 input_channel : ${in_channels} 과 이전 레이어의 output_channel : ${input.channels}이 맞지 않습니다.`,
+        `${block.name}의 input_channel : ${in_channels} 과 이전 레이어의 output_channel : ${input.channels * input.height * input.width}이 맞지 않습니다.`,
       );
       return;
     }
@@ -227,6 +227,11 @@ export const useBlockStore = create<BlockState>((set, get) => ({
     if (dataShape && dataShape.channels !== datasetLabels[dataset]) {
       toast.error(
         `마지막 출력은 ${datasetLabels[dataset]} 개의 channel로 이루어져 있어야 합니다.`,
+      );
+    }
+    if (dataShape && (dataShape.width != 1 || dataShape.height != 1)) {
+      toast.error(
+        `마지막 출력 전에 width와 height을 1로 만들어 주세요. (힌트: Linear 레이어)`,
       );
     }
   },
