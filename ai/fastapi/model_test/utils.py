@@ -57,8 +57,6 @@ def get_example_image(outputs, dataset) -> str:
 
     for actual in data_labels:
         for pred in data_labels:
-            if dataset == "emnist":
-                actual = actual - 1
             example_images[(actual,pred)] = {
                 "conf" : 0.0,
                 "image" : "null"
@@ -100,7 +98,7 @@ def get_feature_activation(origin, activation) -> list[feature_activation]:
 def get_activation_maximization(model, dataset) -> list[activation_maximization]:
 
     resp = []
-    for label in dataset_labels["mnist"]:
+    for label in dataset_labels[dataset]:
         resp.append({
             "label": str(label),
             "image": json.dumps(maximize_class_image(model, label, dataset))
