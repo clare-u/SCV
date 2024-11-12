@@ -1,5 +1,6 @@
 import { MemberResponse } from "../users";
 import { UserResponse } from "../users";
+import { Dataset } from "../dataset";
 
 // 단일 모델 객체에 대한 타입 정의
 export interface Model {
@@ -141,4 +142,15 @@ export interface FeatureActivation {
 
 export interface ActivationMaximization {
   image: string;
+}
+
+// 모델 생성
+export interface ModelRequest {
+  dataName: Dataset;
+  modelName: string;
+}
+
+export interface ModelResponse {
+  modelId: number;
+  modelVersionId: number;
 }

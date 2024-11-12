@@ -4,6 +4,8 @@ import {
   MyModelList,
   ModelVersions,
   VersionResponse,
+  ModelRequest,
+  ModelResponse,
 } from "@/types";
 import { handleApiRequest } from "../client";
 
@@ -102,4 +104,15 @@ export const fetchVersionDetails = async (versionId: number) => {
   const url = `/api/v1/models/versions/${versionId}`;
   console.log("API 요청 URL:", url);
   return handleApiRequest<VersionResponse, "get">(url, "get");
+};
+
+// 모델 최초 생성
+export const createModel = async (modelData: ModelRequest) => {
+  const url = `/api/v1/models`;
+  console.log("API 요청 URL:", url);
+  return handleApiRequest<ModelResponse, "post", ModelRequest>(
+    url,
+    "post",
+    modelData,
+  );
 };
