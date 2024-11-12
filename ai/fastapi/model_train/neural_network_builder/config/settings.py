@@ -1,7 +1,9 @@
 from pathlib import Path
 
 # Project Base Path
-BASE_DIR = Path(__file__).resolve().parent.parent.parent
+BASE_DIR = Path(__file__).resolve().parents[3]
+log_dir = BASE_DIR / 'logs'
+log_dir.mkdir(exist_ok=True)
 
 # Logging Configuration
 LOG_CONFIG = {
@@ -22,7 +24,7 @@ LOG_CONFIG = {
             'level': 'INFO',
             'formatter': 'standard',
             'class': 'logging.FileHandler',
-            'filename': BASE_DIR / 'logs' / 'model_builder.log',
+            'filename': log_dir / 'scv_model.log',
             'mode': 'a',
         },
     },

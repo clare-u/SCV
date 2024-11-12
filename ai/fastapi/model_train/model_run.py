@@ -1,16 +1,13 @@
 import logging
+import os
+import sys
+from typing import List, Dict, Any, Tuple
 
 import torch
 import torch.nn as nn
 import torch.optim as optim
-from torch.utils.data import DataLoader
-from torchvision import datasets, transforms
 from minio import Minio
-from torchsummary import summary
-import sys
-import os
-from typing import List, Dict, Any, Optional, Tuple
-from pathlib import Path
+from torch.utils.data import DataLoader
 
 current_dir = os.path.dirname(os.path.abspath(__file__))
 root_dir = os.path.dirname(current_dir)
@@ -27,8 +24,6 @@ os.makedirs(log_dir, exist_ok=True)
 # )
 logger = logging.getLogger(__name__)
 
-from neural_network_builder.exceptions.custom_exceptions import ValidationError
-from .datasets.datasets_registry import setup_logger
 from .datasets import DatasetRegistry, DatasetFactory, DatasetInfo
 from .validators.model_validator import ModelValidator
 
@@ -36,10 +31,11 @@ current_dir = os.path.dirname(os.path.abspath(__file__))
 root_dir = os.path.dirname(current_dir)
 sys.path.append(root_dir)
 
-from neural_network_builder.builders import ModelBuilder, ModelCodeGenerator
-from neural_network_builder.parsers.validators import ModelConfig
+from .neural_network_builder.builders import ModelBuilder, ModelCodeGenerator
+from .neural_network_builder.parsers.validators import ModelConfig
 from .save_minio import save_model_to_minio, minio_host_name, minio_user_name, minio_user_password, minio_model_bucket, \
     minio_api_port
+
 
 class ModelTrainer:
     def __init__(self):
@@ -66,7 +62,7 @@ class ModelTrainer:
             model.dataset_info = dataset_info.to_dict()
             model.training_history = training_history
             model.model_layer = model_layer
-            model.model_id = model_id # 식별자
+            model.model_id = model_id  # 식별자
 
             # MinIO에 저장
             save_model_to_minio(model, model_name)
@@ -77,7 +73,7 @@ class ModelTrainer:
             raise
 
     def train_epoch(self, model: nn.Module, train_loader: DataLoader,
-                   optimizer: optim.Optimizer, criterion: nn.Module) -> Tuple[float, float]:
+                    optimizer: optim.Optimizer, criterion: nn.Module) -> Tuple[float, float]:
         """한 epoch 동안의 학습을 수행"""
         model.train()
         total_loss = 0
@@ -106,7 +102,7 @@ class ModelTrainer:
         return avg_loss, accuracy
 
     def test_model(self, model: nn.Module, test_loader: DataLoader,
-                  criterion: nn.Module) -> Tuple[float, float]:
+                   criterion: nn.Module) -> Tuple[float, float]:
         """모델 테스트 수행"""
         model.eval()
         test_loss = 0
@@ -188,7 +184,7 @@ class ModelTrainer:
                 logger.info(f'Training - Loss: {train_loss:.4f}, Accuracy: {train_acc:.2f}%')
                 logger.info(f'Testing  - Loss: {test_loss:.4f}, Accuracy: {test_acc:.2f}%')
 
-            #TODO 고쳐야함
+                # TODO 고쳐야함
 
                 # 최고 성능 모델 저장
                 if test_acc > best_accuracy:
