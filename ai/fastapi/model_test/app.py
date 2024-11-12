@@ -84,7 +84,7 @@ async def analyze_model(model_id: str, version_id:str, dataset: Literal["mnist",
     total_params = get_total_params() # 현재
     params = get_params() # 현재
     feature_activation = get_feature_activation(maximization_input, activation_map) # 나
-    activation_maximization = get_activation_maximization(model) # 나
+    activation_maximization = get_activation_maximization(model, dataset) # 나
 
     _ = await save_cka_to_milvus(model, dataset, f"model_{model_id}_v{version_id}", conv_idx, test_accuracy, layers)
 
