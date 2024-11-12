@@ -6,7 +6,27 @@ from torch.optim import Adam
 from sklearn.metrics import confusion_matrix
 
 dataset_labels = {
-    "mnist": [0,1,2,3,4,5,6,7,8,9]
+    "mnist": [0,1,2,3,4,5,6,7,8,9],
+    "fashion_mnist": [0,1,2,3,4,5,6,7,8,9],
+    "cifar10": [0,1,2,3,4,5,6,7,8,9],
+    "svhn": [0,1,2,3,4,5,6,7,8,9],
+    "emnist": [0,1,2,3,4,5,6,7,8,9,10,11,12,13,14,15,16,17,18,19,20,21,22,23,24,25]
+}
+
+dataset_width = {
+    "mnist": 28,
+    "fashion_mnist": 28,
+    "cifar10": 32,
+    "svhn": 32,
+    "emnist": 28
+}
+
+dataset_channels = {
+    "mnist": 1,
+    "fashion_mnist": 1,
+    "cifar10": 3,
+    "svhn": 3,
+    "emnist": 1
 }
 
 def get_code() -> str:
@@ -73,21 +93,21 @@ def get_feature_activation(origin, activation) -> list[feature_activation]:
     return resp
 
 # 가장 라벨 스러운 이미지를 출력
-def get_activation_maximization(model) -> list[activation_maximization]:
+def get_activation_maximization(model, dataset) -> list[activation_maximization]:
 
     resp = []
     for label in dataset_labels["mnist"]:
         resp.append({
             "label": str(label),
-            "image": json.dumps(maximize_class_image(model, label))
+            "image": json.dumps(maximize_class_image(model, label, dataset))
         })
     return resp
 
 
 
-def maximize_class_image(model, target_class, num_steps=100, lr=0.1):
+def maximize_class_image(model, target_class, dataset, num_steps=100, lr=0.1):
     # 랜덤한 노이즈 이미지 생성 (MNIST: 1x28x28)
-    optimized_image = torch.randn((1, 1, 28, 28), requires_grad=True)
+    optimized_image = torch.randn((1, dataset_channels[dataset], dataset_width[dataset], dataset_width[dataset]), requires_grad=True)
 
     # Adam 옵티마이저 설정
     optimizer = Adam([optimized_image], lr=lr)
