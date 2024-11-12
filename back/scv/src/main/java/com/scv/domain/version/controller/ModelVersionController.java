@@ -1,6 +1,6 @@
 package com.scv.domain.version.controller;
 
-import com.scv.domain.data.enums.DataSet;
+import com.scv.domain.model.dto.response.ModelCreateResponse;
 import com.scv.global.oauth2.auth.AuthUser;
 import com.scv.global.oauth2.auth.CustomOAuth2User;
 import com.scv.domain.result.dto.response.ResultResponse;
@@ -41,10 +41,10 @@ public class ModelVersionController {
             @ApiResponse(responseCode = "400", description = "잘못된 요청", content = @Content(schema = @Schema(implementation = ErrorResponse.class))),
             @ApiResponse(responseCode = "404", description = "존재하지 않는 모델", content = @Content(schema = @Schema(implementation = ErrorResponse.class)))
     })
-    public ResponseEntity<Void> createModelVersion(@PathVariable Long modelId, @RequestBody ModelVersionRequest request, @AuthUser CustomOAuth2User user) throws BadRequestException {
-        modelVersionService.createModelVersion(modelId, request, user);
+    public ResponseEntity<ModelCreateResponse> createModelVersion(@PathVariable Long modelId, @RequestParam Long modelVersionId, @AuthUser CustomOAuth2User user) throws BadRequestException {
+        ModelCreateResponse modelResponse = modelVersionService.createModelVersion(modelId, modelVersionId, user);
 
-        return ResponseEntity.status(201).build();
+        return ResponseEntity.status(201).body(modelResponse);
     }
 
     // 모델 버전 상세 조회
@@ -94,10 +94,10 @@ public class ModelVersionController {
             @ApiResponse(responseCode = "404", description = "존재하지 않는 모델버전", content = @Content(schema = @Schema(implementation = ErrorResponse.class)))
     })
     public ResponseEntity<Page<ModelVersionOnWorking>> getModelVersionsOnWorking(@RequestParam(defaultValue = "0") int page,
-                                                                                @RequestParam(defaultValue = "12") int size,
-                                                                                @RequestParam(defaultValue = "") String orderBy,
-                                                                                @RequestParam(defaultValue = "") String direction,
-                                                                                @AuthUser CustomOAuth2User user) {
+                                                                                 @RequestParam(defaultValue = "12") int size,
+                                                                                 @RequestParam(defaultValue = "") String orderBy,
+                                                                                 @RequestParam(defaultValue = "") String direction,
+                                                                                 @AuthUser CustomOAuth2User user) {
 
         Pageable pageable = pageableUtil.createPageable(page, size, orderBy, direction);
 
