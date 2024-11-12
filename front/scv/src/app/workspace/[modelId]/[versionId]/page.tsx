@@ -2,7 +2,12 @@
 
 import { useState, useEffect } from "react";
 import { useRouter } from "next/navigation";
-import { useFetchModelVersions, useFetchVersionDetails } from "@/hooks";
+import {
+  useFetchModelVersions,
+  useFetchVersionDetails,
+  useExportModel,
+} from "@/hooks";
+import { Dataset } from "@/types";
 import ListboxComponent from "@/components/input/ListBoxComponent";
 import Loading from "@/components/loading/Loading";
 import Chips from "@/components/chips/Chips";
@@ -101,6 +106,18 @@ export default function WorkspaceDetail({ params }: PageProps) {
     }`,
   };
   console.log("versionData:", versionData);
+
+  // github export
+  const { mutate: exportModelMutation, isPending } = useExportModel();
+
+  // 블록 데이터를 JSON 문자열로 변환하는 함수
+  const getBlockContent = () => {
+    if (!versionData?.layers) return "";
+    const blocks = convertApiToBlocks({ layers: versionData.layers });
+    return JSON.stringify(blocks);
+  };
+
+  ///////////////////
 
   // 에러 및 로딩 상태 처리
   if (!params.versionId || params.versionId === null) {
@@ -246,6 +263,26 @@ export default function WorkspaceDetail({ params }: PageProps) {
           </Chips>
         </div>
         <div className="flex items-center gap-20">
+          <Button
+            size="l"
+            design="outline"
+            color="indigo"
+            icon="upload"
+            disabled={isPending}
+            onClick={() => {
+              exportModelMutation({
+                dataName: modelData.DataName as Dataset,
+                modelName: modelData.modelName,
+                versionNo:
+                  modelData.modelVersions.find(
+                    (v) => v.versionId === Number(params.versionId),
+                  )?.versionNo || 1,
+                content: getBlockContent(),
+              });
+            }}
+          >
+            깃허브로 내보내기
+          </Button>
           <Button size="l" design="fill" color="indigo" icon="search">
             유사모델 찾기
           </Button>
