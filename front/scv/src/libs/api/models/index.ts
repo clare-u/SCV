@@ -136,7 +136,6 @@ export const saveModelVersion = async (
 };
 
 // 모델 실행
-// 모델 실행 함수
 export const runModelVersion = async (versionId: number) => {
   const url = `/api/v1/models/versions/${versionId}/result/run`;
   console.log("API 요청 URL:", url);
@@ -146,4 +145,17 @@ export const runModelVersion = async (versionId: number) => {
     "post",
     { versionId },
   );
+};
+
+// 모델 버전 생성 함수
+export const createVersion = async (
+  modelId: number,
+  modelVersionId: number,
+) => {
+  // URL에 modelId는 경로로, modelVersionId는 쿼리 매개변수로 추가
+  const url = `/api/v1/models/versions/${modelId}?modelVersionId=${modelVersionId}`;
+  console.log("API 요청 URL:", url);
+
+  // 요청 본문 데이터가 필요 없다면 생략 가능
+  return handleApiRequest<ModelResponse, "post">(url, "post");
 };
