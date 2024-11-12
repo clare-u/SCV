@@ -209,19 +209,21 @@ export default function communityDetail({ params }: PageProps) {
     }
   };
 
-  // layerParams를 파싱하여 number[]로 변환
-  const layerParams: number[] = Array.isArray(
-    versionData!.resultResponseWithImages.layerParams,
-  )
-    ? versionData!.resultResponseWithImages.layerParams
-    : JSON.parse(versionData!.resultResponseWithImages.layerParams);
+  // layerParams를 파싱하여 number[]로 변환 (resultResponseWithImages가 존재할 경우에만)
+  const layerParams: number[] = versionData?.resultResponseWithImages
+    ?.layerParams
+    ? Array.isArray(versionData.resultResponseWithImages.layerParams)
+      ? versionData.resultResponseWithImages.layerParams
+      : JSON.parse(versionData.resultResponseWithImages.layerParams)
+    : [];
 
-  // Training History 데이터를 조건부로 파싱
-  const trainingHistory =
-    typeof versionData!.resultResponseWithImages.trainInfos === "string"
-      ? JSON.parse(versionData!.resultResponseWithImages.trainInfos)
+  // Training History 데이터를 조건부로 파싱 (resultResponseWithImages가 존재할 경우에만)
+  const trainingHistory = versionData?.resultResponseWithImages?.trainInfos
+    ? typeof versionData.resultResponseWithImages.trainInfos === "string"
+      ? JSON.parse(versionData.resultResponseWithImages.trainInfos)
           .training_history
-      : versionData!.resultResponseWithImages.trainInfos.training_history;
+      : versionData.resultResponseWithImages.trainInfos.training_history
+    : [];
 
   return (
     <div className="flex w-[1100px] flex-col gap-[30px] px-10 py-20">
