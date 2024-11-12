@@ -118,10 +118,9 @@ export default function Edit({ params }: EditProps) {
   if (modelLoading || versionLoading) return <Loading />;
   if (!modelData || !versionData) return <div>데이터를 찾을 수 없습니다.</div>;
 
-  const currentVersionNo =
-    modelData.modelVersions.find(
-      (version) => version.versionId === params.versionId,
-    )?.versionNo ?? 1;
+  const currentVersionNo = modelData.modelVersions.find(
+    (version) => Number(version.versionId) === Number(params.versionId),
+  )?.versionNo;
 
   // versionId가 null인지 확인하는 함수
   const isNullVersion = () => {
