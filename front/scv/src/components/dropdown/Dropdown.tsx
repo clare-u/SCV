@@ -1,6 +1,7 @@
 "use client";
 import { useState } from "react";
-import { useDeleteModel, useDeleteVersion } from "@/hooks";
+import { useDeleteModel, useDeleteVersion, useCreateVersion } from "@/hooks";
+import { ModelResponse } from "@/types";
 import { toast } from "sonner";
 import { useRouter } from "next/navigation";
 
@@ -17,6 +18,8 @@ const Dropdown: React.FC<DropdownProps> = ({ modelId, versionId }) => {
     useDeleteModel();
   const { mutate: deleteVersionMutation, isPending: isVersionPending } =
     useDeleteVersion();
+  const { mutate: createVersion, isPending: isVersionCreatePending } =
+    useCreateVersion();
 
   const toggleDropbox = () => {
     setIsDropboxOpen(!isDropboxOpen);
@@ -28,7 +31,22 @@ const Dropdown: React.FC<DropdownProps> = ({ modelId, versionId }) => {
   };
 
   // 새로운 버전 만들기
-  const handleCreateVersionClick = () => {};
+  const handleCreateVersionClick = () => {
+    createVersion(
+      {
+        modelId,
+        modelVersionId: versionId,
+      },
+      {
+        onSuccess: (data: ModelResponse) => {
+          router.push(`/edit/${data.modelId}/${data.modelVersionId}`);
+        },
+        onError: (error) => {
+          console.error("Create version error:", error);
+        },
+      },
+    );
+  };
 
   // 버전 삭제하기
   const handleVersionDeleteClick = () => {
@@ -87,7 +105,9 @@ const Dropdown: React.FC<DropdownProps> = ({ modelId, versionId }) => {
             </div>
             <div
               onClick={handleCreateVersionClick}
-              className={`flex cursor-pointer items-center gap-10 whitespace-nowrap rounded-4 bg-white px-16 py-10 text-14 hover:bg-gray-100`}
+              className={`flex cursor-pointer items-center gap-10 whitespace-nowrap rounded-4 bg-white px-16 py-10 text-14 hover:bg-gray-100 ${
+                isVersionCreatePending ? "opacity-50" : ""
+              }`}
             >
               <span className="material-symbols-outlined">add_circle</span>
               새로운 버전 만들기

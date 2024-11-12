@@ -8,3 +8,4 @@ export * from "./useFetchVersionDetails";
 export * from "./useCreateModel";
 export * from "./useSaveModelVersion";
 export * from "./useRunModelVersion";
+export * from "./useCreateVersion";
