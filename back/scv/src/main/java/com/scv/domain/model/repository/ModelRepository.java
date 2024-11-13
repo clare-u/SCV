@@ -14,7 +14,7 @@ import org.springframework.stereotype.Repository;
 @Repository
 public interface ModelRepository extends JpaRepository<Model, Long> {
 
-    @EntityGraph(attributePaths = {"data", "modelVersions", "modelVersions.result", "user"})
+    @EntityGraph(attributePaths = {"data", "user"})
     @Query("SELECT m FROM Model m " +
             "WHERE m.deleted = false " +
             "AND m.latestVersion != 0 " +
@@ -27,7 +27,7 @@ public interface ModelRepository extends JpaRepository<Model, Long> {
                                Pageable pageable);
 
 
-    @EntityGraph(attributePaths = {"data", "modelVersions", "modelVersions.result", "user"})
+    @EntityGraph(attributePaths = {"data", "user"})
     @Query("SELECT m FROM Model m " +
             "WHERE m.deleted = false " +
             "AND m.latestVersion != 0" +
@@ -36,6 +36,5 @@ public interface ModelRepository extends JpaRepository<Model, Long> {
     Page<Model> searchModels(@Param("modelName") String modelName,
                              @Param("dataName") DataSet dataName,
                              Pageable pageable);
-
 
 }
