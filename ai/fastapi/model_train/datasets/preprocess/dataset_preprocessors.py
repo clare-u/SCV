@@ -127,3 +127,168 @@ class FashionMNISTPreprocessor(BaseImagePreprocessor):
         edges = cv2.Canny(image, 30, 150)
         edges = cv2.dilate(edges, None)
         return cv2.addWeighted(image, 0.9, edges, 0.1, 0)
+
+
+class CIFAR10Preprocessor(BaseImagePreprocessor):
+    """CIFAR10 데이터셋 전처리"""
+
+    def preprocess(self, image: np.ndarray) -> np.ndarray:
+        # RGB 이미지 검증
+        if len(image.shape) != 3:
+            raise ValueError("CIFAR10은 RGB 이미지가 필요합니다")
+
+        # CIFAR10 표준 크기(32x32)로 리사이즈
+        image = cv2.resize(image, (32, 32))
+
+        # BGR을 RGB로 변환 (OpenCV는 BGR을 사용)
+        image = cv2.cvtColor(image, cv2.COLOR_BGR2RGB)
+
+        # 노이즈 제거 (선택적)
+        if self.params.get('noise_reduction', True):
+            image = cv2.fastNlMeansDenoisingColored(
+                image,
+                None,
+                10,  # h (필터링 강도)
+                10,  # hColor
+                7,  # templateWindowSize
+                21  # searchWindowSize
+            )
+
+        # 대비 개선
+        alpha = self.params.get('contrast_alpha', 1.2)  # 대비
+        beta = self.params.get('contrast_beta', 10)  # 밝기
+        image = cv2.convertScaleAbs(image, alpha=alpha, beta=beta)
+
+        # 채널별 정규화
+        for i in range(3):  # RGB 각 채널
+            image[:, :, i] = cv2.normalize(
+                image[:, :, i],
+                None,
+                0, 255,
+                cv2.NORM_MINMAX
+            )
+
+        # uint8로 변환
+        image = image.astype(np.uint8)
+
+        # RGB -> 그레이스케일로 변환 (contour 검출용)
+        gray = cv2.cvtColor(image, cv2.COLOR_RGB2GRAY)
+
+        return gray  # 그레이스케일 이미지 반환
+
+    def _enhance_colors(self, image: np.ndarray) -> np.ndarray:
+        """색상 향상을 위한 보조 메서드"""
+        # HSV 색상 공간에서 채도(S)와 명도(V) 조정
+        hsv = cv2.cvtColor(image, cv2.COLOR_RGB2HSV)
+        hsv[:, :, 1] = cv2.multiply(hsv[:, :, 1], 1.2)  # 채도 증가
+        hsv[:, :, 2] = cv2.multiply(hsv[:, :, 2], 1.1)  # 명도 증가
+        return cv2.cvtColor(hsv, cv2.COLOR_HSV2RGB)
+
+
+class SVHNPreprocessor(BaseImagePreprocessor):
+    """SVHN(Street View House Numbers) 데이터셋 전처리기"""
+
+    def preprocess(self, image: np.ndarray) -> np.ndarray:
+        """SVHN 이미지 전처리 - 숫자를 더 뚜렷하게"""
+        if len(image.shape) != 3:
+            raise ValueError("SVHN은 RGB 이미지가 필요합니다")
+
+        # SVHN 표준 크기(32x32)로 리사이즈
+        image = cv2.resize(image, (32, 32))
+
+        # BGR을 RGB로 변환
+        image = cv2.cvtColor(image, cv2.COLOR_BGR2RGB)
+
+        # 노이즈 제거
+        denoised = cv2.fastNlMeansDenoisingColored(
+            image, None,
+            h=self.params.get('denoise_strength', 10),
+            hColor=10,
+            templateWindowSize=7,
+            searchWindowSize=21
+        )
+
+        # LAB 색상 공간에서 대비 개선
+        lab = cv2.cvtColor(denoised, cv2.COLOR_RGB2LAB)
+        l, a, b = cv2.split(lab)
+
+        # CLAHE로 명도 채널 개선
+        clahe = cv2.createCLAHE(
+            clipLimit=self.params.get('clahe_clip_limit', 2.0),
+            tileGridSize=(8, 8)
+        )
+        l = clahe.apply(l)
+
+        # 채널 병합
+        enhanced = cv2.merge((l, a, b))
+        enhanced = cv2.cvtColor(enhanced, cv2.COLOR_LAB2RGB)
+
+        # 엣지 강화
+        gray = cv2.cvtColor(enhanced, cv2.COLOR_RGB2GRAY)
+        edges = cv2.Canny(
+            gray,
+            self.params.get('edge_low', 50),
+            self.params.get('edge_high', 150)
+        )
+        edges = cv2.dilate(edges, None)
+
+        # 그레이스케일로 변환
+        gray = cv2.cvtColor(enhanced, cv2.COLOR_RGB2GRAY)
+
+        return gray
+
+
+class EMNISTPreprocessor(BaseImagePreprocessor):
+    """EMNIST(Extended MNIST) 데이터셋 전처리기"""
+
+    def preprocess(self, image: np.ndarray) -> np.ndarray:
+        """EMNIST 이미지 전처리 - 알파벳 문자 강조"""
+        # 흑백 변환
+        image = self._convert_to_grayscale(image)
+
+        # 이미지 정규화 (대비 향상)
+        image = self._normalize_image(image)
+
+        # 노이즈 제거를 위한 가우시안 블러
+        kernel_size = self.params.get('blur_kernel', 3)
+        image = cv2.GaussianBlur(image, (kernel_size, kernel_size), 0)
+
+        # 배경과 문자 분석
+        mean_brightness = np.mean(image)
+        is_dark_background = mean_brightness < 127
+
+        # 이진화 처리
+        if not is_dark_background:  # 밝은 배경인 경우
+            _, image = cv2.threshold(
+                image, 0, 255,
+                cv2.THRESH_BINARY_INV + cv2.THRESH_OTSU
+            )
+        else:  # 어두운 배경인 경우
+            _, image = cv2.threshold(
+                image, 0, 255,
+                cv2.THRESH_BINARY + cv2.THRESH_OTSU
+            )
+
+        # 문자 방향 보정 (EMNIST 특화)
+        if self.params.get('rotation_correction', True):
+            coords = np.column_stack(np.where(image > 0))
+            if len(coords) > 0:
+                angle = cv2.minAreaRect(coords.astype(np.float32))[-1]
+                if angle < -45:
+                    angle = 90 + angle
+                if angle != 0:
+                    (h, w) = image.shape[:2]
+                    center = (w // 2, h // 2)
+                    M = cv2.getRotationMatrix2D(center, angle, 1.0)
+                    image = cv2.warpAffine(
+                        image, M, (w, h),
+                        flags=cv2.INTER_CUBIC,
+                        borderMode=cv2.BORDER_REPLICATE
+                    )
+
+        # 최종 검사 및 반전
+        final_brightness = np.mean(image)
+        if final_brightness > 127:  # 배경이 밝은 경우
+            image = 255 - image  # EMNIST 형식으로 반전
+
+        return image
