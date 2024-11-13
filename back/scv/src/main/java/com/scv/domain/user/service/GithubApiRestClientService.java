@@ -10,7 +10,7 @@ import com.scv.domain.user.exception.*;
 import com.scv.domain.user.util.GithubUrlBuilder;
 import com.scv.global.oauth2.auth.CustomOAuth2User;
 import lombok.RequiredArgsConstructor;
-import org.springframework.beans.factory.annotation.Qualifier;
+import org.springframework.context.annotation.Primary;
 import org.springframework.core.ParameterizedTypeReference;
 import org.springframework.http.HttpHeaders;
 import org.springframework.http.HttpStatusCode;
@@ -23,12 +23,13 @@ import java.util.List;
 import java.util.Optional;
 
 @Service
+@Primary
 @RequiredArgsConstructor
-@Qualifier("githubApiRestClientService")
 public class GithubApiRestClientService implements GithubApiService {
 
     private final OAuth2AuthorizedClientService oAuth2AuthorizedClientService;
     private final GithubUrlBuilder githubUrlBuilder;
+
     private static final RestClient restClient = RestClient.builder()
             .defaultHeader(HttpHeaders.CONTENT_TYPE, MediaType.APPLICATION_JSON_VALUE)
             .defaultHeader(HttpHeaders.ACCEPT, "application/vnd.github+json")

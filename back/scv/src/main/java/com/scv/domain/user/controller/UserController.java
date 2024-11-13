@@ -2,6 +2,8 @@ package com.scv.domain.user.controller;
 
 import com.scv.domain.data.enums.DataSet;
 import com.scv.domain.user.dto.request.ExportGithubRepoFileRequestDTO;
+import com.scv.domain.user.service.GithubService;
+import com.scv.domain.user.service.UserService;
 import com.scv.global.jwt.exception.InvalidTokenException;
 import com.scv.global.jwt.util.CookieUtil;
 import com.scv.global.oauth2.auth.AuthUser;
@@ -9,8 +11,6 @@ import com.scv.global.oauth2.auth.CustomOAuth2User;
 import com.scv.domain.user.dto.request.LinkGithubRepoRequestDTO;
 import com.scv.domain.user.dto.response.GithubRepoFileResponseDTO;
 import com.scv.domain.user.dto.response.UserProfileResponseDTO;
-import com.scv.domain.user.service.GithubService;
-import com.scv.domain.user.service.UserService;
 import com.scv.global.error.ErrorResponse;
 import io.swagger.v3.oas.annotations.Operation;
 import io.swagger.v3.oas.annotations.media.Content;
