@@ -22,4 +22,4 @@ COPY . .
 EXPOSE 8002
 
 # FastAPI 애플리케이션 실행
-CMD ["uvicorn", "main:app", "--host", "0.0.0.0", "--port", "8002"]
+CMD ["uvicorn", "app:app", "--host", "0.0.0.0", "--port", "8002"]

@@ -6,16 +6,16 @@ import os
 load_dotenv(verbose=True)
 db_name = os.getenv("DB_NAME")
 collection_name = os.getenv("COLLECTION_NAME")
-milvus_host_name = os.getenv("MILVUS_HOST_NAME")
-milvus_port = os.getenv("MILVUS_PORT")
+# milvus_host_name = os.getenv("MILVUS_HOST_NAME")
+# milvus_port = os.getenv("MILVUS_PORT")
 
-conn = connections.connect(host=milvus_host_name, port=milvus_port)
+# conn = connections.connect(host=milvus_host_name, port=milvus_port)
 
 if not db_name in db.list_database():
     database = db.create_database(db_name)
 
 client = MilvusClient(
-    uri="http://{}:{}".format(milvus_host_name, milvus_port),
+    uri="./milvus_demo.db",
     db_name=db_name
 )
 
