@@ -19,6 +19,7 @@ import {
 } from "@/hooks";
 import Loading from "@/components/loading/Loading";
 import { useRouter } from "next/navigation";
+import { toast } from "sonner";
 
 interface EditProps {
   params: {
@@ -170,7 +171,21 @@ export default function Edit({ params }: EditProps) {
   // 결과 출력 (저장)
   const { mutate: saveResult, isPending: isSaving } = useSaveResult();
   const handleSaveResult = () => {
-    saveResult(params.versionId);
+    saveResult(params.versionId, {
+      onSuccess: (data) => {
+        toast.success(
+          <div>
+            결과가 저장되었습니다.{" "}
+            <a
+              href={`/workspace/${params.modelId}/${params.versionId}`}
+              style={{ textDecoration: "underline", color: "blue" }}
+            >
+              바로 확인하기
+            </a>
+          </div>,
+        );
+      },
+    });
   };
 
   /////////////////////

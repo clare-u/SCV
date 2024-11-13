@@ -18,6 +18,9 @@ import CanvasComponent from "@/components/canvas/CanvasComponent";
 import CodeViewer from "@/components/code/CodeViewer";
 import BlockItem from "@/components/block/BlockItem";
 import { convertApiToBlocks, findBlockCategory } from "@/utils/block-converter";
+import FeatureActivationViewer from "@/components/canvas/FeatureActivationViewer";
+import ActivationMaximizationViewer from "@/components/canvas/ActivationMaximizationViewer";
+import ConfusionMatrixTable from "@/components/canvas/ConfusionMatrixTable";
 
 interface Version {
   id: number;
@@ -116,6 +119,8 @@ export default function WorkspaceDetail({ params }: PageProps) {
     const blocks = convertApiToBlocks({ layers: versionData.layers });
     return JSON.stringify(blocks);
   };
+
+  console.log();
 
   ///////////////////
 
@@ -338,51 +343,60 @@ export default function WorkspaceDetail({ params }: PageProps) {
                 {versionData.resultResponseWithImages.totalParams.toLocaleString()}
               </p>
             </div>
+
             {/* Feature Activation */}
-            {versionData.resultResponseWithImages.featureActivation?.[0]
-              ?.origin && (
+            {versionData?.resultResponseWithImages?.featureActivation && (
               <div className="flex flex-col px-20">
                 <div className="text-24 font-bold text-indigo-900">
                   Feature Activation
                 </div>
-                <div className="inline-block border-2 border-gray-500 p-4">
-                  <CanvasComponent
-                    data={
-                      versionData.resultResponseWithImages.featureActivation[0]
-                        .origin
-                    }
-                  />
-                </div>
+                <FeatureActivationViewer
+                  featureActivation={
+                    versionData.resultResponseWithImages.featureActivation
+                  }
+                />
               </div>
             )}
+
             {/* Activation Maximization */}
-            {versionData.resultResponseWithImages.activationMaximization?.[0]
-              ?.image && (
+            {versionData.resultResponseWithImages.activationMaximization && (
               <div className="flex flex-col px-20">
                 <div className="text-24 font-bold text-indigo-900">
                   Activation Maximization
                 </div>
-                <div className="inline-block border-2 border-gray-500 p-4">
-                  <CanvasComponent
-                    data={
-                      versionData.resultResponseWithImages
-                        .activationMaximization[0].image
-                    }
-                  />
-                </div>
+                <ActivationMaximizationViewer
+                  activationData={
+                    typeof versionData.resultResponseWithImages
+                      .activationMaximization === "string"
+                      ? versionData.resultResponseWithImages
+                          .activationMaximization
+                      : JSON.stringify(
+                          versionData.resultResponseWithImages
+                            .activationMaximization,
+                        )
+                  }
+                />
               </div>
             )}
+
             {/* Confusion Matrix */}
             {versionData.resultResponseWithImages.confusionMatrix && (
               <div className="flex flex-col px-20">
                 <div className="text-24 font-bold text-indigo-900">
                   Confusion Matrix
                 </div>
-                <div className="max-w-1100">
-                  {versionData.resultResponseWithImages.confusionMatrix}
-                </div>
+                <ConfusionMatrixTable
+                  data={versionData.resultResponseWithImages.confusionMatrix}
+                ></ConfusionMatrixTable>
               </div>
             )}
+
+            {/* Example Images */}
+            {/* {versionData.resultResponseWithImages.exampleImg && (
+              <ExampleImagesComponent
+                data={versionData.resultResponseWithImages.exampleImg}
+              />
+            )} */}
 
             {/* Training History */}
             {versionData.resultResponseWithImages.trainInfos

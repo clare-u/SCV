@@ -114,13 +114,11 @@ export interface ResultResponseWithImages {
   totalParams: number;
   trainInfos: TrainingInfo;
   layerParams: number[];
-  confusionMatrix: number[][];
-  exampleImg: ExampleImage;
+  confusionMatrix: string;
+  exampleImg: ExampleImages;
   featureActivation: FeatureActivation[];
-  activationMaximization: ActivationMaximization[];
+  activationMaximization: ActivationMaximization;
 }
-
-// Define nested types for clarity
 
 export interface TrainingInfo {
   training_history: Array<{
@@ -132,16 +130,35 @@ export interface TrainingInfo {
   }>;
 }
 
-export interface ExampleImage {
-  example_image: string;
+// 이미지 데이터를 포함하는 객체 구조의 타입 정의
+export interface ImageData {
+  conf: number; // 신뢰도 값
+  image: number[][][][]; // 4차원 배열 형태의 이미지 데이터
+}
+
+// ExampleImages 데이터의 전체 구조 타입 정의
+export interface ExampleImages {
+  [key: string]: ImageData | null; // 각 이미지의 키는 문자열이며, 값은 ImageData 또는 null
 }
 
 export interface FeatureActivation {
   origin: string;
+  visualize: string;
 }
 
-export interface ActivationMaximization {
-  image: string;
+export interface LayerFeatureMaps {
+  layerName: string; // 레이어 이름
+  featureMaps: string[]; // 해당 레이어의 특징 맵 이미지들 (base64 인코딩된 문자열 배열)
+}
+
+type ActivationImage = number[][];
+
+// 단일 활성화 데이터 샘플을 위한 인터페이스
+interface ActivationMaximization {
+  // 28x28 크기의 이미지 데이터
+  image: ActivationImage;
+  // MNIST 데이터셋의 레이블 (0-9)
+  label: string;
 }
 
 // 모델 생성
