@@ -116,18 +116,14 @@ public class ModelService {
     @Transactional
     public void deleteModel(Long modelId, CustomOAuth2User user) throws BadRequestException {
         Model model = modelRepository.findById(modelId).orElseThrow(ModelNotFoundException::new);
-        if (user.getUserId() != model.getUser().getUserId()) {
+
+        if (!user.getUserId().equals(model.getUser().getUserId())) {
             throw new BadRequestException("자신의 모델만 수정할 수 있습니다.");
         }
 
-        List<ModelVersion> modelVersionsList = modelVersionRepository.findAllByModel_IdAndDeletedFalse(modelId);
+        modelVersionRepository.softDeleteAllByModelId(modelId);
 
-        for (ModelVersion modelVersion : modelVersionsList) {
-            modelVersion.delete();
-            modelVersionRepository.save(modelVersion);
-        } // 소프트 딜리트
         model.delete();
-
         modelRepository.save(model);
     }
 
