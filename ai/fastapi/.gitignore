@@ -3,3 +3,4 @@
 *.iml
 *.egg-info/
 __pycache__/
+.model_cache
