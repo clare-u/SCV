@@ -1,4 +1,5 @@
 "use client";
+import axios from "axios";
 import { useState, useEffect, useCallback } from "react";
 import BlockList from "@/components/block/BlockList";
 import CodeViewer from "@/components/code/CodeViewer";
@@ -48,9 +49,6 @@ export default function Edit({ params }: EditProps) {
   const [editedTitle, setEditedTitle] = useState("");
   const [isEditing, setIsEditing] = useState(false);
   const [isHovered, setIsHovered] = useState(false);
-  const [filePreviews, setFilePreviews] = useState<string[]>([]);
-  const [testResult, setTestResult] = useState<string | null>(null);
-
   const { getLayerData, blockListValidation } = useBlockStore();
 
   // modelData가 로드되면 title 초기화
@@ -93,17 +91,6 @@ export default function Edit({ params }: EditProps) {
   const handleCancelEdit = () => {
     setEditedTitle(title); // 현재 title로 복원
     setIsEditing(false);
-  };
-
-  const onDrop = useCallback((acceptedFiles: File[]) => {
-    const previews = acceptedFiles.map((file) => URL.createObjectURL(file));
-    setFilePreviews(previews);
-  }, []);
-
-  const { getRootProps, getInputProps, isDragActive } = useDropzone({ onDrop });
-
-  const handleTest = () => {
-    setTestResult("출력: 6");
   };
 
   const [isVersionValid, setIsVersionValid] = useState<boolean | null>(null);
@@ -187,6 +174,50 @@ export default function Edit({ params }: EditProps) {
         );
       },
     });
+  };
+
+  // 사용자 파일 업로드하여 테스트
+  const [filePreviews, setFilePreviews] = useState<string[]>([]);
+  const [uploadedFiles, setUploadedFiles] = useState<File[]>([]);
+  const [testResult, setTestResult] = useState<string | null>(null);
+
+  const onDrop = useCallback((acceptedFiles: File[]) => {
+    const previews = acceptedFiles.map((file) => URL.createObjectURL(file));
+    setFilePreviews(previews);
+    setUploadedFiles(acceptedFiles); // 파일 객체를 상태에 저장
+  }, []);
+
+  const { getRootProps, getInputProps, isDragActive } = useDropzone({ onDrop });
+
+  const handleTest = () => {
+    if (uploadedFiles.length === 0) {
+      toast.error("업로드할 파일을 선택하세요.");
+      return;
+    }
+
+    (async () => {
+      try {
+        const formData = new FormData();
+        formData.append("file", uploadedFiles[0]);
+
+        // const url = `http://localhost:8003/fast/v1/models/${params.modelId}/versions/${params.versionId}/my-data`;
+        const url = `https://k11a107.p.ssafy.io/fast/v1/models/${params.modelId}/versions/${params.versionId}/my-data`;
+
+        const response = await axios.post(url, formData, {
+          headers: {
+            "Content-Type": "multipart/form-data",
+          },
+          withCredentials: true,
+        });
+
+        setTestResult(response.data.result.predicted_label);
+        toast.success("파일 업로드 성공");
+      } catch (error) {
+        console.error("파일 업로드 실패:", error);
+        setTestResult("파일 업로드 실패");
+        toast.error("파일 업로드 실패");
+      }
+    })();
   };
 
   /////////////////////
@@ -396,9 +427,9 @@ export default function Edit({ params }: EditProps) {
               >
                 <input {...getInputProps()} />
                 {isDragActive ? (
-                  <p>여기에 파일을 드롭하세요...</p>
+                  <p>이곳에 파일을 드롭하세요...</p>
                 ) : (
-                  <p>파일을 드래그하거나 클릭하여 업로드하세요</p>
+                  <p>파일을 드래그하거나 클릭하여 업로드</p>
                 )}
               </div>
 
@@ -429,8 +460,8 @@ export default function Edit({ params }: EditProps) {
               )}
 
               {testResult && (
-                <div className="rounded border border-green-300 p-3 text-18 font-semibold text-green-600">
-                  {testResult}
+                <div className="rounded border-2 border-green-300 p-3 text-18 font-semibold text-green-600">
+                  출력: {testResult}
                 </div>
               )}
             </div>

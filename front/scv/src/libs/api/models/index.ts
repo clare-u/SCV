@@ -171,3 +171,9 @@ export const createVersion = async (
   // 요청 본문 데이터가 필요 없다면 생략 가능
   return handleApiRequest<ModelResponse, "post">(url, "post");
 };
+
+interface UploadFileParams {
+  modelId: number;
+  versionId: number;
+  file: File;
+}
