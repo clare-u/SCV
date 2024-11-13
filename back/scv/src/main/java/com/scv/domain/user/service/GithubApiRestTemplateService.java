@@ -10,7 +10,6 @@ import com.scv.domain.user.exception.GithubNotFoundException;
 import com.scv.domain.user.util.GithubUrlBuilder;
 import com.scv.global.oauth2.auth.CustomOAuth2User;
 import lombok.RequiredArgsConstructor;
-import org.springframework.beans.factory.annotation.Qualifier;
 import org.springframework.core.ParameterizedTypeReference;
 import org.springframework.http.*;
 import org.springframework.security.oauth2.client.OAuth2AuthorizedClientService;
@@ -23,7 +22,6 @@ import java.util.Optional;
 
 @Service
 @RequiredArgsConstructor
-@Qualifier("githubApiRestTemplateService")
 public class GithubApiRestTemplateService implements GithubApiService {
 
     private final OAuth2AuthorizedClientService oAuth2AuthorizedClientService;
