@@ -200,8 +200,8 @@ export default function Edit({ params }: EditProps) {
         const formData = new FormData();
         formData.append("file", uploadedFiles[0]);
 
-        const url = `http://localhost:8003/fast/v1/models/${params.modelId}/versions/${params.versionId}/my-data`;
-        // const url = `https://k11a107.p.ssafy.io/fast/v1/models/${params.modelId}/versions/${params.versionId}/my-data`;
+        // const url = `http://localhost:8003/fast/v1/models/${params.modelId}/versions/${params.versionId}/my-data`;
+        const url = `https://k11a107.p.ssafy.io/fast/v1/models/${params.modelId}/versions/${params.versionId}/my-data`;
 
         const response = await axios.post(url, formData, {
           headers: {
