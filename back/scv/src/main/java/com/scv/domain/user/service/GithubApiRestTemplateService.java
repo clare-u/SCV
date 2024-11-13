@@ -25,7 +25,6 @@ import java.util.Optional;
 public class GithubApiRestTemplateService implements GithubApiService {
 
     private final OAuth2AuthorizedClientService oAuth2AuthorizedClientService;
-    private final GithubUrlBuilder githubUrlBuilder;
     private final RestTemplate restTemplate;
 
     // 인증된 유저의 AccessToken 반환
@@ -55,7 +54,7 @@ public class GithubApiRestTemplateService implements GithubApiService {
 
     @Override
     public List<GithubEmailApiResponseDTO> getGithubEmailList(String accessToken) {
-        String url = githubUrlBuilder.buildEmailListUrl();
+        String url = GithubUrlBuilder.buildEmailListUrl();
 
         HttpEntity<Void> entity = new HttpEntity<>(createHeaders(accessToken));
         ResponseEntity<List<GithubEmailApiResponseDTO>> responseEntity = restTemplate.exchange(url, HttpMethod.GET, entity, new ParameterizedTypeReference<>() {
@@ -65,7 +64,7 @@ public class GithubApiRestTemplateService implements GithubApiService {
 
     @Override
     public void createGithubRepo(CustomOAuth2User authUser, CreateGithubRepoApiRequestDTO requestDTO) {
-        String url = githubUrlBuilder.buildCreateRepoUrl();
+        String url = GithubUrlBuilder.buildCreateRepoUrl();
 
         HttpEntity<CreateGithubRepoApiRequestDTO> entity = new HttpEntity<>(requestDTO, createHeaders(authUser));
         restTemplate.exchange(url, HttpMethod.POST, entity, Void.class);
@@ -73,7 +72,7 @@ public class GithubApiRestTemplateService implements GithubApiService {
 
     @Override
     public List<GithubRepoApiResponseDTO> getGithubRepoList(CustomOAuth2User authUser) {
-        String url = githubUrlBuilder.buildRepoListUrl(authUser);
+        String url = GithubUrlBuilder.buildRepoListUrl(authUser);
 
         HttpEntity<Void> entity = new HttpEntity<>(createHeaders(authUser));
         ResponseEntity<List<GithubRepoApiResponseDTO>> responseEntity = restTemplate.exchange(url, HttpMethod.GET, entity, new ParameterizedTypeReference<>() {
@@ -83,7 +82,7 @@ public class GithubApiRestTemplateService implements GithubApiService {
 
     @Override
     public Optional<GithubRepoFileApiResponseDTO> importGithubRepoFile(CustomOAuth2User authUser, DataSet dataName, String modelName) {
-        String url = githubUrlBuilder.buildRepoFileUrl(authUser, dataName, modelName);
+        String url = GithubUrlBuilder.buildRepoFileUrl(authUser, dataName, modelName);
 
         HttpEntity<Void> entity = new HttpEntity<>(createHeaders(authUser));
         try {
@@ -97,7 +96,7 @@ public class GithubApiRestTemplateService implements GithubApiService {
 
     @Override
     public void exportGithubRepoFile(CustomOAuth2User authUser, DataSet dataName, String modelName, ExportGithubRepoFileApiRequestDTO requestDTO) {
-        String url = githubUrlBuilder.buildRepoFileUrl(authUser, dataName, modelName);
+        String url = GithubUrlBuilder.buildRepoFileUrl(authUser, dataName, modelName);
 
         HttpEntity<ExportGithubRepoFileApiRequestDTO> entity = new HttpEntity<>(requestDTO, createHeaders(authUser));
         restTemplate.exchange(url, HttpMethod.PUT, entity, Void.class);
