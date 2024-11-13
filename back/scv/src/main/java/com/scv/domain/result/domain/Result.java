@@ -13,6 +13,9 @@ import lombok.*;
 @NoArgsConstructor(access = AccessLevel.PROTECTED)
 public class Result extends BaseEntity {
 
+    @Version
+    private Long version;
+
     @Id
     @Column(name = "model_version_id", nullable = false)
     private Long id;
@@ -67,6 +70,23 @@ public class Result extends BaseEntity {
         this.activationMaximization = activationMaximization;
     }
 
+    /**
+     *
+     * @param code
+     * @param testAccuracy
+     * @param testLoss
+     * @param trainInfo
+     * @param layerParams
+     * @param totalParams
+     */
+    public void updateResult(String code, Double testAccuracy, Double testLoss, String trainInfo, String layerParams, int totalParams) {
+        this.code = code;
+        this.testAccuracy = testAccuracy;
+        this.testLoss = testLoss;
+        this.trainInfo = trainInfo;
+        this.layerParams = layerParams;
+        this.totalParams = totalParams;
+    }
 
 }
 

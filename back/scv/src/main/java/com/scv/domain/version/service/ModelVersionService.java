@@ -189,20 +189,23 @@ public class ModelVersionService {
 
         int totalParams = calculateTotalParams(testResults.path("layer_parameters"));
 
-        Result result = Result.builder()
-                .modelVersion(modelVersion)
-                .code(codeJson)
-                .testAccuracy(finalTestAccuracy)
-                .testLoss(finalTestLoss)
-                .layerParams(layerParams)
-                .trainInfo(trainInfo)
-                .totalParams(totalParams)
-                .build();
-
-        Optional<Result> existingResult = resultRepository.findById(modelVersionId);
+        Optional<Result> existingResult = resultRepository.findByIdWithLock(modelVersionId);
+        Result result;
         if (existingResult.isPresent()) {
-            resultRepository.delete(existingResult.get());
+            result = existingResult.get();
+            result.updateResult(codeJson, finalTestAccuracy, finalTestLoss, trainInfo, layerParams, totalParams);
+        } else {
+            result = Result.builder()
+                    .modelVersion(modelVersion)
+                    .code(codeJson)
+                    .testAccuracy(finalTestAccuracy)
+                    .testLoss(finalTestLoss)
+                    .layerParams(layerParams)
+                    .trainInfo(trainInfo)
+                    .totalParams(totalParams)
+                    .build();
         }
+
         resultRepository.save(result);
 
         return new ResultResponse(result);
