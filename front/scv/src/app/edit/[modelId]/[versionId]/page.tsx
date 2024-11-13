@@ -200,8 +200,8 @@ export default function Edit({ params }: EditProps) {
         const formData = new FormData();
         formData.append("file", uploadedFiles[0]);
 
-        // const url = `http://localhost:8003/fast/v1/models/${params.modelId}/versions/${params.versionId}/my-data`;
-        const url = `https://k11a107.p.ssafy.io/fast/v1/models/${params.modelId}/versions/${params.versionId}/my-data`;
+        const url = `http://localhost:8003/fast/v1/models/${params.modelId}/versions/${params.versionId}/my-data`;
+        // const url = `https://k11a107.p.ssafy.io/fast/v1/models/${params.modelId}/versions/${params.versionId}/my-data`;
 
         const response = await axios.post(url, formData, {
           headers: {
@@ -211,11 +211,11 @@ export default function Edit({ params }: EditProps) {
         });
 
         setTestResult(response.data.result.predicted_label);
-        toast.success("파일 업로드 성공");
+        toast.success("파일 테스트 성공");
       } catch (error) {
-        console.error("파일 업로드 실패:", error);
-        setTestResult("파일 업로드 실패");
-        toast.error("파일 업로드 실패");
+        console.error("파일 테스트 실패:", error);
+        setTestResult("파일 테스트 실패");
+        toast.error("파일 테스트 실패");
       }
     })();
   };

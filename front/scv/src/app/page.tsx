@@ -1,277 +1,164 @@
 "use client";
 
-import { Suspense, useState, useEffect } from "react";
-import { useRouter, useSearchParams } from "next/navigation";
+import { useRouter } from "next/navigation";
 import Button from "@/components/button/Button";
-import Badge from "@/components/badge/Badge";
-import Chips from "@/components/chips/Chips";
-import SearchInput from "@/components/input/SearchInput";
-import ModalInput from "@/components/input/ModalInput";
-import ListboxComponent from "@/components/input/ListBoxComponent";
-import NewModal from "@/components/modal/NewModal";
-import CloneModal from "@/components/modal/CloneModal";
-import BoardCard from "@/components/card/BoardCard";
-import WorkspaceCard from "@/components/card/WorkspaceCard";
-import Pagination from "@/components/pagination/Pagination";
-import ModalButton from "@/components/button/ModalButton";
-import Dropdown from "@/components/dropdown/Dropdown";
-import LoadingSpinner from "@/components/loading/LoadingSpinner";
+import LoginButton from "@/components/button/LoginButton";
 
-function Home() {
-  // 검색 인풋
+export default function Home() {
   const router = useRouter();
-
-  const handleSearchSubmit = (value: string) => {
-    router.push(`/?keyword=${value}`);
+  const handleButtonClick = () => {
+    router.push("/docs");
   };
-
-  // 모달 인풋
-  const [inputValue, setInputValue] = useState("");
-
-  const handleInputChange = (e: React.ChangeEvent<HTMLInputElement>) => {
-    setInputValue(e.target.value);
-  };
-
-  const [input2Value, setInput2Value] = useState("");
-
-  const handleInput2Change = (e: React.ChangeEvent<HTMLInputElement>) => {
-    setInput2Value(e.target.value);
-  };
-
-  // 리스트박스
-  const option = [
-    { id: 1, name: "새 레포지토리와 연동" },
-    { id: 2, name: "기존 레포지토리와 연동" },
-  ];
-
-  const version = [
-    { id: 1, name: "v1" },
-    { id: 2, name: "v2" },
-    { id: 3, name: "v3" },
-    { id: 4, name: "v4" },
-    { id: 5, name: "v5" },
-    { id: 6, name: "v6" },
-  ];
-
-  const [selectedOption, setSelectedOption] = useState(option[0]);
-
-  const [selectedVersion, setSelectedVersion] = useState(version[0]);
-
-  // board카드
-  const datasets = ["MNIST", "Fashion", "CIFAR10", "SVHN", "EMNIST"];
-
-  // 더미 데이터 생성을 위한 헬퍼 함수
-  const cards = datasets.map((dataset, index) => ({
-    modelId: `model-${index + 1}`,
-    versionId: `version-${index + 1}`,
-    title: `Model ${index + 1}`,
-    version: `v${index + 1}`,
-    dataset: dataset,
-    profileImg: `/profile.png`,
-    nickname: `User${index + 1}`,
-    accuracy: parseFloat((85 + index * 2).toFixed(2)), // float 형식으로 소수점 2자리까지
-    updatedAt: new Date(Date.now() - index * 100000000).toISOString(),
-  }));
-
-  // workspace카드
-  const workspaceDatasets = [
-    "MNIST",
-    "Fashion",
-    "CIFAR10",
-    "SVHN",
-    "EMNIST",
-    "Editing",
-  ];
-
-  // 더미 데이터 생성
-  const workspaceCards = workspaceDatasets.map((dataset, i) => ({
-    modelId: `model-${i + 1}`,
-    versionId: `v-${i + 1}`,
-    title: `Model ${i + 1}`,
-    version: `v${i + 1}`,
-    dataset: dataset,
-    accuracy: parseFloat((85 + i * 1.5).toFixed(2)), // 정확도 값
-    createdAt: new Date(Date.now() - i * 10000000).toISOString(), // 예시 생성일
-    updatedAt: new Date(Date.now() - i * 5000000).toISOString(), // 예시 수정일
-  }));
-
-  // 페이지네이션
-  const [totalItems, setTotalItems] = useState(0);
-  const searchParams = useSearchParams();
-  const page = searchParams.get("page");
-
-  useEffect(() => {
-    window.scrollTo(0, 0); // 페이지 이동 시 스크롤 위치 맨 위로 초기화
-    /* api 호출 및 데이터(totalItems, books) 저장 */
-  }, [page]);
 
   return (
-    <div className="flex flex-col gap-10 p-20">
-      {/* Indigo fill 버튼 */}
-      <div className="flex gap-10">
-        <Button size="l" design="fill" color="indigo" icon="add_box">
-          Indigo Fill Large
-        </Button>
-        <Button size="m" design="fill" color="indigo" icon="add_box">
-          Indigo Fill Medium
-        </Button>
-        <Button size="s" design="fill" color="indigo" icon="add_box">
-          Indigo Fill Small
-        </Button>
+    <>
+      <div className="flex w-full max-w-[1200px] flex-col gap-[150px] px-40 py-[80px]">
+        {/* 1문단 */}
+        <div className="flex items-center justify-between">
+          <div className="flex flex-col gap-40">
+            <div className="flex flex-col gap-10">
+              <div className="text-20 font-semibold text-green-600">
+                💡 코딩 없는 모델 개발
+              </div>
+              <div className="text-40 font-bold">단순하게,</div>
+              <div className="text-40 font-bold">머리속의 모델을</div>
+              <div className="text-40 font-bold">블록으로</div>
+            </div>
+            <div className="flex flex-col gap-10">
+              <div className="text-18">
+                AI 모델을 만들기 위한 수많은 개발코드들,
+              </div>
+              <div className="text-18">번거로운 건 SCV가 다 해드릴게요</div>
+              <div className="text-18">
+                오직 블록만 드래그해 AI 모델을 만들어보세요
+              </div>
+            </div>
+          </div>
+          <img
+            src="/landing-1.png"
+            alt="블록 코딩 이미지"
+            className="h-auto w-[600px] rounded-10 shadow-xl"
+          />
+        </div>
+
+        {/* 2문단 */}
+        <div className="flex items-center justify-between">
+          <img
+            src="/landing-2.png"
+            alt="사용자 테스트 이미지"
+            className="h-auto w-[400px] rounded-10 shadow-xl"
+          />
+          <div className="flex flex-col gap-40">
+            <div className="flex flex-col gap-10">
+              <div className="text-20 font-semibold text-green-600">
+                💡 데이터 전처리
+              </div>
+              <div className="text-40 font-bold">
+                번거로운 데이터 전처리 많죠?
+              </div>
+              <div className="text-40 font-bold">
+                전처리도 드래그 앤 드롭으로 해결해요
+              </div>
+            </div>
+            <div className="flex flex-col gap-10">
+              <div className="text-18">간단한 드래그 앤 드롭만으로</div>
+              <div className="text-18">
+                쉽고 빠르게 데이터 전처리 후 테스트 해 볼 수 있어요
+              </div>
+            </div>
+          </div>
+        </div>
+
+        {/* 3문단 */}
+        <div className="flex items-center justify-between">
+          <div className="flex flex-col gap-40">
+            <div className="flex flex-col gap-10">
+              <div className="text-20 font-semibold text-green-600">
+                💡 다양한 코드 활용
+              </div>
+              <div className="text-40 font-bold">
+                블록으로 코드를 얻으셨나요?
+              </div>
+              <div className="text-40 font-bold">
+                코드를 마음껏 활용해보세요
+              </div>
+            </div>
+            <div className="flex flex-col gap-10">
+              <div className="text-18">.py 확장자의 파일을 제공해요</div>
+              <div className="text-18">
+                생성된 소스 코드들은 깃허브로 내보내기 가능해요
+              </div>
+              <div className="text-18">어디서든 다양하게 활용해 보세요</div>
+            </div>
+          </div>
+          <img
+            src="/landing-3.png"
+            alt="깃허브로 내보내기 이미지"
+            className="h-auto w-[500px] rounded-10 shadow-xl"
+          />
+        </div>
+
+        {/* 4문단 */}
+        <div className="flex items-center justify-between">
+          <img
+            src="/landing-4.png"
+            alt="사용자 테스트 이미지"
+            className="h-auto w-[400px] rounded-10 shadow-xl"
+          />
+          <div className="flex flex-col gap-40">
+            <div className="flex flex-col gap-10">
+              <div className="text-20 font-semibold text-green-600">
+                💡 결과 보고서 열람
+              </div>
+              <div className="text-40 font-bold">
+                어떻게 데이터를 처리하고 있을까요?
+              </div>
+              <div className="text-40 font-bold">
+                시각화된 결과 보고서로 탐구해요
+              </div>
+            </div>
+            <div className="flex flex-col gap-10">
+              <div className="text-18">결과가 요약된 보고서를 제공해요</div>
+              <div className="text-18">
+                항목별 수치와 시각화된 이미지를 확인하세요
+              </div>
+            </div>
+          </div>
+        </div>
+
+        {/* 5문단 */}
+        <div className="flex items-center justify-between">
+          <div className="flex flex-col gap-10">
+            <div className="text-[30px] font-semibold">
+              사용 방법, 어렵지 않아요
+            </div>
+            <div className="text-[30px] font-semibold">
+              SCV의 공식문서를 보고 따라해보세요
+            </div>
+          </div>
+          <div className="px-[60px]">
+            <Button
+              size="l"
+              design="fill"
+              color="green"
+              onClick={handleButtonClick}
+            >
+              공식문서 바로가기
+            </Button>
+          </div>
+        </div>
+
+        {/* 6문단 */}
+        <div className="flex flex-col items-center justify-center gap-[20px]">
+          <div className="text-[30px] font-semibold">
+            SCV는 모델 생성을 위한 모든 기능을 담았습니다
+          </div>
+          <div className="text-[30px] font-semibold">
+            SCV, 바로 시작해보세요
+          </div>
+          <LoginButton />
+        </div>
       </div>
-
-      {/* Green fill and outline 버튼 */}
-      <div className="flex gap-10">
-        <Button size="m" design="fill" color="green" icon="add_box">
-          Green Fill
-        </Button>
-        <Button size="m" design="outline" color="green" icon="add_box">
-          Green Outline
-        </Button>
-      </div>
-
-      {/* Disabled Button */}
-      <div className="flex gap-10">
-        <Button size="m" design="fill" color="red" disabled icon="add_box">
-          Disabled Button
-        </Button>
-      </div>
-
-      {/* Badge */}
-      <div className="flex gap-10">
-        <Badge color="red">Badge</Badge>
-        <Badge color="gray">Badge</Badge>
-        <Badge color="green">Badge</Badge>
-        <Badge color="blue">Badge</Badge>
-        <Badge color="amber">Badge</Badge>
-        <Badge color="teal">Badge</Badge>
-      </div>
-
-      {/* Chips */}
-      <div className="flex gap-10">
-        <Chips color="indigo" design="fill">
-          Chips
-        </Chips>
-        <Chips color="teal" design="fill">
-          Chips
-        </Chips>
-        <Chips color="gray" design="fill">
-          Chips
-        </Chips>
-        <Chips color="amber" design="fill">
-          Chips
-        </Chips>
-        <Chips color="red" design="fill">
-          Chips
-        </Chips>
-        <Chips color="green" design="fill">
-          Chips
-        </Chips>
-        <Chips color="black" design="fill">
-          Chips
-        </Chips>
-      </div>
-
-      <div className="flex gap-10">
-        <Chips color="indigo" design="outline">
-          Chips
-        </Chips>
-        <Chips color="teal" design="outline">
-          Chips
-        </Chips>
-        <Chips color="gray" design="outline">
-          Chips
-        </Chips>
-        <Chips color="amber" design="outline">
-          Chips
-        </Chips>
-        <Chips color="red" design="outline">
-          Chips
-        </Chips>
-        <Chips color="green" design="outline">
-          Chips
-        </Chips>
-        <Chips color="black" design="outline">
-          Chips
-        </Chips>
-      </div>
-
-      {/* Input */}
-      <div className="flex flex-col gap-10">
-        {/* <SearchInput placeholder="placeholder" onSubmit={handleSearchSubmit} /> */}
-        <ModalInput
-          placeholder="placeholder"
-          value={inputValue}
-          onChange={handleInputChange}
-        />
-        <ModalInput
-          placeholder="placeholder"
-          value={input2Value}
-          onChange={handleInput2Change}
-          color="dark"
-        />
-        <ListboxComponent
-          value={selectedOption}
-          onChange={setSelectedOption}
-          options={option}
-          color="dark"
-        />
-        <ListboxComponent
-          value={selectedVersion}
-          onChange={setSelectedVersion}
-          options={version}
-        />
-      </div>
-
-      {/* Modal */}
-      <div className="flex gap-10">
-        <NewModal />
-        <CloneModal />
-      </div>
-
-      {/* boardCard */}
-      {/* <div className="grid w-[1100px] grid-cols-3 gap-10">
-        {cards.map((card) => (
-          <BoardCard key={card.modelId} {...card} />
-        ))}
-      </div> */}
-
-      {/* workspaceCard */}
-      {/* <div className="grid w-[1100px] grid-cols-3 gap-10">
-        {workspaceCards.map((card) => (
-          <WorkspaceCard key={card.modelId} {...card} />
-        ))}
-      </div> */}
-
-      {/* 페이지네이션 */}
-      <Pagination
-        totalItems={10000}
-        currentPage={page && parseInt(page) > 0 ? parseInt(page) : 1}
-        pageCount={10}
-        itemCountPerPage={50}
-      />
-
-      {/* modalButton */}
-      <div className="flex bg-indigo-900 p-20">
-        <ModalButton icon="logout" disabled>
-          Button
-        </ModalButton>
-      </div>
-
-      {/* Dropdown */}
-      <div className="mb-80 flex w-full items-end justify-end p-20">
-        <Dropdown modelId={1} versionId={1} />
-      </div>
-
-      <div></div>
-    </div>
-  );
-}
-
-export default function Page() {
-  return (
-    <Suspense fallback={<div>Loading...</div>}>
-      <Home />
-    </Suspense>
+    </>
   );
 }

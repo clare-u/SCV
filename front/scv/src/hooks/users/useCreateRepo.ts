@@ -11,9 +11,7 @@ export const useCreateRepo = () => {
 
     // TODO: 관련 캐시 무효화 처리?
     onSuccess: (data: CreateRepo) => {
-      toast.success(
-        `새로 생성된 "${data.repoName}" 레포지토리에 연동되었습니다`,
-      );
+      toast.success(`새로 생성된 레포지토리에 연동되었습니다`);
       refetch();
     },
 
