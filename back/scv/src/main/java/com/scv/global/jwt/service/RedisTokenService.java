@@ -40,7 +40,6 @@ public class RedisTokenService {
     }
 
     public boolean isBlacklisted(String accessToken) {
-        System.out.println(slaveIndex);
         RedisTemplate<String, Object> accessTokenBlacklistRedisSlaveTemplate = getNextAccessTokenBlacklistRedisSlaveTemplate();
         Boolean isBlacklisted = (Boolean) accessTokenBlacklistRedisSlaveTemplate.opsForValue().get(accessToken);
         return Boolean.TRUE.equals(isBlacklisted);
