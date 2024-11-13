@@ -7,7 +7,10 @@ class PreprocessorFactory:
     """전처리기 팩토리 클래스"""
     _preprocessors = {
         "MNIST": MNISTPreprocessor,
-        "FASHION_MNIST": FashionMNISTPreprocessor
+        "FASHION_MNIST": FashionMNISTPreprocessor,
+        "CIFAR10": CIFAR10Preprocessor,
+        "SVHN": SVHNPreprocessor,
+        "EMNIST": EMNISTPreprocessor,
     }
 
     @classmethod
