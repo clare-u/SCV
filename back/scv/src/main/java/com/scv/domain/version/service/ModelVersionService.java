@@ -37,6 +37,7 @@ import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 import org.springframework.web.client.RestTemplate;
 
+import javax.swing.text.html.Option;
 import java.util.*;
 
 @Service
@@ -124,14 +125,12 @@ public class ModelVersionService {
         }
 
         Model model = modelVersion.getModel();
-        modelVersion.delete();
-        modelVersionRepository.save(modelVersion);
-        Optional<Result> result = resultRepository.findById(modelVersionId);
-        if (result.isPresent()) {
-            Result existingResult = result.get();
-            existingResult.delete();
-            resultRepository.save(existingResult);
-        }
+
+        modelVersionRepository.softDeleteById(modelVersionId);
+
+        // Result가 존재하는 경우에만 소프트 삭제
+        Optional<Result> result = resultRepository.findByIdAndDeletedFalse(modelVersionId);
+        result.ifPresent(r -> resultRepository.softDeleteByModelVersionId(modelVersionId));
 
         // 버전, 정확도관리
         if (model.getLatestVersion() != 0) {
