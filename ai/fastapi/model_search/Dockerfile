@@ -21,5 +21,5 @@ COPY . .
 # 포트 설정
 EXPOSE 8001
 
-# FastAPI 애플리케이션 실행
-CMD ["uvicorn", "main:app", "--host", "0.0.0.0", "--port", "8001"]
+# FastAPI 애플리케이션 실행 전에 Milvus 초기화 스크립트를 실행
+CMD ["sh", "-c", "python ./Milvus/milvus_init.py && uvicorn app:app --reload --host=0.0.0.0 --port=8001"]
