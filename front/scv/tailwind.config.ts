@@ -21,6 +21,15 @@ const config: Config = {
         background: "var(--background)",
         foreground: "var(--foreground)",
       },
+      animation: {
+        "spin-slow": "spin 1s cubic-bezier(0.55, 0.15, 0.45, 0.85) infinite",
+      },
+      keyframes: {
+        spin: {
+          "0%": { transform: "translate(-50%,-50%) rotate(0deg)" },
+          "100%": { transform: "translate(-50%,-50%) rotate(360deg)" },
+        },
+      },
       fontFamily: {
         sans: ["Pretendard"],
       },

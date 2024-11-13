@@ -20,6 +20,7 @@ import {
 import Loading from "@/components/loading/Loading";
 import { useRouter } from "next/navigation";
 import { toast } from "sonner";
+import LoadingSpinner from "@/components/loading/LoadingSpinner";
 
 interface EditProps {
   params: {
@@ -435,6 +436,10 @@ export default function Edit({ params }: EditProps) {
             </div>
           </div>
         </div>
+      </div>
+
+      <div>
+        <LoadingSpinner isOpen={isSaving || isRunning} setIsOpen={() => {}} />
       </div>
     </div>
   );

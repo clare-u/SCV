@@ -15,6 +15,7 @@ import WorkspaceCard from "@/components/card/WorkspaceCard";
 import Pagination from "@/components/pagination/Pagination";
 import ModalButton from "@/components/button/ModalButton";
 import Dropdown from "@/components/dropdown/Dropdown";
+import LoadingSpinner from "@/components/loading/LoadingSpinner";
 
 function Home() {
   // 검색 인풋
