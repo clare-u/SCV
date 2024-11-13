@@ -147,6 +147,18 @@ export const runModelVersion = async (versionId: number) => {
   );
 };
 
+// 실행 후 결과 저장
+export const saveResult = async (versionId: number) => {
+  const url = `/api/v1/models/versions/${versionId}/result/save`;
+  console.log("API 요청 URL:", url);
+
+  return handleApiRequest<RunResponse, "post", { versionId: number }>(
+    url,
+    "post",
+    { versionId },
+  );
+};
+
 // 모델 버전 생성 함수
 export const createVersion = async (
   modelId: number,
