@@ -22,4 +22,4 @@ COPY . .
 EXPOSE 8002
 
 # FastAPI 애플리케이션 실행
-CMD ["uvicorn", "app:app", "--host", "0.0.0.0", "--port", "8002"]
+CMD ["sh", "-c", "python ./MinIO/minio_init.py && uvicorn app:app --reload --host=0.0.0.0 --port=8002"]
