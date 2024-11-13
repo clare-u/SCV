@@ -1,3 +1,4 @@
+"use client";
 import MonacoEditor from "@monaco-editor/react";
 
 interface CodeViewerProps {
