@@ -11,15 +11,14 @@ collection_name = os.getenv("COLLECTION_NAME")
 
 # conn = connections.connect(host=milvus_host_name, port=milvus_port)
 
-if not db_name in db.list_database():
-    database = db.create_database(db_name)
+# if not db_name in db.list_database():
+#     database = db.create_database(db_name)
 
 client = MilvusClient(
-    uri="./milvus_demo.db",
-    db_name=db_name
+    uri="./milvus_demo.db"
 )
 
-db.using_database(db_name)
+# db.using_database(db_name)
 
 id_field = FieldSchema(
     name="model_version_layer_id", 
