@@ -28,7 +28,6 @@ import java.util.Optional;
 public class GithubApiRestClientService implements GithubApiService {
 
     private final OAuth2AuthorizedClientService oAuth2AuthorizedClientService;
-    private final GithubUrlBuilder githubUrlBuilder;
 
     private static final RestClient restClient = RestClient.builder()
             .defaultHeader(HttpHeaders.CONTENT_TYPE, MediaType.APPLICATION_JSON_VALUE)
@@ -55,7 +54,7 @@ public class GithubApiRestClientService implements GithubApiService {
     @Override
     public List<GithubEmailApiResponseDTO> getGithubEmailList(String accessToken) {
         return restClient.get()
-                .uri(githubUrlBuilder.buildEmailListUrl())
+                .uri(GithubUrlBuilder.buildEmailListUrl())
                 .header(HttpHeaders.AUTHORIZATION, "Bearer " + accessToken)
                 .retrieve()
                 .body(new ParameterizedTypeReference<>() {
@@ -65,7 +64,7 @@ public class GithubApiRestClientService implements GithubApiService {
     @Override
     public void createGithubRepo(CustomOAuth2User authUser, CreateGithubRepoApiRequestDTO requestDTO) {
         restClient.post()
-                .uri(githubUrlBuilder.buildCreateRepoUrl())
+                .uri(GithubUrlBuilder.buildCreateRepoUrl())
                 .header(HttpHeaders.AUTHORIZATION, "Bearer " + getAccessToken(authUser))
                 .body(requestDTO)
                 .retrieve()
@@ -75,7 +74,7 @@ public class GithubApiRestClientService implements GithubApiService {
     @Override
     public List<GithubRepoApiResponseDTO> getGithubRepoList(CustomOAuth2User authUser) {
         return restClient.get()
-                .uri(githubUrlBuilder.buildRepoListUrl(authUser))
+                .uri(GithubUrlBuilder.buildRepoListUrl(authUser))
                 .header(HttpHeaders.AUTHORIZATION, "Bearer " + getAccessToken(authUser))
                 .retrieve()
                 .body(new ParameterizedTypeReference<>() {
@@ -86,7 +85,7 @@ public class GithubApiRestClientService implements GithubApiService {
     public Optional<GithubRepoFileApiResponseDTO> importGithubRepoFile(CustomOAuth2User authUser, DataSet dataName, String modelName) {
         try {
             return restClient.get()
-                    .uri(githubUrlBuilder.buildRepoFileUrl(authUser, dataName, modelName))
+                    .uri(GithubUrlBuilder.buildRepoFileUrl(authUser, dataName, modelName))
                     .header(HttpHeaders.AUTHORIZATION, "Bearer " + getAccessToken(authUser))
                     .retrieve()
                     .body(new ParameterizedTypeReference<>() {
@@ -99,7 +98,7 @@ public class GithubApiRestClientService implements GithubApiService {
     @Override
     public void exportGithubRepoFile(CustomOAuth2User authUser, DataSet dataName, String modelName, ExportGithubRepoFileApiRequestDTO requestDTO) {
         restClient.put()
-                .uri(githubUrlBuilder.buildRepoFileUrl(authUser, dataName, modelName))
+                .uri(GithubUrlBuilder.buildRepoFileUrl(authUser, dataName, modelName))
                 .header(HttpHeaders.AUTHORIZATION, "Bearer " + getAccessToken(authUser))
                 .body(requestDTO)
                 .retrieve()

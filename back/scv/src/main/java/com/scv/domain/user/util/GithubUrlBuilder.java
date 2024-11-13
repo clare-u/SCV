@@ -2,10 +2,8 @@ package com.scv.domain.user.util;
 
 import com.scv.domain.data.enums.DataSet;
 import com.scv.global.oauth2.auth.CustomOAuth2User;
-import org.springframework.stereotype.Component;
 import org.springframework.web.util.UriComponentsBuilder;
 
-@Component
 public class GithubUrlBuilder {
     private static final String GITHUB_API_URL = "https://api.github.com";
 
@@ -16,14 +14,17 @@ public class GithubUrlBuilder {
 
     private static final String REPO_FILE_PATH = "/repos/{userNickname}/{userRepo}/contents/{dataName}/{modelName}/model.py";
 
-    public String buildEmailListUrl() {
+    private GithubUrlBuilder() {
+    }
+
+    public static String buildEmailListUrl() {
         return UriComponentsBuilder
                 .fromHttpUrl(GITHUB_API_URL)
                 .path(GET_EMAIL_LIST_PATH)
                 .toUriString();
     }
 
-    public String buildRepoListUrl(CustomOAuth2User authUser) {
+    public static String buildRepoListUrl(CustomOAuth2User authUser) {
         return UriComponentsBuilder
                 .fromHttpUrl(GITHUB_API_URL)
                 .path(GET_REPO_LIST_PATH)
@@ -31,18 +32,19 @@ public class GithubUrlBuilder {
                 .toUriString();
     }
 
-    public String buildCreateRepoUrl() {
+    public static String buildCreateRepoUrl() {
         return UriComponentsBuilder
                 .fromHttpUrl(GITHUB_API_URL)
                 .path(CREATE_REPO_PATH)
                 .toUriString();
     }
 
-    public String buildRepoFileUrl(CustomOAuth2User authUser, DataSet dataName, String modelName) {
+    public static String buildRepoFileUrl(CustomOAuth2User authUser, DataSet dataName, String modelName) {
         return UriComponentsBuilder
                 .fromHttpUrl(GITHUB_API_URL)
                 .path(REPO_FILE_PATH)
                 .buildAndExpand(authUser.getUserNickname(), authUser.getUserRepo(), dataName, modelName)
                 .toUriString();
     }
+
 }
