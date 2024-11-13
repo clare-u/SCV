@@ -8,14 +8,8 @@ from fastapi import FastAPI, HTTPException, Path
 from fastapi.middleware.cors import CORSMiddleware
 
 from api.routes import inference_routes
+from config.cors import CORS_CONFIG
 from utils.model_utils import generate_model_name
-
-origins = [
-    "http://localhost.tiangolo.com",
-    "https://localhost.tiangolo.com",
-    "http://localhost:3000",
-    "http://localhost:8080",
-]
 
 logging.basicConfig(
     level=logging.INFO,
@@ -39,38 +33,11 @@ except ImportError:
     from model_train import ModelTrainer
     from save_minio import save_model_to_minio
 
-# def generate_model_name(model_id: Union[int, str], version_id: Union[int, str]) -> str:
-#     """모델ID랑 버전 ID로 고유한 모델 이름 생성"""
-#     try:
-#         model_id = int(model_id)
-#         version_id = int(version_id)
-#
-#         if model_id < 0 or version_id < 0:
-#             raise ValueError("모델 ID와 버전 ID는 0 양수만 가능합니다.")
-#
-#         model_name = f"model_{model_id}_v{version_id}"
-#         logger.debug(f"Generated model name: {model_name}")
-#
-#         return model_name
-#
-#     except ValueError as e:
-#         error_msg = f"잘못된 입력값: {str(e)}"
-#         logger.error(error_msg)
-#         raise HTTPException(status_code=400, detail=error_msg)
-#     except Exception as e:
-#         error_msg = f"모델 이름 생성 중 오류 발생: {str(e)}"
-#         logger.error(error_msg)
-#         raise HTTPException(status_code=500, detail=error_msg)
-
-
 app = FastAPI()
 
 app.add_middleware(
     CORSMiddleware,
-    allow_origins=origins,
-    allow_credentials=True,
-    allow_methods=["*"],
-    allow_headers=["*"],
+    **CORS_CONFIG  # 설정을 언패킹하여 적용
 )
 
 app.include_router(inference_routes.router)
