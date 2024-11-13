@@ -15,6 +15,7 @@ import {
   useFetchVersionDetails,
   useSaveModelVersion,
   useRunModelVersion,
+  useSaveResult,
 } from "@/hooks";
 import Loading from "@/components/loading/Loading";
 import { useRouter } from "next/navigation";
@@ -165,6 +166,13 @@ export default function Edit({ params }: EditProps) {
       },
     });
   };
+
+  // 결과 출력 (저장)
+  const { mutate: saveResult, isPending: isSaving } = useSaveResult();
+  const handleSaveResult = () => {
+    saveResult(params.versionId);
+  };
+
   /////////////////////
 
   if (modelLoading || versionLoading) return <Loading />;
@@ -323,6 +331,16 @@ export default function Edit({ params }: EditProps) {
           >
             실행
           </Button>
+          <Button
+            size="m"
+            design="outline"
+            color="indigo"
+            icon="file_save"
+            onClick={handleSaveResult}
+            disabled={isSaving}
+          >
+            결과 출력
+          </Button>
         </div>
       </div>
       <div className="flex h-[92vh]">
@@ -334,9 +352,12 @@ export default function Edit({ params }: EditProps) {
           <div className="flex max-h-[450px] w-full flex-1 overflow-y-auto overflow-x-hidden border-b border-gray-500">
             <CodeViewer
               codeString={
-                runResult?.codeView || "# 실행 후 이곳에 코드가 나타납니다." // 실행 결과 코드 렌더링
+                (runResult?.codeView || "# 실행 후 이곳에 코드가 나타납니다.")
+                  .replace(/^"|"$/g, "") // 양 끝의 " 제거
+                  .replace(/\\n/g, "\n") // \n을 줄바꿈으로 변환
+                  .replace(/\\t/g, "\t") // \t를 탭으로 변환
               }
-            ></CodeViewer>
+            />
           </div>
           <div className="flex items-center gap-10 border-b border-gray-500 p-10">
             <div className="text-20 font-semibold">실행 결과 : </div>
@@ -344,13 +365,6 @@ export default function Edit({ params }: EditProps) {
               {runResult?.testAccuracy
                 ? `${runResult.testAccuracy}%`
                 : "실행 후 나타납니다"}
-            </div>
-            <div className="text-20">
-              (
-              {runResult?.totalParams
-                ? runResult.totalParams.toLocaleString()
-                : "실행 후 나타납니다"}
-              /1000000)
             </div>
           </div>
           <div className="flex flex-col justify-center p-10">

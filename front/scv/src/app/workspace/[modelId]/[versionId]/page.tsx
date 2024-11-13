@@ -305,7 +305,10 @@ export default function WorkspaceDetail({ params }: PageProps) {
             <div className="ml-20 w-[480px] items-center justify-center">
               <CodeViewer
                 codeString={
-                  JSON.parse(versionData.resultResponseWithImages.codeView).code
+                  versionData.resultResponseWithImages.codeView
+                    .replace(/^"|"$/g, "")
+                    .replace(/\\n/g, "\n") // \n을 줄바꿈으로 변환
+                    .replace(/\\t/g, "\t") // \t를 탭으로 변환
                 }
               />
             </div>
