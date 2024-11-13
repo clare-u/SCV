@@ -13,7 +13,7 @@ public class ResultResponse {
     private final double testAccuracy;
     private final double testLoss;
     private final int totalParams;
-    private final String trainInfos; // train_result_per_epoch + training_history 담기
+    private final String trainInfos;
     private final String layerParams;
 
     public ResultResponse(Result result) {

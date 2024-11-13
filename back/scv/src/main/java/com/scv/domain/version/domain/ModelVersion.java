@@ -23,7 +23,7 @@ public class ModelVersion extends BaseEntity {
     @JoinColumn(name = "model_id", nullable = false)
     private Model model;
 
-    @OneToOne(mappedBy = "modelVersion", fetch = FetchType.LAZY)
+    @OneToOne(mappedBy = "modelVersion", fetch = FetchType.LAZY, cascade = CascadeType.PERSIST)
     private Result result;
 
     @Column(name = "version_no", nullable = false)

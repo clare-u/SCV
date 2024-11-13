@@ -37,6 +37,7 @@ import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 import org.springframework.web.client.RestTemplate;
 
+import javax.swing.text.html.Option;
 import java.util.*;
 
 @Service
@@ -124,14 +125,12 @@ public class ModelVersionService {
         }
 
         Model model = modelVersion.getModel();
-        modelVersion.delete();
-        modelVersionRepository.save(modelVersion);
-        Optional<Result> result = resultRepository.findById(modelVersionId);
-        if (result.isPresent()) {
-            Result existingResult = result.get();
-            existingResult.delete();
-            resultRepository.save(existingResult);
-        }
+
+        modelVersionRepository.softDeleteById(modelVersionId);
+
+        // Result가 존재하는 경우에만 소프트 삭제
+        Optional<Result> result = resultRepository.findByIdAndDeletedFalse(modelVersionId);
+        result.ifPresent(r -> resultRepository.softDeleteByModelVersionId(modelVersionId));
 
         // 버전, 정확도관리
         if (model.getLatestVersion() != 0) {
@@ -189,20 +188,23 @@ public class ModelVersionService {
 
         int totalParams = calculateTotalParams(testResults.path("layer_parameters"));
 
-        Result result = Result.builder()
-                .modelVersion(modelVersion)
-                .code(codeJson)
-                .testAccuracy(finalTestAccuracy)
-                .testLoss(finalTestLoss)
-                .layerParams(layerParams)
-                .trainInfo(trainInfo)
-                .totalParams(totalParams)
-                .build();
-
-        Optional<Result> existingResult = resultRepository.findById(modelVersionId);
+        Optional<Result> existingResult = resultRepository.findByIdWithLock(modelVersionId);
+        Result result;
         if (existingResult.isPresent()) {
-            resultRepository.delete(existingResult.get());
+            result = existingResult.get();
+            result.updateResult(codeJson, finalTestAccuracy, finalTestLoss, trainInfo, layerParams, totalParams);
+        } else {
+            result = Result.builder()
+                    .modelVersion(modelVersion)
+                    .code(codeJson)
+                    .testAccuracy(finalTestAccuracy)
+                    .testLoss(finalTestLoss)
+                    .layerParams(layerParams)
+                    .trainInfo(trainInfo)
+                    .totalParams(totalParams)
+                    .build();
         }
+
         resultRepository.save(result);
 
         return new ResultResponse(result);
