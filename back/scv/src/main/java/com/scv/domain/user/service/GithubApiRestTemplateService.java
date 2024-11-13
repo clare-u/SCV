@@ -2,10 +2,10 @@ package com.scv.domain.user.service;
 
 import com.scv.domain.data.enums.DataSet;
 import com.scv.domain.user.dto.request.CreateGithubRepoApiRequestDTO;
-import com.scv.domain.user.dto.request.ExportGithubRepoBlockFileApiRequestDTO;
+import com.scv.domain.user.dto.request.ExportGithubRepoFileApiRequestDTO;
 import com.scv.domain.user.dto.response.GithubEmailApiResponseDTO;
 import com.scv.domain.user.dto.response.GithubRepoApiResponseDTO;
-import com.scv.domain.user.dto.response.GithubRepoBlockFileApiResponseDTO;
+import com.scv.domain.user.dto.response.GithubRepoFileApiResponseDTO;
 import com.scv.domain.user.exception.GithubNotFoundException;
 import com.scv.domain.user.util.GithubUrlBuilder;
 import com.scv.global.oauth2.auth.CustomOAuth2User;
@@ -84,12 +84,12 @@ public class GithubApiRestTemplateService implements GithubApiService {
     }
 
     @Override
-    public Optional<GithubRepoBlockFileApiResponseDTO> importGithubRepoBlockFile(CustomOAuth2User authUser, DataSet dataName, String modelName) {
+    public Optional<GithubRepoFileApiResponseDTO> importGithubRepoFile(CustomOAuth2User authUser, DataSet dataName, String modelName) {
         String url = githubUrlBuilder.buildRepoFileUrl(authUser, dataName, modelName);
 
         HttpEntity<Void> entity = new HttpEntity<>(createHeaders(authUser));
         try {
-            ResponseEntity<GithubRepoBlockFileApiResponseDTO> responseEntity = restTemplate.exchange(url, HttpMethod.GET, entity, new ParameterizedTypeReference<>() {
+            ResponseEntity<GithubRepoFileApiResponseDTO> responseEntity = restTemplate.exchange(url, HttpMethod.GET, entity, new ParameterizedTypeReference<>() {
             });
             return Optional.ofNullable(responseEntity.getBody());
         } catch (GithubNotFoundException e) {
@@ -98,10 +98,10 @@ public class GithubApiRestTemplateService implements GithubApiService {
     }
 
     @Override
-    public void exportGithubRepoBlockFile(CustomOAuth2User authUser, DataSet dataName, String modelName, ExportGithubRepoBlockFileApiRequestDTO requestDTO) {
+    public void exportGithubRepoFile(CustomOAuth2User authUser, DataSet dataName, String modelName, ExportGithubRepoFileApiRequestDTO requestDTO) {
         String url = githubUrlBuilder.buildRepoFileUrl(authUser, dataName, modelName);
 
-        HttpEntity<ExportGithubRepoBlockFileApiRequestDTO> entity = new HttpEntity<>(requestDTO, createHeaders(authUser));
+        HttpEntity<ExportGithubRepoFileApiRequestDTO> entity = new HttpEntity<>(requestDTO, createHeaders(authUser));
         restTemplate.exchange(url, HttpMethod.PUT, entity, Void.class);
     }
 

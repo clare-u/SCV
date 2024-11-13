@@ -1,13 +1,13 @@
 package com.scv.domain.user.controller;
 
 import com.scv.domain.data.enums.DataSet;
-import com.scv.domain.user.dto.request.ExportGithubRepoBlockFileRequestDTO;
+import com.scv.domain.user.dto.request.ExportGithubRepoFileRequestDTO;
 import com.scv.global.jwt.exception.InvalidTokenException;
 import com.scv.global.jwt.util.CookieUtil;
 import com.scv.global.oauth2.auth.AuthUser;
 import com.scv.global.oauth2.auth.CustomOAuth2User;
 import com.scv.domain.user.dto.request.LinkGithubRepoRequestDTO;
-import com.scv.domain.user.dto.response.GithubRepoBlockFileResponseDTO;
+import com.scv.domain.user.dto.response.GithubRepoFileResponseDTO;
 import com.scv.domain.user.dto.response.UserProfileResponseDTO;
 import com.scv.domain.user.service.GithubService;
 import com.scv.domain.user.service.UserService;
@@ -114,21 +114,21 @@ public class UserController {
     }
 
     @GetMapping("/repo/import")
-    @Operation(summary = "깃허브에서 모델 import", description = "깃허브에서 블록 json 파일을 import 합니다.")
+    @Operation(summary = "깃허브에서 모델 import", description = "깃허브에서 변환된 파이썬 파일을 import 합니다.")
     @ApiResponses(value = {
             @ApiResponse(responseCode = "200", description = "깃허브에서 모델 import 성공"),
             @ApiResponse(responseCode = "403", description = "GITHUB_API_FORBIDDEN", content = @Content(schema = @Schema(implementation = ErrorResponse.class))),
             @ApiResponse(responseCode = "404", description = "GITHUB_API_NOT_FOUND", content = @Content(schema = @Schema(implementation = ErrorResponse.class))),
     })
-    public ResponseEntity<GithubRepoBlockFileResponseDTO> importGithubRepoFile(@AuthUser CustomOAuth2User auth2User,
-                                                                               @RequestParam DataSet dataName,
-                                                                               @RequestParam String modelName) {
-        GithubRepoBlockFileResponseDTO responseDTO = githubService.importGithubRepoBlockFile(auth2User, dataName, modelName);
+    public ResponseEntity<GithubRepoFileResponseDTO> importGithubRepoFile(@AuthUser CustomOAuth2User auth2User,
+                                                                          @RequestParam DataSet dataName,
+                                                                          @RequestParam String modelName) {
+        GithubRepoFileResponseDTO responseDTO = githubService.importGithubRepoFile(auth2User, dataName, modelName);
         return new ResponseEntity<>(responseDTO, HttpStatus.OK);
     }
 
     @PostMapping("repo/export")
-    @Operation(summary = "깃허브에 모델 export", description = "깃허브에 블록 json 파일을 export 합니다.")
+    @Operation(summary = "깃허브에 모델 export", description = "깃허브에 변환된 파이썬 파일을 export 합니다.")
     @ApiResponses(value = {
             @ApiResponse(responseCode = "200", description = "깃허브에 모델 export 성공"),
             @ApiResponse(responseCode = "403", description = "GITHUB_API_FORBIDDEN", content = @Content(schema = @Schema(implementation = ErrorResponse.class))),
@@ -137,8 +137,8 @@ public class UserController {
             @ApiResponse(responseCode = "422", description = "GITHUB_API_UNPROCESSABLE_ENTITY", content = @Content(schema = @Schema(implementation = ErrorResponse.class))),
     })
     public ResponseEntity<Void> exportGithubRepoFile(@AuthUser CustomOAuth2User auth2User,
-                                                     @RequestBody ExportGithubRepoBlockFileRequestDTO requestDTO) {
-        githubService.exportGithubRepoBlockFile(auth2User, requestDTO);
+                                                     @RequestBody ExportGithubRepoFileRequestDTO requestDTO) {
+        githubService.exportGithubRepoFile(auth2User, requestDTO);
         return ResponseEntity.ok().build();
     }
 

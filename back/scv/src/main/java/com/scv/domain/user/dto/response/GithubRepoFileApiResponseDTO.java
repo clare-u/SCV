@@ -8,7 +8,7 @@ import lombok.NoArgsConstructor;
 @Getter
 @NoArgsConstructor
 @AllArgsConstructor
-public class GithubRepoBlockFileApiResponseDTO {
+public class GithubRepoFileApiResponseDTO {
 
     @JsonProperty("name")
     private String name;
