@@ -7,7 +7,9 @@ import lombok.*;
 
 import java.util.List;
 
-@Table(name = "data")
+@Table(name = "data", indexes = {
+        @Index(name = "idx_data_name", columnList = "data_name")
+})
 @Entity
 @Getter
 @Builder(toBuilder = true)

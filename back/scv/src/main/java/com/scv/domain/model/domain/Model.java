@@ -6,11 +6,14 @@ import com.scv.domain.version.domain.ModelVersion;
 import com.scv.global.shared.BaseEntity;
 import jakarta.persistence.*;
 import lombok.*;
+import org.hibernate.annotations.BatchSize;
 
 import java.util.Comparator;
 import java.util.List;
 
-@Table(name = "model")
+@Table(name = "model", indexes = {
+        @Index(name = "idx_model_name", columnList = "name")
+})
 @Entity
 @Getter
 @Builder(toBuilder = true)
@@ -32,6 +35,7 @@ public class Model extends BaseEntity {
     private Data data;
 
     @OneToMany(mappedBy = "model", fetch = FetchType.LAZY, cascade = CascadeType.ALL, orphanRemoval = true)
+    @BatchSize(size = 10)
     private List<ModelVersion> modelVersions;
 
     @Column(name = "model_name", length = 20, nullable = false)
