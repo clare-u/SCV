@@ -10,7 +10,7 @@ import lombok.NoArgsConstructor;
 @Getter
 @NoArgsConstructor
 @AllArgsConstructor
-public class GithubRepoBlockFileResponseDTO {
+public class GithubRepoFileResponseDTO {
 
     @JsonProperty("content")
     private String content;

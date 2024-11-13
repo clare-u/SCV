@@ -2,17 +2,17 @@ package com.scv.domain.user.service;
 
 import com.scv.domain.data.enums.DataSet;
 import com.scv.domain.user.dto.request.CreateGithubRepoApiRequestDTO;
-import com.scv.domain.user.dto.request.ExportGithubRepoBlockFileApiRequestDTO;
-import com.scv.domain.user.dto.request.ExportGithubRepoBlockFileRequestDTO;
+import com.scv.domain.user.dto.request.ExportGithubRepoFileApiRequestDTO;
+import com.scv.domain.user.dto.request.ExportGithubRepoFileRequestDTO;
 import com.scv.domain.user.dto.request.LinkGithubRepoRequestDTO;
 import com.scv.domain.user.dto.response.GithubEmailApiResponseDTO;
 import com.scv.domain.user.dto.response.GithubRepoApiResponseDTO;
-import com.scv.domain.user.dto.response.GithubRepoBlockFileApiResponseDTO;
+import com.scv.domain.user.dto.response.GithubRepoFileApiResponseDTO;
 import com.scv.domain.user.exception.UserNotFoundException;
 import com.scv.global.jwt.service.RedisTokenService;
 import com.scv.global.jwt.util.JwtUtil;
 import com.scv.global.oauth2.auth.CustomOAuth2User;
-import com.scv.domain.user.dto.response.GithubRepoBlockFileResponseDTO;
+import com.scv.domain.user.dto.response.GithubRepoFileResponseDTO;
 import com.scv.domain.user.exception.GithubConflictException;
 import com.scv.domain.user.exception.GithubNotFoundException;
 import com.scv.domain.user.repository.UserRepository;
@@ -77,27 +77,27 @@ public class GithubService {
     }
 
     // 깃허브에서 모델 import 서비스 로직
-    public GithubRepoBlockFileResponseDTO importGithubRepoBlockFile(CustomOAuth2User auth2User, DataSet dataName, String modelName) {
-        return GithubRepoBlockFileResponseDTO.builder()
-                .content(githubApiService.importGithubRepoBlockFile(auth2User, dataName, modelName)
-                        .map(GithubRepoBlockFileApiResponseDTO::getContent)
+    public GithubRepoFileResponseDTO importGithubRepoFile(CustomOAuth2User auth2User, DataSet dataName, String modelName) {
+        return GithubRepoFileResponseDTO.builder()
+                .content(githubApiService.importGithubRepoFile(auth2User, dataName, modelName)
+                        .map(GithubRepoFileApiResponseDTO::getContent)
                         .map(encodedContent -> new String(Base64.getDecoder().decode(encodedContent.replaceAll("\\s", ""))))
                         .orElse(null))
                 .build();
     }
 
     // 깃허브에 모델 export 서비스 로직
-    public void exportGithubRepoBlockFile(CustomOAuth2User auth2User, ExportGithubRepoBlockFileRequestDTO requestDTO) {
-        String sha = githubApiService.importGithubRepoBlockFile(auth2User, requestDTO.getDataName(), requestDTO.getModelName())
-                .map(GithubRepoBlockFileApiResponseDTO::getSha)
+    public void exportGithubRepoFile(CustomOAuth2User auth2User, ExportGithubRepoFileRequestDTO requestDTO) {
+        String sha = githubApiService.importGithubRepoFile(auth2User, requestDTO.getDataName(), requestDTO.getModelName())
+                .map(GithubRepoFileApiResponseDTO::getSha)
                 .orElse(null);
 
-        ExportGithubRepoBlockFileApiRequestDTO newRequestDTO = ExportGithubRepoBlockFileApiRequestDTO.builder()
+        ExportGithubRepoFileApiRequestDTO newRequestDTO = ExportGithubRepoFileApiRequestDTO.builder()
                 .content(Base64.getEncoder().encodeToString(requestDTO.getContent().getBytes(StandardCharsets.UTF_8)))
                 .message(getExportMessage(requestDTO.getMessage(), requestDTO.getModelName(), requestDTO.getVersionNo(), sha))
                 .sha(sha)
                 .build();
-        githubApiService.exportGithubRepoBlockFile(auth2User, requestDTO.getDataName(), requestDTO.getModelName(), newRequestDTO);
+        githubApiService.exportGithubRepoFile(auth2User, requestDTO.getDataName(), requestDTO.getModelName(), newRequestDTO);
     }
 
     // 깃허브 새 리포 설명 메시지 반환

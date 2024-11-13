@@ -14,7 +14,7 @@ public class GithubUrlBuilder {
     private static final String GET_REPO_LIST_PATH = "/users/{userNickname}/repos";
     private static final String CREATE_REPO_PATH = "/user/repos";
 
-    private static final String REPO_FILE_PATH = "/repos/{userNickname}/{userRepo}/contents/{dataName}/{modelName}/block.json";
+    private static final String REPO_FILE_PATH = "/repos/{userNickname}/{userRepo}/contents/{dataName}/{modelName}/model.py";
 
     public String buildEmailListUrl() {
         return UriComponentsBuilder

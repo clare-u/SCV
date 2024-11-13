@@ -6,7 +6,7 @@ import lombok.Getter;
 
 @Builder
 @Getter
-public class ExportGithubRepoBlockFileApiRequestDTO {
+public class ExportGithubRepoFileApiRequestDTO {
 
     @JsonProperty("content")
     private String content;

@@ -2,10 +2,10 @@ package com.scv.domain.user.service;
 
 import com.scv.domain.data.enums.DataSet;
 import com.scv.domain.user.dto.request.CreateGithubRepoApiRequestDTO;
-import com.scv.domain.user.dto.request.ExportGithubRepoBlockFileApiRequestDTO;
+import com.scv.domain.user.dto.request.ExportGithubRepoFileApiRequestDTO;
 import com.scv.domain.user.dto.response.GithubEmailApiResponseDTO;
 import com.scv.domain.user.dto.response.GithubRepoApiResponseDTO;
-import com.scv.domain.user.dto.response.GithubRepoBlockFileApiResponseDTO;
+import com.scv.domain.user.dto.response.GithubRepoFileApiResponseDTO;
 import com.scv.domain.user.exception.*;
 import com.scv.domain.user.util.GithubUrlBuilder;
 import com.scv.global.oauth2.auth.CustomOAuth2User;
@@ -82,7 +82,7 @@ public class GithubApiRestClientService implements GithubApiService {
     }
 
     @Override
-    public Optional<GithubRepoBlockFileApiResponseDTO> importGithubRepoBlockFile(CustomOAuth2User authUser, DataSet dataName, String modelName) {
+    public Optional<GithubRepoFileApiResponseDTO> importGithubRepoFile(CustomOAuth2User authUser, DataSet dataName, String modelName) {
         try {
             return restClient.get()
                     .uri(githubUrlBuilder.buildRepoFileUrl(authUser, dataName, modelName))
@@ -96,7 +96,7 @@ public class GithubApiRestClientService implements GithubApiService {
     }
 
     @Override
-    public void exportGithubRepoBlockFile(CustomOAuth2User authUser, DataSet dataName, String modelName, ExportGithubRepoBlockFileApiRequestDTO requestDTO) {
+    public void exportGithubRepoFile(CustomOAuth2User authUser, DataSet dataName, String modelName, ExportGithubRepoFileApiRequestDTO requestDTO) {
         restClient.put()
                 .uri(githubUrlBuilder.buildRepoFileUrl(authUser, dataName, modelName))
                 .header(HttpHeaders.AUTHORIZATION, "Bearer " + getAccessToken(authUser))
