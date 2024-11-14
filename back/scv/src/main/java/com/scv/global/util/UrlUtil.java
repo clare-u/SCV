@@ -18,12 +18,16 @@ public class UrlUtil {
     @Value("${spring.fastapi.test.port}")
     private String fastTestPort;
 
-//    "http://host:port/fast/v1/models/" + modelVersion.getModel().getId() + "/versions/" + modelVersionId;
+    /**
+     * @return "http://{fastTrainHost}:{fastTrainPort}/fast/v1/models/{modelId}/versions/{modelVersionId}"
+     */
     public String getTrainUrl(Long modelId, Long modelVersionId) {
         return String.format("http://%s:%s/fast/v1/models/%d/versions/%d", fastTrainHost, fastTrainPort, modelId, modelVersionId);
     }
 
-//    "http://host:port/fast/v1/model/test/analyze/" + modelId + "/" + modelVersionId + "/" + data.toLowerCase();
+    /**
+     * @return "http://{fastTestHost}:{fastTestPort}/fast/v1/model/test/analyze/{modelId}/{modelVersionId}/{dataName}"
+     */
     public String getTestUrl(Long modelId, Long modelVersionId, String dataName) {
         return String.format("http://%s:%s/fast/v1/model/test/analyze/%d/%d/%s", fastTestHost, fastTestPort, modelId, modelVersionId, dataName.toLowerCase());
     }
