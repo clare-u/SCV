@@ -1,6 +1,6 @@
 package com.scv.global.oauth2.handler;
 
-import com.scv.global.jwt.exception.InvalidTokenException;
+import com.scv.global.util.ResponseUtil;
 import jakarta.servlet.http.HttpServletRequest;
 import jakarta.servlet.http.HttpServletResponse;
 import org.springframework.security.core.AuthenticationException;
@@ -21,6 +21,6 @@ public class CustomAuthenticationEntryPoint implements AuthenticationEntryPoint 
             return;
         }
 
-        throw InvalidTokenException.getInstance();
+        ResponseUtil.sendResponse(response, HttpServletResponse.SC_UNAUTHORIZED, "CustomAuthenticationEntryPoint", "인증되지 않은 사용자입니다.");
     }
 }

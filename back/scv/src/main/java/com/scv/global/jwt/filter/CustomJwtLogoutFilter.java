@@ -2,6 +2,7 @@ package com.scv.global.jwt.filter;
 
 import com.scv.global.jwt.service.RedisTokenService;
 import com.scv.global.jwt.util.CookieUtil;
+import com.scv.global.util.ResponseUtil;
 import jakarta.servlet.FilterChain;
 import jakarta.servlet.ServletException;
 import jakarta.servlet.http.HttpServletRequest;
@@ -35,18 +36,7 @@ public class CustomJwtLogoutFilter extends OncePerRequestFilter {
             CookieUtil.deleteCookie(response, ACCESS_TOKEN_NAME);
             CookieUtil.deleteCookie(response, REFRESH_TOKEN_NAME);
 
-            response.setStatus(HttpServletResponse.SC_OK);
-            response.setContentType("application/json");
-
-            String jsonResponse = "{"
-                    + "\"httpStatus\": 200,"
-                    + "\"code\": \"LOGOUT_SUCCESS\","
-                    + "\"message\": \"Logout successful\""
-                    + "}";
-
-            response.getWriter().write(jsonResponse);
-            response.getWriter().flush();
-
+            ResponseUtil.sendResponse(response, HttpServletResponse.SC_OK, "CustomJwtLogoutFilter", "로그아웃이 성공했습니다.");
             return;
         }
 
