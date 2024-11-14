@@ -1,19 +1,20 @@
+from typing import Union, Literal, List
+from pydantic import BaseModel
 from fastapi import FastAPI, status
-import json
-import os
-
-import redis
-from dotenv import load_dotenv
-from fastapi import FastAPI, status
-from fastapi.middleware.cors import CORSMiddleware
-from fastapi.responses import JSONResponse
-from pymilvus import MilvusClient
-
+from pymilvus import connections, db, FieldSchema, MilvusClient
 from classes import *
 from config.cors import CORS_CONFIG
 from exception import *
 from gpt import get_gpt_answer
-from model_layer_class import deserialize_layers, serialize_layers
+from fastapi.responses import JSONResponse
+from openai import AsyncOpenAI
+from dotenv import load_dotenv
+from model_layer_class import Layer, deserialize_layers, serialize_layers
+import json
+import os
+import redis
+from fastapi.middleware.cors import CORSMiddleware
+from config.cors import CORS_CONFIG
 
 load_dotenv(verbose=True)
 db_name = os.getenv("DB_NAME")
