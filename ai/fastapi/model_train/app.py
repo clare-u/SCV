@@ -24,12 +24,13 @@ sys.path.append(root_dir)
 
 from neural_network_builder.parsers.validators import ModelConfig, layer_classes
 
-try:
-    from model_run import ModelTrainer
-    from save_minio import save_model_to_minio
-except ImportError:
-    from model_train import ModelTrainer
-    from save_minio import save_model_to_minio
+from model_run import ModelTrainer
+# try:
+#     from model_run import ModelTrainer
+#     from save_minio import save_model_to_minio
+# except ImportError:
+#     from model_train import ModelTrainer
+#     from save_minio import save_model_to_minio
 
 # def generate_model_name(model_id: Union[int, str], version_id: Union[int, str]) -> str:
 #     """모델ID랑 버전 ID로 고유한 모델 이름 생성"""
