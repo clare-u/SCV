@@ -24,16 +24,16 @@ os.makedirs(log_dir, exist_ok=True)
 # )
 logger = logging.getLogger(__name__)
 
-from .datasets import DatasetRegistry, DatasetFactory, DatasetInfo
-from .validators.model_validator import ModelValidator
+from datasets import DatasetRegistry, DatasetFactory, DatasetInfo
+from validators.model_validator import ModelValidator
 
 current_dir = os.path.dirname(os.path.abspath(__file__))
 root_dir = os.path.dirname(current_dir)
 sys.path.append(root_dir)
 
-from .neural_network_builder.builders import ModelBuilder, ModelCodeGenerator
-from .neural_network_builder.parsers.validators import ModelConfig
-from .save_minio import save_model_to_minio, minio_host_name, minio_user_name, minio_user_password, minio_model_bucket, \
+from neural_network_builder.builders import ModelBuilder, ModelCodeGenerator
+from neural_network_builder.parsers.validators import ModelConfig
+from save_minio import save_model_to_minio, minio_host_name, minio_user_name, minio_user_password, minio_model_bucket, \
     minio_api_port
 
 
