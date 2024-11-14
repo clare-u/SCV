@@ -122,6 +122,11 @@ export default function WorkspaceDetail({ params }: PageProps) {
 
   console.log();
 
+  // 유사모델 찾기
+  const handleMatchClick = () => {
+    router.push(`/match/${params.modelId}/${params.versionId}`);
+  };
+
   ///////////////////
 
   // 에러 및 로딩 상태 처리
@@ -288,7 +293,13 @@ export default function WorkspaceDetail({ params }: PageProps) {
           >
             깃허브로 내보내기
           </Button>
-          <Button size="l" design="fill" color="indigo" icon="search">
+          <Button
+            size="l"
+            design="fill"
+            color="indigo"
+            icon="search"
+            onClick={handleMatchClick}
+          >
             유사모델 찾기
           </Button>
           <Dropdown modelId={params.modelId} versionId={params.versionId} />
@@ -300,7 +311,7 @@ export default function WorkspaceDetail({ params }: PageProps) {
         {/* Model Architecture */}
 
         <div className="flex w-full justify-center">
-          <div className="flex w-[480px] flex-col items-center gap-2 rounded-10 bg-stone-100 px-10">
+          <div className="flex w-[480px] flex-col items-center gap-2 rounded-10 bg-stone-100 p-10">
             {renderModelArchitecture()}
           </div>
           <div className="flex w-1 self-stretch border border-gray-300"></div>

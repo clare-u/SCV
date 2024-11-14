@@ -8,6 +8,7 @@ interface BlockItemProps {
   category: BlockCategory;
   small?: boolean;
   open?: boolean;
+  onClick?: () => void;
   onBlurParam?: (paramIndex: number, value: number) => void;
   isEditable?: boolean;
 }
@@ -50,6 +51,7 @@ const BlockItem: React.FC<BlockItemProps> = ({
   category,
   small = false,
   open = false,
+  onClick,
   onBlurParam,
   isEditable = true,
 }) => {

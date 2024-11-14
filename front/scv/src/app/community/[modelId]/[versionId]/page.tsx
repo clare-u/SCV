@@ -264,7 +264,7 @@ export default function communityDetail({ params }: PageProps) {
         {/* Model Architecture */}
 
         <div className="flex w-full justify-center">
-          <div className="flex w-[480px] flex-col items-center gap-2 rounded-10 bg-stone-100 px-10">
+          <div className="flex w-[480px] flex-col items-center gap-2 rounded-10 bg-stone-100 p-10">
             {renderModelArchitecture()}
           </div>
           <div className="flex w-1 self-stretch border border-gray-300"></div>

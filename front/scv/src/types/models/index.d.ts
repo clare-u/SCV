@@ -189,3 +189,12 @@ export interface RunResponse {
   trainInfos: string; // JSON 문자열 형식
   layerParams: string; // JSON 문자열 형식
 }
+
+// 유사 모델 찾기
+export interface MatchModelData {
+  model_version_id: string;
+  layer_id: number;
+  gpt_description: string;
+  test_accuracy: number;
+  layers: Layer[];
+}
