@@ -12,6 +12,8 @@ from model_layer_class import Layer, deserialize_layers, serialize_layers
 import json
 import os
 import redis
+from fastapi.middleware.cors import CORSMiddleware
+from config.cors import CORS_CONFIG
 
 load_dotenv(verbose=True)
 db_name = os.getenv("DB_NAME")
@@ -23,6 +25,11 @@ redis_port = os.getenv("REDIS_PORT")
 
 app = FastAPI(root_path="/fast/v1/model/match")
 
+app.add_middleware(
+    CORSMiddleware,
+    **CORS_CONFIG  # 설정을 언패킹하여 적용
+)
+
 client = MilvusClient(
     uri="./milvus_demo.db",
     db_name=db_name
@@ -32,41 +39,41 @@ client.load_collection(
     collection_name=collection_name
 )
 
-redis = redis.Redis(host=redis_host_name, port= redis_port, db=0)
+redis = redis.Redis(host=redis_host_name, port=redis_port, db=0)
+
 
 # vectordb에서 한 레이어 조회
 @app.get("/{model_id}/{version_id}/{layer_id}", response_model=Model_Read_Response)
 def read_model(model_id: str, version_id: str, layer_id: str):
-
     print("{}_{} id 의 vector를 조회합니다.".format(f"model_{model_id}_v{version_id}", layer_id))
 
     res = client.get(
         collection_name=collection_name,
         ids=["{}_{}".format(f"model_{model_id}_v{version_id}", layer_id)]
     )
-    
+
     if len(res) == 0:
         raise LayerNotFound()
 
     print(res[0])
-    
+
     res[0]["layers"] = deserialize_layers(res[0]["layers"])
 
     return res[0]
 
+
 # vectordb에 한 레이어 추가
 @app.post("/{model_id}/{version_id}/{layer_id}", response_model=Model_Insert_Response)
-def insert_model(model_id: str,version_id:str, layer_id: str, req: Model_Insert_Request):
-
+def insert_model(model_id: str, version_id: str, layer_id: str, req: Model_Insert_Request):
     res = client.insert(
         collection_name=collection_name,
         data=[
             {
-                "model_version_layer_id" : f"model_{model_id}_v{version_id}_{layer_id}",
-                "model_version_id" : f"model_{model_id}_v{version_id}",
-                "test_accuracy" : req.test_accuracy,
-                "layers" : req.layers,
-                "cka_vec" : req.cka_vec
+                "model_version_layer_id": f"model_{model_id}_v{version_id}_{layer_id}",
+                "model_version_id": f"model_{model_id}_v{version_id}",
+                "test_accuracy": req.test_accuracy,
+                "layers": req.layers,
+                "cka_vec": req.cka_vec
             }
         ]
     )
@@ -75,15 +82,15 @@ def insert_model(model_id: str,version_id:str, layer_id: str, req: Model_Insert_
 
     res = dict(res)
 
-    if res["insert_count"] == 1 :
-        return {"model_version_layer_id" : f"model_{model_id}_v{version_id}" + "_" + layer_id, "success": True}
+    if res["insert_count"] == 1:
+        return {"model_version_layer_id": f"model_{model_id}_v{version_id}" + "_" + layer_id, "success": True}
 
-    return {"model_version_layer_id" : f"model_{model_id}_v{version_id}" + "_" + layer_id, "success": False}
+    return {"model_version_layer_id": f"model_{model_id}_v{version_id}" + "_" + layer_id, "success": False}
+
 
 # vectordb에서 모델 삭제
 @app.delete("/{model_id}/{version_id}")
 def delete_model(model_id: str, version_id: str):
-    
     print(f"{f"model_{model_id}_v{version_id}"} 의 model_version_id를 가진 레이어를 지웁니다.")
 
     res = client.delete(
@@ -95,15 +102,15 @@ def delete_model(model_id: str, version_id: str):
     print("{}개의 layer가 삭제되었습니다.".format(res["delete_count"]))
     return JSONResponse(
         status_code=status.HTTP_200_OK,
-        content = {
+        content={
             "content": f"{res["delete_count"]}개의 layer가 삭제되었습니다."
         }
     )
 
+
 # 유사 모델 검색
 @app.get("/{model_id}/{version_id}/{layer_id}/search", response_model=Model_Search_Response)
 async def search_model(model_id: str, version_id: str, layer_id: str):
-    
     model_version_layer_id = "{}_{}".format(f"model_{model_id}_v{version_id}", layer_id)
 
     cached = redis.get(model_version_layer_id)
@@ -122,24 +129,24 @@ async def search_model(model_id: str, version_id: str, layer_id: str):
 
     if (len(model) == 0):
         raise InvalidModelId(model_version_layer_id)
-    
+
     model = model[0]
 
     print("{} id로 가장 유사한 레이어를 검색합니다.".format(model_version_layer_id))
 
     results = client.search(
         collection_name=collection_name,
-        data=[model["cka_vec"]], 
-        anns_field="cka_vec", 
+        data=[model["cka_vec"]],
+        anns_field="cka_vec",
         output_fields=["model_version_layer_id", "test_accuracy", "cka_vec", "layers"],
-        search_params={"metric_type": "IP"}, 
+        search_params={"metric_type": "IP"},
         limit=1,
         # filter="model_version_layer_id != '{}'".format(model_version_layer_id)
         # 성능이 더 좋은 모델만 찾아주려면, 아무 것도 찾지 못했을 수 있음
         # filter="test_accuracy > {}".format(model[0]["test_accuracy"])
     )
 
-    if(len(results[0]) == 0) :
+    if (len(results[0]) == 0):
         raise LayerNotFound()
 
     results = dict(results[0][0])
@@ -148,16 +155,19 @@ async def search_model(model_id: str, version_id: str, layer_id: str):
     searched_model_version_id = id_parse[0] + id_parse[1] + id_parse[2]
     searched_layer_id = id_parse[1]
     searched_test_accuracy = results["entity"]["test_accuracy"]
-    
+
     target = model["layers"]
     target_test_accuracy = model["test_accuracy"]
     searched = results["entity"]["layers"]
 
-    gpt_description = await get_gpt_answer(target, searched, layer_id, searched_layer_id, target_test_accuracy, searched_test_accuracy)
-    
+    gpt_description = await get_gpt_answer(target, searched, layer_id, searched_layer_id, target_test_accuracy,
+                                           searched_test_accuracy)
+
     searched = deserialize_layers(searched)
 
-    resp = {"model_version_id": searched_model_version_id, "layer_id": searched_layer_id, "gpt_description": gpt_description, "test_accuracy": searched_test_accuracy, "layers": serialize_layers(searched)}
+    resp = {"model_version_id": searched_model_version_id, "layer_id": searched_layer_id,
+            "gpt_description": gpt_description, "test_accuracy": searched_test_accuracy,
+            "layers": serialize_layers(searched)}
 
     redis.set(model_version_layer_id, json.dumps(resp))
     redis.expire(model_version_layer_id, 3600)
@@ -165,21 +175,23 @@ async def search_model(model_id: str, version_id: str, layer_id: str):
     resp["layers"] = deserialize_layers(resp["layers"])
     return resp
 
+
 @app.exception_handler(InvalidModelId)
 def invalid_model_id_exception_handler(req, exc: InvalidModelId):
     return JSONResponse(
         status_code=status.HTTP_400_BAD_REQUEST,
         content={
             "content": "invalid model id 입니다.",
-            "model_id" : exc.model_version_layer_id
+            "model_id": exc.model_version_layer_id
         }
     )
+
 
 @app.exception_handler(LayerNotFound)
 def layer_not_found_exception_handler(req, exc: LayerNotFound):
     return JSONResponse(
         status_code=status.HTTP_404_NOT_FOUND,
-        content = {
+        content={
             "content": "레이어를 찾지 못했습니다."
         }
     )
