@@ -1,6 +1,6 @@
 from typing import Dict
 
-from dataset_preprocessors import *
+from datasets.preprocess.dataset_preprocessors import *
 
 
 class PreprocessorFactory:

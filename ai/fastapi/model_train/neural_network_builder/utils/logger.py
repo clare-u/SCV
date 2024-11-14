@@ -1,7 +1,7 @@
 import logging
 import logging.config
 from pathlib import Path
-from config.settings import LOG_CONFIG
+from neural_network_builder.config.settings import LOG_CONFIG
 
 
 def setup_logger(name: str) -> logging.Logger:

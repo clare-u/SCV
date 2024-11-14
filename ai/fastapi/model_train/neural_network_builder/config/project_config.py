@@ -4,7 +4,7 @@ from typing import Dict, Any
 
 import yaml
 
-from exceptions.custom_exceptions import ConfigurationError
+from neural_network_builder.exceptions.custom_exceptions import ConfigurationError
 
 
 class ProjectConfig:
