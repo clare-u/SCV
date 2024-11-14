@@ -3,7 +3,6 @@ from pydantic import BaseModel
 from fastapi import FastAPI, status
 from pymilvus import connections, db, FieldSchema, MilvusClient
 from classes import *
-from config.cors import CORS_CONFIG
 from exception import *
 from gpt import get_gpt_answer
 from fastapi.responses import JSONResponse
