@@ -151,6 +151,7 @@ public class ModelVersionService {
         modelVersionRepository.save(modelVersion);
     }
 
+
     // 모델 실행 및 저장
     public ResultResponse runResult(Long modelVersionId) {
         ModelVersion modelVersion = modelVersionRepository.findById(modelVersionId)
@@ -206,6 +207,7 @@ public class ModelVersionService {
 
         return new ResultResponse(result);
     }
+
 
     // 결과 및 분석 저장
     public ResultResponseWithImages saveResult(Long modelVersionId) {

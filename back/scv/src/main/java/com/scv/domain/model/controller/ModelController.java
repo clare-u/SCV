@@ -84,7 +84,6 @@ public class ModelController {
         return ResponseEntity.ok(modelDetail);
     }
 
-
     @GetMapping("/")
     @Operation(summary = "전체 모델 조회", description = "전체 모델을 조회합니다. orderBy = createdAt or updatedAt, direction = asc or desc. 미입력시 정렬 안함.")
     @ApiResponses(value = {
@@ -92,16 +91,17 @@ public class ModelController {
             @ApiResponse(responseCode = "400", description = "잘못된 요청", content = @Content(schema = @Schema(implementation = ErrorResponse.class))),
     })
     public ResponseEntity<Page<ModelResponse>> getAllModels(
-            @RequestParam(defaultValue = "") DataSet dataName,
-            @RequestParam(defaultValue = "") String modelName,
+            @RequestParam(required = false) DataSet dataName,
+            @RequestParam(required = false) String modelName,
             @RequestParam(defaultValue = "0") int page,
             @RequestParam(defaultValue = "12") int size,
-            @RequestParam(defaultValue = "") String orderBy,
-            @RequestParam(defaultValue = "") String direction
+            @RequestParam(required = false) String orderBy,
+            @RequestParam(required = false) String direction
     ) {
         Pageable pageable = pageableUtil.createPageable(page, size, orderBy, direction);
-        Page<ModelResponse> pages = modelService.getAllModels(pageable, dataName, modelName);
-        return ResponseEntity.ok(pages);
+        Page<ModelResponse> models = modelService.getAllModels(pageable, dataName, modelName);
+
+        return ResponseEntity.ok(models);
     }
 
     @GetMapping("/users")
@@ -111,16 +111,17 @@ public class ModelController {
             @ApiResponse(responseCode = "400", description = "잘못된 요청", content = @Content(schema = @Schema(implementation = ErrorResponse.class))),
     })
     public ResponseEntity<Page<ModelResponse>> getMyModels(
-            @RequestParam(defaultValue = "") DataSet dataName,
-            @RequestParam(defaultValue = "") String modelName,
+            @RequestParam(required = false) DataSet dataName,
+            @RequestParam(required = false) String modelName,
             @RequestParam(defaultValue = "0") int page,
             @RequestParam(defaultValue = "12") int size,
-            @RequestParam(defaultValue = "") String orderBy,
-            @RequestParam(defaultValue = "") String direction,
+            @RequestParam(required = false) String orderBy,
+            @RequestParam(required = false) String direction,
             @AuthUser CustomOAuth2User user
     ) {
         Pageable pageable = pageableUtil.createPageable(page, size, orderBy, direction);
-        Page<ModelResponse> pages = modelService.getMyModels(pageable, user, dataName, modelName);
-        return ResponseEntity.ok(pages);
+        Page<ModelResponse> myModels = modelService.getMyModels(pageable, user, dataName, modelName);
+
+        return ResponseEntity.ok(myModels);
     }
 }

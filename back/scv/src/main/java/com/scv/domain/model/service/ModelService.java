@@ -25,7 +25,6 @@ import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
 import java.util.ArrayList;
-import java.util.List;
 
 @Service
 @RequiredArgsConstructor
@@ -38,7 +37,6 @@ public class ModelService {
     private final UserRepository userRepository;
 
     // 모델 생성
-    @Transactional
     public ModelCreateResponse createModel(ModelCreateRequest request, CustomOAuth2User user) {
         Data data = dataRepository.findByName(request.dataName()).orElseThrow(DataNotFoundException::new);
         User existingUser = userRepository.findById(user.getUserId()).orElseThrow(UserNotFoundException::getInstance);
@@ -66,27 +64,20 @@ public class ModelService {
         return new ModelCreateResponse(savedModel.getId(), firstVersion.getId());
     }
 
-
+    
     // 전체 모델 조회
     @Transactional(readOnly = true)
     public Page<ModelResponse> getAllModels(Pageable pageable, DataSet dataName, String modelName) {
-        modelName = (modelName == null || modelName.isEmpty()) ? null : modelName;
-
-        Page<Model> models = modelRepository.searchModels(modelName, dataName, pageable);
-
-        return models.map(ModelResponse::new);
+        return modelRepository.searchModels(modelName, dataName, pageable);
     }
 
 
     // 내 모델 조회
     @Transactional(readOnly = true)
     public Page<ModelResponse> getMyModels(Pageable pageable, CustomOAuth2User user, DataSet dataName, String modelName) {
-        modelName = (modelName == null || modelName.isEmpty()) ? null : modelName;
-        Long userId = user.getUserId();
-
-        Page<Model> models = modelRepository.searchMyModels(modelName, dataName, userId, pageable);
-        return models.map(ModelResponse::new);
+        return modelRepository.searchMyModels(modelName, dataName, user.getUserId(), pageable);
     }
+
 
     // 모델 버전 조회
     @Transactional(readOnly = true)
@@ -98,7 +89,6 @@ public class ModelService {
 
 
     // 이름 수정
-    @Transactional
     public void updateModelName(Long modelId, String name, CustomOAuth2User user) throws BadRequestException {
         Model model = modelRepository.findById(modelId).orElseThrow(ModelNotFoundException::new);
 
@@ -113,7 +103,6 @@ public class ModelService {
 
 
     // 모델 삭제
-    @Transactional
     public void deleteModel(Long modelId, CustomOAuth2User user) throws BadRequestException {
         Model model = modelRepository.findById(modelId).orElseThrow(ModelNotFoundException::new);
 
