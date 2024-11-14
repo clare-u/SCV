@@ -60,6 +60,14 @@ spring:
           port: ${REDIS_REFRESH_MASTER_PORT}
           password: ${REDIS_REFRESH_MASTER_PASSWORD}
 
+  fastapi:
+    train:
+      host: ${FAST_MODEL_TRAIN_HOST_NAME}
+      port: ${FAST_MODEL_TRAIN_PORT}
+    test:
+      host: ${FAST_MODEL_TEST_HOST_NAME}
+      port: ${FAST_MODEL_TEST_PORT}
+
 # actuator health 체크 설정
 management:
   endpoints:
