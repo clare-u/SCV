@@ -1,3 +1,3 @@
-from .model_validator import ModelValidator
+from model_validator import ModelValidator
 
 __all__ = ['ModelValidator']

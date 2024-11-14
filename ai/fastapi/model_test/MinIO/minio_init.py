@@ -109,8 +109,8 @@ emnist_transforms = transforms.Compose([
 ])
 
 # MNIST 데이터셋
-train_dataset_mnist = MNIST(root='./data', train=True, download=True, transform=mnist_transforms)
-test_dataset_mnist = MNIST(root='./data', train=False, download=True, transform=mnist_transforms)
+train_dataset_mnist = MNIST(root='/data', train=True, download=True, transform=mnist_transforms)
+test_dataset_mnist = MNIST(root='/data', train=False, download=True, transform=mnist_transforms)
 
 # DataLoader 설정
 train_loader_mnist = DataLoader(train_dataset_mnist, batch_size=64, shuffle=True)  # 배치 크기 64
@@ -121,8 +121,8 @@ upload_dataset_to_minio(test_loader_mnist, "mnist_test")
 upload_cka_dataset_to_minio(test_dataset_mnist, "mnist")
 
 # Fashion-MNIST 데이터셋
-train_dataset_fashion_mnist = FashionMNIST(root='./data', train=True, download=True, transform=fashion_mnist_transforms)
-test_dataset_fashion_mnist = FashionMNIST(root='./data', train=False, download=True, transform=fashion_mnist_transforms)
+train_dataset_fashion_mnist = FashionMNIST(root='/data', train=True, download=True, transform=fashion_mnist_transforms)
+test_dataset_fashion_mnist = FashionMNIST(root='/data', train=False, download=True, transform=fashion_mnist_transforms)
 
 # DataLoader 설정
 train_loader_fashion_mnist = DataLoader(train_dataset_fashion_mnist, batch_size=64, shuffle=True)  # 배치 크기 64
@@ -133,8 +133,8 @@ upload_dataset_to_minio(test_loader_fashion_mnist, "fashion_mnist_test")
 upload_cka_dataset_to_minio(test_dataset_fashion_mnist, "fashion_mnist")
 
 # CIFAR-10 데이터셋
-train_dataset_cifar10 = CIFAR10(root='./data', train=True, download=True, transform=cifar10_transforms)
-test_dataset_cifar10 = CIFAR10(root='./data', train=False, download=True, transform=cifar10_transforms)
+train_dataset_cifar10 = CIFAR10(root='/data', train=True, download=True, transform=cifar10_transforms)
+test_dataset_cifar10 = CIFAR10(root='/data', train=False, download=True, transform=cifar10_transforms)
 
 # DataLoader 설정
 train_loader_cifar10 = DataLoader(train_dataset_cifar10, batch_size=64, shuffle=True)  # 배치 크기 64
@@ -145,8 +145,8 @@ upload_dataset_to_minio(test_loader_cifar10, "cifar10_test")
 upload_cka_dataset_to_minio(test_dataset_cifar10, "cifar10")
 
 # SVHN 데이터셋
-train_dataset_svhn = SVHN(root='./data', split='train', download=True, transform=svhn_transforms)
-test_dataset_svhn = SVHN(root='./data', split='test', download=True, transform=svhn_transforms)
+train_dataset_svhn = SVHN(root='/data', split='train', download=True, transform=svhn_transforms)
+test_dataset_svhn = SVHN(root='/data', split='test', download=True, transform=svhn_transforms)
 
 # DataLoader 설정
 train_loader_svhn = DataLoader(train_dataset_svhn, batch_size=64, shuffle=True)  # 배치 크기 64
@@ -157,8 +157,8 @@ upload_dataset_to_minio(test_loader_svhn, "svhn_test")
 upload_cka_dataset_to_minio(test_dataset_svhn, "svhn")
 
 # EMNIST 데이터셋
-train_dataset_emnist = EMNIST(root='./data', split='letters', train=True, download=True, transform=emnist_transforms)
-test_dataset_emnist = EMNIST(root='./data', split='letters', train=False, download=True, transform=emnist_transforms)
+train_dataset_emnist = EMNIST(root='/data', split='letters', train=True, download=True, transform=emnist_transforms)
+test_dataset_emnist = EMNIST(root='/data', split='letters', train=False, download=True, transform=emnist_transforms)
 
 # DataLoader 설정
 train_loader_emnist = DataLoader(train_dataset_emnist, batch_size=64, shuffle=True)  # 배치 크기 64

@@ -2,7 +2,7 @@ from torch.utils.data import DataLoader, Subset, Dataset
 from torchvision import datasets, transforms
 import random
 from typing import Tuple, Optional
-from .datasets_registry import DatasetRegistry, DatasetInfo
+from datasets_registry import DatasetRegistry, DatasetInfo
 
 
 class DatasetFactory:
