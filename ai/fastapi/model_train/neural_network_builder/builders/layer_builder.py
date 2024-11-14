@@ -5,9 +5,9 @@ PyTorch의 각종 레이어(Conv2d, Linear 등)를 실제로 생성하는 빌더
 """
 import torch.nn as nn
 from typing import Dict, Any, Optional
-from ..utils.logger import setup_logger
-from ..exceptions.custom_exceptions import BuilderError
-from ..parsers.validators import Layer, layer_classes
+from utils.logger import setup_logger
+from exceptions.custom_exceptions import BuilderError
+from parsers.validators import Layer, layer_classes
 
 logger = setup_logger(__name__)
 

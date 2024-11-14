@@ -15,10 +15,10 @@ root_dir = os.path.dirname(os.path.dirname(current_dir))
 sys.path.append(root_dir)
 
 # model_test의 exceptions 모듈 import
-from ..neural_network_builder.exceptions.custom_exceptions import (
+from neural_network_builder.exceptions.custom_exceptions import (
     ValidationError, InputShapeError, ArchitectureError, LayerConnectionError
 )
-from ..neural_network_builder.parsers.validators import ModelConfig
+from neural_network_builder.parsers.validators import ModelConfig
 
 
 class ModelValidator:
