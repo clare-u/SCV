@@ -11,10 +11,10 @@ import torch
 import torch.nn as nn
 
 from .layer_builder import LayerBuilder
-from ..exceptions.custom_exceptions import BuilderError
-from ..parsers.json_parser import JSONParser
-from ..parsers.validators import Layer, Flatten
-from ..utils.logger import setup_logger
+from exceptions.custom_exceptions import BuilderError
+from parsers.json_parser import JSONParser
+from parsers.validators import Layer, Flatten
+from utils.logger import setup_logger
 
 logger = setup_logger(__name__)
 
