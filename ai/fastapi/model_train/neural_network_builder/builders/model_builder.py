@@ -10,7 +10,7 @@ from typing import List, Union, Dict
 import torch
 import torch.nn as nn
 
-from .layer_builder import LayerBuilder
+from layer_builder import LayerBuilder
 from exceptions.custom_exceptions import BuilderError
 from parsers.json_parser import JSONParser
 from parsers.validators import Layer, Flatten
