@@ -5,6 +5,7 @@ import org.springframework.stereotype.Component;
 
 @Component
 public class UrlUtil {
+
     @Value(("${spring.fastapi.train.host}"))
     private String fastTrainHost;
 
