@@ -10,11 +10,11 @@ from typing import List, Union, Dict
 import torch
 import torch.nn as nn
 
-from layer_builder import LayerBuilder
-from exceptions.custom_exceptions import BuilderError
-from parsers.json_parser import JSONParser
-from parsers.validators import Layer, Flatten
-from utils.logger import setup_logger
+from neural_network_builder.builders.layer_builder import LayerBuilder
+from neural_network_builder.exceptions.custom_exceptions import BuilderError
+from neural_network_builder.parsers.json_parser import JSONParser
+from neural_network_builder.parsers.validators import Layer, Flatten
+from neural_network_builder.utils.logger import setup_logger
 
 logger = setup_logger(__name__)
 

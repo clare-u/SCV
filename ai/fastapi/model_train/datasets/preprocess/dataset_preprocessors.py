@@ -1,7 +1,7 @@
 import cv2
 import numpy as np
 
-from base_preprocessor import BaseImagePreprocessor
+from datasets.preprocess.base_preprocessor import BaseImagePreprocessor
 
 
 class MNISTPreprocessor(BaseImagePreprocessor):

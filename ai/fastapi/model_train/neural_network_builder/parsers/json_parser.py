@@ -6,9 +6,9 @@ JSON -> Layer 객체 변환 및 검증
 """
 import json
 from typing import Dict, List, Union, Any
-from utils.logger import setup_logger
-from exceptions.custom_exceptions import JSONParsingError, LayerConfigError, UnsupportedLayerError
-from validators import ModelConfig, layer_classes, Layer
+from neural_network_builder.utils.logger import setup_logger
+from neural_network_builder.exceptions.custom_exceptions import JSONParsingError, LayerConfigError, UnsupportedLayerError
+from neural_network_builder.parsers.validators import ModelConfig, layer_classes, Layer
 
 logger = setup_logger(__name__)
 
