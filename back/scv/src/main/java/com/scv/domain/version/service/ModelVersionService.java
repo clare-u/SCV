@@ -10,6 +10,7 @@ import com.scv.domain.model.domain.Model;
 import com.scv.domain.model.dto.response.ModelCreateResponse;
 import com.scv.domain.model.exception.ModelNotFoundException;
 import com.scv.domain.model.repository.ModelRepository;
+import com.scv.global.util.UrlUtil;
 import com.scv.global.oauth2.auth.CustomOAuth2User;
 import com.scv.domain.result.domain.Result;
 import com.scv.domain.result.dto.request.ResultRequest;
@@ -48,9 +49,9 @@ public class ModelVersionService {
     private final ModelVersionRepository modelVersionRepository;
     private final ResultRepository resultRepository;
     private final DataRepository dataRepository;
+    private final UrlUtil urlUtil;
 
     // 모델 버전 생성
-    @Transactional
     public ModelCreateResponse createModelVersion(Long modelId, Long modelVersionId, CustomOAuth2User user) throws BadRequestException {
         Model model = modelRepository.findById(modelId).orElseThrow(ModelNotFoundException::new);
         ModelVersion modelVersion = modelVersionRepository.findById(modelVersionId).orElseThrow(ModelNotFoundException::new);
@@ -94,7 +95,6 @@ public class ModelVersionService {
 
 
     // 모델 버전 수정
-    @Transactional
     public void updateModelVersion(Long modelVersionId, ModelVersionRequest request, CustomOAuth2User user) throws BadRequestException {
         ModelVersion modelVersion = modelVersionRepository.findById(modelVersionId)
                 .orElseThrow(ModelVersionNotFoundException::new);
@@ -115,7 +115,6 @@ public class ModelVersionService {
 
 
     // 모델 버전 삭제
-    @Transactional
     public void deleteModelVersion(Long modelVersionId, CustomOAuth2User user) throws BadRequestException {
         ModelVersion modelVersion = modelVersionRepository.findById(modelVersionId)
                 .orElseThrow(ModelVersionNotFoundException::new);
@@ -153,7 +152,6 @@ public class ModelVersionService {
     }
 
     // 모델 실행 및 저장
-    @Transactional
     public ResultResponse runResult(Long modelVersionId) {
         ModelVersion modelVersion = modelVersionRepository.findById(modelVersionId)
                 .orElseThrow(ModelVersionNotFoundException::new);
@@ -162,7 +160,7 @@ public class ModelVersionService {
 
         List<LayerDTO> layers = ParsingUtil.parseJsonToList(modelVersion.getLayers(), LayerDTO.class);
         ResultRequest request = new ResultRequest(layers, data);
-        String url = "http://localhost:8003/fast/v1/models/" + modelVersion.getModel().getId() + "/versions/" + modelVersionId;
+        String url = urlUtil.getTrainUrl(modelVersion.getModel().getId(), modelVersionId);
 
         RestTemplate restTemplate = new RestTemplate();
         ResponseEntity<String> response = restTemplate.postForEntity(url, request, String.class);
@@ -210,7 +208,6 @@ public class ModelVersionService {
     }
 
     // 결과 및 분석 저장
-    @Transactional
     public ResultResponseWithImages saveResult(Long modelVersionId) {
         ModelVersion modelVersion = modelVersionRepository.findById(modelVersionId)
                 .orElseThrow(ModelVersionNotFoundException::new);
@@ -222,7 +219,8 @@ public class ModelVersionService {
             data += "_MNIST";
         }
 
-        String url = "http://localhost:8002/fast/v1/model/test/analyze/" + modelId + "/" + modelVersionId + "/" + data.toLowerCase();
+        String url = urlUtil.getTestUrl(modelId, modelVersionId, data);
+
         RestTemplate restTemplate = new RestTemplate();
 
         HttpHeaders headers = new HttpHeaders();
