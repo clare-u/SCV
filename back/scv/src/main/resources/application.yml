@@ -27,6 +27,9 @@ spring:
   security:
     oauth2:
       client:
+        provider:
+          github:
+            authorization-uri: https://github.com/login/oauth/authorize?prompt=select_account
         registration:
           github:
             client-id: ${OAUTH_CLIENT_ID}
