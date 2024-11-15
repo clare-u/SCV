@@ -95,7 +95,7 @@ class ModelValidator:
             # 테스트 배치 생성
             model = model.to(self.device)
             test_batch = self.create_test_batch(dataset_name)
-            test_batch = test_batch.to(next(model.parameters()).device)
+            # test_batch = test_batch.to(next(model.parameters()).device)
 
             # 모델을 평가 모드로 설정
             model.eval()
@@ -126,7 +126,7 @@ class ModelValidator:
         """모델의 레이어 간 연결을 검증합니다."""
         model = model.to(self.device)
         test_batch = self.create_test_batch(dataset_name)
-        test_batch = test_batch.to(next(model.parameters()).device)
+        # test_batch = test_batch.to(next(model.parameters()).device)
 
         activation = {}
         hooks = []
