@@ -59,6 +59,10 @@ class ModelBuilder:
             model = self._build_model(layers)
             model = model.to(self.device)
 
+            for param in model.parameters():
+                if param.device != self.device:
+                    param.data = param.data.to(self.device)
+
             logger.info(f"생성된모델 device종류: {next(model.parameters()).device}")
             return model
 
@@ -107,7 +111,6 @@ class ModelBuilder:
         torch_layers = []
         for i, layer in enumerate(layers):
             torch_layer = self.layer_builder.build(layer)
-            torch_layer = torch_layer.to(self.device)
             torch_layers.append(torch_layer)
             logger.debug(f"Built layer {i}: {layer.name}")
 
