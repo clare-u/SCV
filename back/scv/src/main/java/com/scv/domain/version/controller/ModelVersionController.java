@@ -95,8 +95,8 @@ public class ModelVersionController {
     })
     public ResponseEntity<Page<ModelVersionOnWorking>> getModelVersionsOnWorking(@RequestParam(defaultValue = "0") int page,
                                                                                  @RequestParam(defaultValue = "12") int size,
-                                                                                 @RequestParam(defaultValue = "") String orderBy,
-                                                                                 @RequestParam(defaultValue = "") String direction,
+                                                                                 @RequestParam(required = false) String orderBy,
+                                                                                 @RequestParam(required = false) String direction,
                                                                                  @AuthUser CustomOAuth2User user) {
 
         Pageable pageable = pageableUtil.createPageable(page, size, orderBy, direction);
@@ -111,7 +111,7 @@ public class ModelVersionController {
     @Operation(summary = "실행 저장", description = "실행 결과를 저장하고 반환합니다.")
     public ResponseEntity<ResultResponse> saveAnalysis(@PathVariable Long versionId) {
         ResultResponse resultResponse = modelVersionService.runResult(versionId);
-        return ResponseEntity.status(201).body(resultResponse);
+        return ResponseEntity.ok(resultResponse);
     }
 
 
@@ -119,7 +119,7 @@ public class ModelVersionController {
     @Operation(summary = "결과 저장", description = "학습 결과(이미지들)를 저장하고 반환합니다.")
     public ResponseEntity<ResultResponseWithImages> saveResult(@PathVariable Long versionId) {
         ResultResponseWithImages resultResponseWithImages = modelVersionService.saveResult(versionId);
-        return ResponseEntity.status(201).body(resultResponseWithImages);
+        return ResponseEntity.ok(resultResponseWithImages);
     }
 
 
