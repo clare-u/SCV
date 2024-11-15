@@ -17,7 +17,7 @@ class ProjectConfig:
     def _get_project_root(self) -> Path:
         """프로젝트 루트 디렉토리 경로 반환"""
         current_file = Path(__file__).resolve()
-        return current_file.parent.parent.parent.parent  # fastapi 디렉토리
+        return current_file.parent.parent.parent  # model_train을 반환
 
     def _load_config(self) -> None:
         """설정 파일 로드 및 환경 변수 처리"""
