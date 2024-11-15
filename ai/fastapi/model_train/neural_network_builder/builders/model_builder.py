@@ -41,6 +41,7 @@ class ModelBuilder:
     def __init__(self):
         self.layer_builder = LayerBuilder()
         self.json_parser = JSONParser()
+        self.device = torch.device("cuda" if torch.cuda.is_available() else "cpu")
 
     @handle_errors
     def create_model(self, json_config: Union[str, Dict]) -> nn.Sequential:
@@ -55,7 +56,9 @@ class ModelBuilder:
             layers = self._insert_flatten_layer(layers)
 
             logger.debug(f"Parsed layers: {[layer.model_dump() for layer in layers]}")
-            return self._build_model(layers)
+            model = self._build_model(layers)
+            model = model.to(self.device)
+            return model
 
         except Exception as e:
             logger.error(f"모델 생성 중 오류 발생: {str(e)}")
@@ -102,6 +105,7 @@ class ModelBuilder:
         torch_layers = []
         for i, layer in enumerate(layers):
             torch_layer = self.layer_builder.build(layer)
+            torch_layer = torch_layer.to(self.device)
             torch_layers.append(torch_layer)
             logger.debug(f"Built layer {i}: {layer.name}")
 

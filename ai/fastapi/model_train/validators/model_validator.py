@@ -27,6 +27,7 @@ class ModelValidator:
     def __init__(self):
         self.logger = logging.getLogger(__name__)
         self.datasets_config = self._load_dataset_config()
+        self.device = torch.device("cuda" if torch.cuda.is_available() else "cpu")
 
     def _load_dataset_config(self) -> Dict:
         """데이터셋 설정 파일을 로드합니다."""
@@ -79,11 +80,11 @@ class ModelValidator:
         test_shape = (batch_size, *input_shape)
 
         # 데이터셋의 정규화 파라미터를 적용
-        mean = torch.tensor(self.datasets_config[dataset_name]['mean'])
-        std = torch.tensor(self.datasets_config[dataset_name]['std'])
+        mean = torch.tensor(self.datasets_config[dataset_name]['mean']).to(self.device)
+        std = torch.tensor(self.datasets_config[dataset_name]['std']).to(self.device)
 
         # 정규화된 랜덤 데이터 생성
-        random_data = torch.rand(test_shape)
+        random_data = torch.rand(test_shape, device=self.device)
         normalized_data = (random_data - mean.view(-1, 1, 1)) / std.view(-1, 1, 1)
 
         return normalized_data
@@ -92,7 +93,9 @@ class ModelValidator:
         """모델의 전체적인 검증을 수행합니다."""
         try:
             # 테스트 배치 생성
+            model = model.to(self.device)
             test_batch = self.create_test_batch(dataset_name)
+            test_batch = test_batch.to(next(model.parameters()).device)
 
             # 모델을 평가 모드로 설정
             model.eval()
@@ -121,7 +124,10 @@ class ModelValidator:
 
     def check_layer_connections(self, model: torch.nn.Module, dataset_name: str) -> None:
         """모델의 레이어 간 연결을 검증합니다."""
+        model = model.to(self.device)
         test_batch = self.create_test_batch(dataset_name)
+        test_batch = test_batch.to(next(model.parameters()).device)
+
         activation = {}
         hooks = []
 
