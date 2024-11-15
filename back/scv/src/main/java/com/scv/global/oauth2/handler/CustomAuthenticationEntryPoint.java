@@ -3,12 +3,14 @@ package com.scv.global.oauth2.handler;
 import com.scv.global.util.ResponseUtil;
 import jakarta.servlet.http.HttpServletRequest;
 import jakarta.servlet.http.HttpServletResponse;
+import lombok.extern.slf4j.Slf4j;
 import org.springframework.security.core.AuthenticationException;
 import org.springframework.security.web.AuthenticationEntryPoint;
 import org.springframework.stereotype.Component;
 
 import java.io.IOException;
 
+@Slf4j
 @Component
 public class CustomAuthenticationEntryPoint implements AuthenticationEntryPoint {
 
@@ -21,6 +23,7 @@ public class CustomAuthenticationEntryPoint implements AuthenticationEntryPoint 
             return;
         }
 
+        log.error("CustomAuthenticationEntryPoint - authException: {}", authException.getMessage());
         ResponseUtil.sendResponse(response, HttpServletResponse.SC_UNAUTHORIZED, "CustomAuthenticationEntryPoint", "인증되지 않은 사용자입니다.");
     }
 }

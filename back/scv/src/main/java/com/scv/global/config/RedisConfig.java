@@ -1,5 +1,6 @@
 package com.scv.global.config;
 
+import lombok.extern.slf4j.Slf4j;
 import org.springframework.beans.factory.annotation.Value;
 import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Configuration;
@@ -13,6 +14,7 @@ import org.springframework.data.redis.serializer.StringRedisSerializer;
 import java.util.Arrays;
 import java.util.List;
 
+@Slf4j
 @Configuration
 public class RedisConfig {
 
@@ -110,6 +112,10 @@ public class RedisConfig {
         template.setConnectionFactory(accessMasterConnectionFactory());
         template.setKeySerializer(new StringRedisSerializer());
         template.setValueSerializer(new GenericJackson2JsonRedisSerializer());
+
+        log.error("accessMasterHost: {}", accessMasterHost);
+        log.error("accessMasterPort: {}", accessMasterPort);
+
         return template;
     }
 
@@ -125,6 +131,10 @@ public class RedisConfig {
         template.setConnectionFactory(accessSlave1ConnectionFactory());
         template.setKeySerializer(new StringRedisSerializer());
         template.setValueSerializer(new GenericJackson2JsonRedisSerializer());
+
+        log.error("accessSlave1Host: {}", accessSlave1Host);
+        log.error("accessSlave1Port: {}", accessSlave1Port);
+
         return template;
     }
 
@@ -134,6 +144,10 @@ public class RedisConfig {
         template.setConnectionFactory(accessSlave2ConnectionFactory());
         template.setKeySerializer(new StringRedisSerializer());
         template.setValueSerializer(new GenericJackson2JsonRedisSerializer());
+
+        log.error("accessSlave2Host: {}", accessSlave2Host);
+        log.error("accessSlave2Port: {}", accessSlave2Port);
+
         return template;
     }
 
@@ -143,6 +157,10 @@ public class RedisConfig {
         template.setConnectionFactory(accessSlave3ConnectionFactory());
         template.setKeySerializer(new StringRedisSerializer());
         template.setValueSerializer(new GenericJackson2JsonRedisSerializer());
+
+        log.error("accessSlave3Host: {}", accessSlave3Host);
+        log.error("accessSlave3Port: {}", accessSlave3Port);
+
         return template;
     }
 
@@ -153,6 +171,10 @@ public class RedisConfig {
         template.setConnectionFactory(refreshMasterConnectionFactory());
         template.setKeySerializer(new StringRedisSerializer());
         template.setValueSerializer(new GenericJackson2JsonRedisSerializer());
+
+        log.error("refreshMasterHost: {}", refreshMasterHost);
+        log.error("refreshMasterPort: {}", refreshMasterPort);
+
         return template;
     }
 }
