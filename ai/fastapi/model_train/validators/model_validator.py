@@ -20,6 +20,13 @@ from neural_network_builder.exceptions.custom_exceptions import (
 )
 from neural_network_builder.parsers.validators import ModelConfig
 
+def get_device():
+    if torch.cuda.is_available():
+        return torch.device("cuda")
+    elif hasattr(torch.backends, "mps") and torch.backends.mps.is_available():
+        return torch.device("mps")
+    else:
+        return torch.device("cpu")
 
 class ModelValidator:
     """신경망 모델의 구조와 입력 데이터를 검증하는 클래스"""
@@ -27,7 +34,8 @@ class ModelValidator:
     def __init__(self):
         self.logger = logging.getLogger(__name__)
         self.datasets_config = self._load_dataset_config()
-        self.device = torch.device("cuda" if torch.cuda.is_available() else "cpu")
+        # self.device = torch.device("cuda" if torch.cuda.is_available() else "cpu")
+        self.device = get_device()
         print(f"ModelValidator클래스 device종류: {self.device}")
 
     def _load_dataset_config(self) -> Dict:
