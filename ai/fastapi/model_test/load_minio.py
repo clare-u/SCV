@@ -8,7 +8,7 @@ import os
 from exception import ModelNotFound, DataSetNotFound
 
 from typing import Literal
-
+from utils import get_device
 import pickle
 
 load_dotenv(verbose=True)
@@ -34,7 +34,7 @@ def load_model_from_minio(model_version_id : str):
     # 바이트 데이터를 메모리 파일로 변환
     model_bytes = io.BytesIO(obj.read())
     # PyTorch 모델 로드
-    model = torch.load(model_bytes)
+    model = torch.load(model_bytes, map_location=get_device())
     # model = torch.jit.load(model_bytes, map_location='cpu')
 # except:
 #     raise ModelNotFound(model_version_id)
