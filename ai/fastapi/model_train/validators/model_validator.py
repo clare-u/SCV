@@ -28,7 +28,7 @@ class ModelValidator:
         self.logger = logging.getLogger(__name__)
         self.datasets_config = self._load_dataset_config()
         self.device = torch.device("cuda" if torch.cuda.is_available() else "cpu")
-        self.logger.info(f"ModelValidator클래스 device종류: {self.device}")
+        print(f"ModelValidator클래스 device종류: {self.device}")
 
     def _load_dataset_config(self) -> Dict:
         """데이터셋 설정 파일을 로드합니다."""
@@ -87,19 +87,28 @@ class ModelValidator:
         # 정규화된 랜덤 데이터 생성
         random_data = torch.rand(test_shape, device=self.device)
         normalized_data = (random_data - mean.view(-1, 1, 1)) / std.view(-1, 1, 1)
+        self.logger.info(f"생성된 test batch device: {normalized_data.device}")
 
         return normalized_data.to(self.device)
 
     def validate_model(self, model: torch.nn.Module, dataset_name: str) -> Dict[str, Any]:
         """모델의 전체적인 검증을 수행합니다."""
         try:
+            self.logger.info(f"검증 시작 시 설정된 device: {self.device}")
+
             # 테스트 배치 생성
             model = model.to(self.device)
             test_batch = self.create_test_batch(dataset_name).to(self.device)
 
             # 디버깅용
-            self.logger.info(f"모델의device종류: {next(model.parameters()).device}")
-            self.logger.info(f"Testbatch device종류: {test_batch.device}")            # test_batch = test_batch.to(next(model.parameters()).device)
+            print(f"모델의device종류: {next(model.parameters()).device}")
+            print(f"Testbatch device종류: {test_batch.device}")            # test_batch = test_batch.to(next(model.parameters()).device)
+
+            # device 일치 여부 확인
+            model_device = next(model.parameters()).device
+            if test_batch.device != model_device:
+                self.logger.error(f"Device 불일치! Model: {model_device}, Test batch: {test_batch.device}")
+                raise ValidationError(f"Device 불일치 발생")
 
             # 모델을 평가 모드로 설정
             model.eval()
