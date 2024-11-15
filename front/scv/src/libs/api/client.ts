@@ -12,6 +12,9 @@ const api = axios.create({
   withCredentials: true,
 });
 
+// 토스트 메시지를 저장할 키
+const REDIRECT_MESSAGE_KEY = "redirect_message";
+
 export const handleApiRequest = async <T, M extends HttpMethod, D = undefined>(
   url: string,
   method: M,
@@ -31,7 +34,6 @@ export const handleApiRequest = async <T, M extends HttpMethod, D = undefined>(
       const apiError: ApiErrorResponse = error.response.data;
       const { message, httpStatus, code } = apiError;
 
-      // 콘솔에 개선된 오류 메시지 출력
       console.error(
         `%c🚨 API Request Error 🚨\n%cEndpoint: %s\n%cHTTP Status: %s\n%cError Code: %s\n%cMessage: %s`,
         "color: red; font-weight: bold; font-size: 16px; background-color: yellow; padding: 2px;",
@@ -45,7 +47,13 @@ export const handleApiRequest = async <T, M extends HttpMethod, D = undefined>(
         message,
       );
 
-      throw apiError; // 전체 에러 객체 throw
+      if (httpStatus === 401) {
+        // 리다이렉트 전에 메시지 저장
+        localStorage.setItem(REDIRECT_MESSAGE_KEY, "로그인이 필요합니다.");
+        window.location.href = `/login`;
+      }
+
+      throw apiError;
     }
 
     console.error("🚨 Unexpected error making API request 🚨\n", error);

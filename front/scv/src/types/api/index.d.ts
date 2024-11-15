@@ -13,7 +13,7 @@ export type ConditionalData<M extends HttpMethod, D> = M extends
   : D;
 
 export interface ApiErrorResponse {
-  httpStatus: string; // ErrorCode에서 받은 HTTP 상태 코드
+  httpStatus: number; // ErrorCode에서 받은 HTTP 상태 코드
   code: string; // ErrorCode에서 받은 에러 코드
   message: string; // ErrorCode에서 받은 메시지
 }
