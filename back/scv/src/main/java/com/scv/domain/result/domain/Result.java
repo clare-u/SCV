@@ -37,7 +37,7 @@ public class Result extends BaseEntity {
     @Column(name = "train_info", columnDefinition = "JSON")
     private String trainInfo;
 
-    @Column(name = "confusion_matrix", columnDefinition = "JSON")
+@Column(name = "confusion_matrix", columnDefinition = "JSON", nullable = true)
     private String confusionMatrix;
 
     @Column(name = "example_img", columnDefinition = "JSON")
