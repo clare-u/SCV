@@ -89,11 +89,11 @@ class ModelValidator:
         test_shape = (batch_size, *input_shape)
 
         # 데이터셋의 정규화 파라미터를 적용
-        mean = torch.tensor(self.datasets_config[dataset_name]['mean']).to(self.device)
-        std = torch.tensor(self.datasets_config[dataset_name]['std']).to(self.device)
+        mean = torch.tensor(self.datasets_config[dataset_name]['mean'])
+        std = torch.tensor(self.datasets_config[dataset_name]['std'])
 
         # 정규화된 랜덤 데이터 생성
-        random_data = torch.rand(test_shape, device=self.device)
+        random_data = torch.rand(test_shape)
         normalized_data = (random_data - mean.view(-1, 1, 1)) / std.view(-1, 1, 1)
         print(f"생성된 test batch device: {normalized_data.device}")
 
@@ -104,22 +104,29 @@ class ModelValidator:
         try:
             print(f"검증 시작 시 설정된 device: {self.device}")
 
+            # 모델을 평가 모드로 설정
+            model.eval()
+
             # 테스트 배치 생성
             model = model.to(self.device)
+
+            # 모든 파라미터가 같은 device에 있는지 확인
+            for param in model.parameters():
+                if param.device != self.device:
+                    param.data = param.data.to(self.device)
+
             test_batch = self.create_test_batch(dataset_name).to(self.device)
 
             # 디버깅용
             print(f"모델의device종류: {next(model.parameters()).device}")
             print(f"Testbatch device종류: {test_batch.device}")            # test_batch = test_batch.to(next(model.parameters()).device)
 
-            # device 일치 여부 확인
+            # device 일치 검증
             model_device = next(model.parameters()).device
             if test_batch.device != model_device:
-                print(f"Device 불일치! Model: {model_device}, Test batch: {test_batch.device}")
-                raise ValidationError(f"Device 불일치 발생")
-
-            # 모델을 평가 모드로 설정
-            model.eval()
+                if test_batch.device != model_device:
+                    test_batch = test_batch.to(model_device)
+                    print(f"Test batch를 model device({model_device})로 이동시킴")
 
             # Forward pass 시도
             with torch.no_grad():
