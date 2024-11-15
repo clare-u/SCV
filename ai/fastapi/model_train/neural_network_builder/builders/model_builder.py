@@ -63,7 +63,7 @@ class ModelBuilder:
                 if param.device != self.device:
                     param.data = param.data.to(self.device)
 
-            logger.info(f"생성된모델 device종류: {next(model.parameters()).device}")
+            print(f"생성된모델 device종류: {next(model.parameters()).device}")
             return model
 
         except Exception as e:

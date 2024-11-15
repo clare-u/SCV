@@ -144,13 +144,13 @@ class ModelTrainer:
             model = self.model_builder.create_model(config.model_dump())
             model.layers = config.modelLayerAt.layers
 
-            logger.info(f"모델을 {self.device}로 이동")
+            print(f"모델을 {self.device}로 이동")
             model = model.to(self.device)
-            logger.info(f"이동확인, 모델 device종류: {next(model.parameters()).device}")
+            print(f"이동확인, 모델 device종류: {next(model.parameters()).device}")
 
             # 모델 검증
             validator = ModelValidator()
-            logger.info(f"Validator device종류: {validator.device}")
+            print(f"Validator device종류: {validator.device}")
             validation_result = validator.validate_model(model, config.dataName)
             logger.info(f"모델 검증 결과: {validation_result}")
 
