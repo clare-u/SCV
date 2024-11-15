@@ -19,9 +19,11 @@ app = FastAPI(root_path="/fast/v1/model/test")
 @app.get("/analyze/{model_id}/{version_id}/{dataset}", response_model=Model_Analyze_Response)
 async def analyze_model(model_id: str, version_id:str, dataset: Literal["mnist", "fashion_mnist", "cifar10", "svhn", "emnist"]):
 
+    device = get_device()
     # model 가져오기
     model = load_model_from_minio(f"model_{model_id}_v{version_id}")
     layers = model.layers
+    model = model.to(device)
     # 데이터 셋 가져오기
     test_dataset = load_dataset_from_minio(dataset, "test")
 
@@ -48,8 +50,12 @@ async def analyze_model(model_id: str, version_id:str, dataset: Literal["mnist",
     # 테스트
     model.eval()
     with torch.no_grad():
-        for index, (input, label) in enumerate(test_dataset):
-
+        for index, data in enumerate(test_dataset):
+            data = data.to(torch.float32)
+            input = data[0]
+            label = data[1]
+            input = input.to(device)
+            label = label.to(device)
             x = input
 
             # confusion matrix를 위한 true label 저장
@@ -83,13 +89,13 @@ async def analyze_model(model_id: str, version_id:str, dataset: Literal["mnist",
     test_loss = get_test_loss() # 현재
     train_info = get_train_info() # 현재
     confusion_matrix = get_confusion_matrix(true_label, predicted_label) # 나
-    example_image = get_example_image(outputs, dataset) # 나
+    example_image = get_example_image(outputs, dataset,) # 나
     total_params = get_total_params() # 현재
     params = get_params() # 현재
     feature_activation = get_feature_activation(maximization_input, activation_map) # 나
-    activation_maximization = get_activation_maximization(model, dataset) # 나
+    activation_maximization = get_activation_maximization(model, dataset, device) # 나
 
-    _ = await save_cka_to_milvus(model, dataset, f"model_{model_id}_v{version_id}", conv_idx, test_accuracy, layers)
+    _ = await save_cka_to_milvus(model, dataset, f"model_{model_id}_v{version_id}", conv_idx, test_accuracy, layers, device)
 
     return {
         "model_version_id": f"model_{model_id}_v{version_id}",

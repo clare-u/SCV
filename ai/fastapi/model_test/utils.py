@@ -95,22 +95,22 @@ def get_feature_activation(origin, activation) -> list[feature_activation]:
     return resp
 
 # 가장 라벨 스러운 이미지를 출력
-def get_activation_maximization(model, dataset) -> list[activation_maximization]:
+def get_activation_maximization(model, dataset, device) -> list[activation_maximization]:
 
     resp = []
     for label in dataset_labels[dataset]:
         resp.append({
             "label": str(label),
-            "image": json.dumps(maximize_class_image(model, label, dataset))
+            "image": json.dumps(maximize_class_image(model, label, dataset, device))
         })
     return resp
 
 
 
-def maximize_class_image(model, target_class, dataset, num_steps=100, lr=0.1):
+def maximize_class_image(model, target_class, dataset, device, num_steps=100, lr=0.1):
     # 랜덤한 노이즈 이미지 생성 (MNIST: 1x28x28)
     optimized_image = torch.randn((1, dataset_channels[dataset], dataset_width[dataset], dataset_width[dataset]), requires_grad=True)
-
+    optimized_image = optimized_image.to(device)
     # Adam 옵티마이저 설정
     optimizer = Adam([optimized_image], lr=lr)
 
@@ -132,3 +132,11 @@ def maximize_class_image(model, target_class, dataset, num_steps=100, lr=0.1):
             optimized_image.clamp_(-1, 1)
 
     return optimized_image.detach().cpu().squeeze().tolist()
+
+def get_device():
+    if torch.cuda.is_available():
+        return torch.device("cuda")
+    elif hasattr(torch.backends, "mps") and torch.backends.mps.is_available():
+        return torch.device("mps")
+    else:
+        return torch.device("cpu")
