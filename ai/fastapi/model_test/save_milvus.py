@@ -24,7 +24,6 @@ async def save_cka_to_milvus(model, dataset, model_version_id, conv_idx, test_ac
     cka_matrix = defaultdict(list)
     with torch.no_grad():
         for index, data in enumerate(cka_dataset):
-            data = data.to(torch.float32)
             input = data[0]
             label = data[1]
             input = input.to(device)

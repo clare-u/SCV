@@ -51,7 +51,6 @@ async def analyze_model(model_id: str, version_id:str, dataset: Literal["mnist",
     model.eval()
     with torch.no_grad():
         for index, data in enumerate(test_dataset):
-            data = data.to(torch.float32)
             input = data[0]
             label = data[1]
             input = input.to(device)
