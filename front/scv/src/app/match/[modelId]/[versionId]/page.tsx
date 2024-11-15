@@ -15,6 +15,10 @@ import { convertApiToBlocks, findBlockCategory } from "@/utils/block-converter";
 import { Tab, TabGroup, TabList, TabPanel, TabPanels } from "@headlessui/react";
 import Tippy from "@tippyjs/react";
 import "tippy.js/dist/tippy.css";
+import MarkdownRenderer from "@/components/markdown/MarkdownRenderer";
+import Badge from "@/components/badge/Badge";
+import { BadgeProps } from "@/components/badge/Badge";
+import { toast } from "sonner";
 
 interface Version {
   id: number;
@@ -31,6 +35,14 @@ interface PageProps {
 // 데이터셋 색상 매핑
 const datasetColors: Record<string, ChipsProps["color"]> = {
   Editing: "gray",
+  MNIST: "indigo",
+  Fashion: "amber",
+  CIFAR10: "green",
+  SVHN: "teal",
+  EMNIST: "red",
+};
+
+const badgeColors: Record<string, BadgeProps["color"]> = {
   MNIST: "indigo",
   Fashion: "amber",
   CIFAR10: "green",
@@ -64,6 +76,9 @@ export default function WorkspaceDetail({ params }: PageProps) {
   const router = useRouter();
   const [isVersionValid, setIsVersionValid] = useState<boolean | null>(null);
   const [matchModelVersionId, setMatchModelVersionId] = useState<number | null>(
+    null,
+  );
+  const [matchModelModelId, setMatchModelModelId] = useState<number | null>(
     null,
   );
 
@@ -146,32 +161,90 @@ export default function WorkspaceDetail({ params }: PageProps) {
     refetchOnWindowFocus: false,
   });
 
-  const handleBlockClick = (index: number) => {
-    setSelectedBlockIndex(index);
+  const handleBlockClick = (blockName: string, index: number) => {
+    if (blockName === "nn.Conv2d") {
+      setSelectedBlockIndex(index);
+    } else {
+      toast.error("nn.Conv2d 레이어만 유사 모델 탐색이 가능합니다.");
+    }
   };
 
   // matchModelData가 변경될 때마다 matchModelVersionId 업데이트
   useEffect(() => {
-    if (matchModelData?.model_version_id) {
-      setMatchModelVersionId(Number(matchModelData.model_version_id));
-    } else {
-      setMatchModelVersionId(null);
+    const modelVersionId = matchModelData?.model_version_id;
+    if (modelVersionId) {
+      // 모델 ID와 버전 ID 추출
+      const versionIdMatch = modelVersionId.match(/(\d+)v(\d+)$/);
+      if (versionIdMatch && versionIdMatch.length === 3) {
+        const modelId = parseInt(versionIdMatch[1], 10);
+        const versionId = parseInt(versionIdMatch[2], 10);
+        console.log("Extracted modelId:", modelId, "and versionId:", versionId);
+        setMatchModelModelId(modelId);
+        setMatchModelVersionId(versionId);
+      }
     }
   }, [matchModelData]);
 
   // 유사모델 정보 불러오기 - matchModelVersionId가 있을 때만 호출
+  const fetchVersionDetails = async (versionId: number) => {
+    const response = await fetch(
+      // `http://localhost:8080/api/v1/models/versions/${versionId}`,
+      `https://k11a107.p.ssafy.io/api/v1/models/versions/${versionId}`,
+      {
+        credentials: "include", // 쿠키 및 인증 정보를 요청과 함께 보내기 위해 추가
+      },
+    );
+    if (!response.ok) {
+      console.log("HTTP response not OK, status:", response.status); // 오류 상태 로깅
+      throw new Error("Network response was not ok");
+    }
+    const data = await response.json();
+    return data;
+  };
+
   const {
     data: matchModelVersionQuery,
     isLoading: matchModelVersionLoading,
     error: matchModelVersionError,
   } = useQuery({
     queryKey: ["matchModelVersion", matchModelVersionId],
-    queryFn: () => useFetchVersionDetails(matchModelVersionId!),
-    enabled: matchModelVersionId !== null,
+    queryFn: () => fetchVersionDetails(matchModelVersionId!),
+    enabled: !!matchModelVersionId,
+  });
+
+  // 유사모델의 모델 정보 불러오기 - matchModelVersionId가 있을 때만 호출
+  const fetchModelDetails = async (modelId: number) => {
+    const response = await fetch(
+      // `http://localhost:8080/api/v1/models/${modelId}`,
+      `https://k11a107.p.ssafy.io/api/v1/models/${modelId}`,
+      {
+        credentials: "include", // 쿠키 및 인증 정보를 요청과 함께 보내기 위해 추가
+      },
+    );
+    if (!response.ok) {
+      console.log("HTTP response not OK, status:", response.status); // 오류 상태 로깅
+      throw new Error("Network response was not ok");
+    }
+    const data = await response.json();
+    return data;
+  };
+
+  const {
+    data: matchModelModelQuery,
+    isLoading: matchModelModelLoading,
+    error: matchModelModelError,
+  } = useQuery({
+    queryKey: ["matchModelVersion", matchModelModelId],
+    queryFn: () => fetchModelDetails(matchModelModelId!),
+    enabled: !!matchModelModelId,
   });
 
   // matchModelVersionData를 별도의 변수로 추출
-  const matchModelVersionData = matchModelVersionQuery?.data;
+  const matchModelVersionData = matchModelVersionQuery;
+  // console.log(matchModelData);
+  const handleVersionChange = (version: Version) => {
+    router.push(`/match/${params.modelId}/${version.id}`);
+  };
 
   ///////////////////
 
@@ -244,10 +317,6 @@ export default function WorkspaceDetail({ params }: PageProps) {
     );
   }
 
-  const handleVersionChange = (version: Version) => {
-    router.push(`/match/${params.modelId}/${version.id}`);
-  };
-
   // 내 모델 블록
   const renderModelArchitecture = () => {
     try {
@@ -257,7 +326,7 @@ export default function WorkspaceDetail({ params }: PageProps) {
 
       return blocks.map((block, index) => (
         <div
-          onClick={() => handleBlockClick(index)} // 클릭 시 핸들러 호출
+          onClick={() => handleBlockClick(block.name, index)} // 클릭 시 핸들러 호출
           className={`${
             selectedBlockIndex === index
               ? "rounded-12 border-4 border-blue-900 p-2"
@@ -341,7 +410,7 @@ export default function WorkspaceDetail({ params }: PageProps) {
       <div className="flex w-full flex-col gap-[30px]">
         <div className="flex w-full justify-center">
           {/* 내 모델 */}
-          <div className="flex w-[480px] flex-col items-center gap-2 rounded-10 bg-stone-100 p-10">
+          <div className="flex w-[480px] flex-col items-center gap-2 rounded-10 p-10">
             {/* Header */}
             <div className="text-40 font-bold text-indigo-900">내 모델</div>
             <div className="mb-20 flex justify-between self-stretch">
@@ -403,8 +472,9 @@ export default function WorkspaceDetail({ params }: PageProps) {
 
           <div className="flex w-1 self-stretch border border-gray-300"></div>
 
-          <div className="flex w-[480px] flex-col items-center gap-2 rounded-10 bg-stone-100 p-10">
+          <div className="flex w-[480px] flex-col items-center gap-2 rounded-10 p-10">
             <div className="text-40 font-bold text-indigo-900">유사 모델</div>
+
             {matchModelLoading || matchModelVersionLoading ? (
               <div className="flex h-[600px] items-center justify-center">
                 <Loading />
@@ -428,40 +498,58 @@ export default function WorkspaceDetail({ params }: PageProps) {
                 </p>
               </div>
             ) : matchModelVersionData ? (
-              <TabGroup className="flex w-[480px] flex-col">
-                <TabList className="flex gap-10 p-10">
-                  <Tab className="rounded-10 px-20 py-10 data-[selected]:bg-blue-900 data-[selected]:text-white data-[hover]:underline">
-                    블록뷰
-                  </Tab>
-                  <Tab className="rounded-10 px-20 py-10 data-[selected]:bg-blue-900 data-[selected]:text-white data-[hover]:underline">
-                    코드뷰
-                  </Tab>
-                </TabList>
-                <TabPanels>
-                  <TabPanel>
-                    <div className="flex w-full flex-col items-center justify-center gap-2 p-10">
-                      {renderMatchModelArchitecture()}
+              <>
+                <div className="mb-20 flex justify-between self-stretch">
+                  <div className="flex items-center gap-20">
+                    <div className="text-[32px] font-bold text-indigo-900">
+                      {matchModelModelQuery.modelName}
                     </div>
-                  </TabPanel>
-                  <TabPanel>
-                    {matchModelVersionData?.resultResponseWithImages
-                      ?.codeView ? (
-                      <div className="h-[600px] items-center justify-center py-10">
-                        <CodeViewer
-                          codeString={matchModelVersionData.resultResponseWithImages.codeView
-                            .replace(/^"|"$/g, "")
-                            .replace(/\\n/g, "\n")
-                            .replace(/\\t/g, "\t")}
-                        />
+                    <Badge color={badgeColors[matchModelModelQuery.DataName]}>
+                      v{matchModelModelQuery.latestVersion}
+                    </Badge>
+                    <Chips
+                      color={datasetColors[matchModelModelQuery.DataName]}
+                      design="fill"
+                    >
+                      {matchModelModelQuery.DataName}
+                    </Chips>
+                  </div>
+                </div>
+                <TabGroup className="flex w-[480px] flex-col">
+                  <TabList className="flex gap-10 p-10">
+                    <Tab className="rounded-10 px-20 py-10 data-[selected]:bg-blue-900 data-[selected]:text-white data-[hover]:underline">
+                      블록뷰
+                    </Tab>
+                    <Tab className="rounded-10 px-20 py-10 data-[selected]:bg-blue-900 data-[selected]:text-white data-[hover]:underline">
+                      코드뷰
+                    </Tab>
+                  </TabList>
+                  <TabPanels>
+                    <TabPanel>
+                      <div className="flex w-full flex-col items-center justify-center gap-2 p-10">
+                        {renderMatchModelArchitecture()}
                       </div>
-                    ) : (
-                      <div className="flex h-[600px] items-center justify-center text-gray-500">
-                        코드 정보를 찾을 수 없습니다.
-                      </div>
-                    )}
-                  </TabPanel>
-                </TabPanels>
-              </TabGroup>
+                    </TabPanel>
+                    <TabPanel>
+                      {matchModelVersionData?.resultResponseWithImages
+                        ?.codeView ? (
+                        <div className="h-[600px] items-center justify-center py-10">
+                          <CodeViewer
+                            codeString={matchModelVersionData.resultResponseWithImages.codeView
+                              .replace(/^"|"$/g, "")
+                              .replace(/\\n/g, "\n")
+                              .replace(/\\t/g, "\t")}
+                          />
+                        </div>
+                      ) : (
+                        <div className="flex h-[600px] items-center justify-center text-gray-500">
+                          코드 정보를 찾을 수 없습니다.
+                        </div>
+                      )}
+                    </TabPanel>
+                  </TabPanels>
+                </TabGroup>
+              </>
             ) : (
               <div className="flex h-[600px] items-center justify-center text-gray-500">
                 유사한 모델을 찾을 수 없습니다.
@@ -471,7 +559,7 @@ export default function WorkspaceDetail({ params }: PageProps) {
         </div>
 
         {/* Results and Visualizations */}
-        <div className="flex flex-col gap-4 rounded-10 bg-stone-100 p-6">
+        <div className="flex flex-col gap-4 rounded-10 p-6">
           <h2 className="text-2xl font-bold text-indigo-900">GPT 설명</h2>
           <div className="min-h-[100px] rounded-md bg-white p-4">
             {matchModelLoading ? (
@@ -484,7 +572,9 @@ export default function WorkspaceDetail({ params }: PageProps) {
                 {matchModelError.message}
               </div>
             ) : matchModelData?.gpt_description ? (
-              <div className="">{matchModelData.gpt_description}</div>
+              <MarkdownRenderer
+                markdownText={matchModelData.gpt_description}
+              ></MarkdownRenderer>
             ) : selectedBlockIndex === null ? (
               <div className="text-gray-500">
                 레이어를 선택하면 유사 모델에 대한 설명이 표시됩니다.
