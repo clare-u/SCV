@@ -1,5 +1,6 @@
 package com.scv.domain.version.repository;
 
+import com.scv.domain.data.enums.DataSet;
 import com.scv.domain.version.domain.ModelVersion;
 import org.springframework.data.domain.Page;
 import org.springframework.data.domain.Pageable;
@@ -20,8 +21,20 @@ public interface ModelVersionRepository extends JpaRepository<ModelVersion, Long
     List<ModelVersion> findAllByModel_IdAndDeletedFalse(Long id);
 
     @EntityGraph(attributePaths = {"model", "model.data", "result"})
-    @Query("SELECT mv FROM ModelVersion mv WHERE mv.model.user.userId = :userId AND mv.isWorkingOn = true AND mv.deleted = false")
-    Page<ModelVersion> findAllByUserAndIsWorkingTrueAndDeletedFalse(@Param("userId") Long userId, Pageable pageable);
+    @Query("SELECT mv FROM ModelVersion mv " +
+            "JOIN mv.model m " +
+            "WHERE mv.model.user.userId = :userId " +
+            "AND (:modelName IS NULL OR m.name LIKE CONCAT('%', :modelName, '%')) " +
+            "AND (:dataName IS NULL OR m.data.name = :dataName) " +
+            "AND mv.isWorkingOn = true " +
+            "AND mv.deleted = false")
+    Page<ModelVersion> findAllByUserAndIsWorkingTrueAndDeletedFalse(
+            @Param("modelName") String modelName,
+            @Param("dataName") DataSet dataName,
+            @Param("userId") Long userId,
+            Pageable pageable
+    );
+
 
     @Modifying
     @Transactional

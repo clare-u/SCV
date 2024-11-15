@@ -1,5 +1,6 @@
 package com.scv.domain.version.controller;
 
+import com.scv.domain.data.enums.DataSet;
 import com.scv.domain.model.dto.response.ModelCreateResponse;
 import com.scv.global.oauth2.auth.AuthUser;
 import com.scv.global.oauth2.auth.CustomOAuth2User;
@@ -93,7 +94,9 @@ public class ModelVersionController {
             @ApiResponse(responseCode = "400", description = "잘못된 요청", content = @Content(schema = @Schema(implementation = ErrorResponse.class))),
             @ApiResponse(responseCode = "404", description = "존재하지 않는 모델버전", content = @Content(schema = @Schema(implementation = ErrorResponse.class)))
     })
-    public ResponseEntity<Page<ModelVersionOnWorking>> getModelVersionsOnWorking(@RequestParam(defaultValue = "0") int page,
+    public ResponseEntity<Page<ModelVersionOnWorking>> getModelVersionsOnWorking(@RequestParam(defaultValue = "") DataSet dataName,
+                                                                                 @RequestParam(defaultValue = "") String modelName,
+                                                                                 @RequestParam(defaultValue = "0") int page,
                                                                                  @RequestParam(defaultValue = "12") int size,
                                                                                  @RequestParam(required = false) String orderBy,
                                                                                  @RequestParam(required = false) String direction,
@@ -101,7 +104,7 @@ public class ModelVersionController {
 
         Pageable pageable = pageableUtil.createPageable(page, size, orderBy, direction);
 
-        Page<ModelVersionOnWorking> modelVersions = modelVersionService.getModelVersionsOnWorking(user, pageable);
+        Page<ModelVersionOnWorking> modelVersions = modelVersionService.getModelVersionsOnWorking(user, pageable, modelName, dataName);
 
         return ResponseEntity.ok(modelVersions);
     }
