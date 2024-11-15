@@ -4,6 +4,7 @@ import com.fasterxml.jackson.databind.JsonNode;
 import com.fasterxml.jackson.databind.ObjectMapper;
 import com.fasterxml.jackson.databind.node.ObjectNode;
 import com.scv.domain.data.domain.Data;
+import com.scv.domain.data.enums.DataSet;
 import com.scv.domain.data.exception.DataNotFoundException;
 import com.scv.domain.data.repository.DataRepository;
 import com.scv.domain.model.domain.Model;
@@ -87,8 +88,8 @@ public class ModelVersionService {
 
     // 개발중인 모델 조회
     @Transactional(readOnly = true)
-    public Page<ModelVersionOnWorking> getModelVersionsOnWorking(CustomOAuth2User user, Pageable pageable) {
-        Page<ModelVersion> modelVersions = modelVersionRepository.findAllByUserAndIsWorkingTrueAndDeletedFalse(user.getUserId(), pageable);
+    public Page<ModelVersionOnWorking> getModelVersionsOnWorking(CustomOAuth2User user, Pageable pageable, String modelName, DataSet dataName) {
+        Page<ModelVersion> modelVersions = modelVersionRepository.findAllByUserAndIsWorkingTrueAndDeletedFalse(modelName, dataName, user.getUserId(), pageable);
 
         return modelVersions.map(ModelVersionOnWorking::new);
     }
