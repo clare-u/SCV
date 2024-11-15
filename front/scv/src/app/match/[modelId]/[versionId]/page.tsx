@@ -131,7 +131,7 @@ export default function WorkspaceDetail({ params }: PageProps) {
   const fetchMatchModelData = async (layerId: number) => {
     const response = await fetch(
       // `http://localhost:8001/${params.modelId}/${params.versionId}/${layerId}/search`,
-      `https://k11a107.p.ssafy.io/${params.modelId}/${params.versionId}/${layerId}/search`,
+      `https://k11a107.p.ssafy.io/fast/v1/model/match/${params.modelId}/${params.versionId}/${layerId}/search`,
       {
         method: "GET",
       },
