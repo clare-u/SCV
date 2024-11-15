@@ -14,7 +14,7 @@ load_dotenv(verbose=True)
 fast_match_host_name = os.getenv("FAST_MATCH_HOST_NAME")
 fast_match_port = os.getenv("FAST_MATCH_PORT")
 
-async def save_cka_to_milvus(model, dataset, model_version_id, conv_idx, test_accuracy, layers):
+async def save_cka_to_milvus(model, dataset, model_version_id, conv_idx, test_accuracy, layers, device):
     cka_dataset = load_dataset_from_minio(dataset, "cka")
     id_parse = model_version_id.split("_")
     model_id = id_parse[1]
@@ -23,8 +23,12 @@ async def save_cka_to_milvus(model, dataset, model_version_id, conv_idx, test_ac
 # Milvus CKA 저장
     cka_matrix = defaultdict(list)
     with torch.no_grad():
-        for index, (input, label) in enumerate(cka_dataset):
-
+        for index, data in enumerate(cka_dataset):
+            data = data.to(torch.float32)
+            input = data[0]
+            label = data[1]
+            input = input.to(device)
+            label = label.to(device)
             x = input
             
             for i in range(0, len(model)):
