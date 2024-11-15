@@ -58,6 +58,8 @@ class ModelBuilder:
             logger.debug(f"Parsed layers: {[layer.model_dump() for layer in layers]}")
             model = self._build_model(layers)
             model = model.to(self.device)
+
+            logger.info(f"생성된모델 device종류: {next(model.parameters()).device}")
             return model
 
         except Exception as e:
