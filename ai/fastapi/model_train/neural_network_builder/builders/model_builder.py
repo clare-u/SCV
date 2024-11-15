@@ -34,6 +34,13 @@ def handle_errors(func):
 
     return wrapper
 
+def get_device():
+    if torch.cuda.is_available():
+        return torch.device("cuda")
+    elif hasattr(torch.backends, "mps") and torch.backends.mps.is_available():
+        return torch.device("mps")
+    else:
+        return torch.device("cpu")
 
 class ModelBuilder:
     """신경망 모델 빌더"""
@@ -41,7 +48,8 @@ class ModelBuilder:
     def __init__(self):
         self.layer_builder = LayerBuilder()
         self.json_parser = JSONParser()
-        self.device = torch.device("cuda" if torch.cuda.is_available() else "cpu")
+        # self.device = torch.device("cuda" if torch.cuda.is_available() else "cpu")
+        self.device = get_device()
 
     @handle_errors
     def create_model(self, json_config: Union[str, Dict]) -> nn.Sequential:

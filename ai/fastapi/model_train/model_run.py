@@ -36,11 +36,20 @@ from neural_network_builder.parsers.validators import ModelConfig
 from save_minio import save_model_to_minio, minio_host_name, minio_user_name, minio_user_password, minio_model_bucket, \
     minio_api_port
 
+def get_device():
+    if torch.cuda.is_available():
+        return torch.device("cuda")
+    elif hasattr(torch.backends, "mps") and torch.backends.mps.is_available():
+        return torch.device("mps")
+    else:
+        return torch.device("cpu")
 
 class ModelTrainer:
     def __init__(self):
-        self.device = torch.device("cuda" if torch.cuda.is_available() else "cpu")
+        # self.device = torch.device("cuda" if torch.cuda.is_available() else "cpu")
+        self.device = get_device()
         self.model_builder = ModelBuilder()
+        self.model_builder.device = self.device
         self.training_history = []
         self.model_layer = None
         self.code_generator = ModelCodeGenerator()
@@ -150,6 +159,7 @@ class ModelTrainer:
 
             # 모델 검증
             validator = ModelValidator()
+            validator.device = self.device
             print(f"Validator device종류: {validator.device}")
             validation_result = validator.validate_model(model, config.dataName)
             logger.info(f"모델 검증 결과: {validation_result}")
