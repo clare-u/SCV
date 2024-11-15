@@ -15,7 +15,7 @@ collection_name = os.getenv("COLLECTION_NAME")
 #     database = db.create_database(db_name)
 
 client = MilvusClient(
-    uri="./milvus_demo.db"
+    uri="/data/scv_milvus.db"
 )
 
 # db.using_database(db_name)

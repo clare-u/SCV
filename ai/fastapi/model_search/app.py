@@ -31,7 +31,7 @@ app.add_middleware(
 )
 
 client = MilvusClient(
-    uri="./milvus_demo.db",
+    uri="/data/scv_milvus.db",
     db_name=db_name
 )
 
