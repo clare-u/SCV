@@ -16,17 +16,28 @@ class ProjectConfig:
 
     def _get_project_root(self) -> Path:
         """프로젝트 루트 디렉토리 경로 반환"""
-        current_file = Path(__file__).resolve()
-        return current_file.parent.parent.parent  # model_train을 반환
+        if os.path.exists('/app'):  # 서버
+            return Path('/app')
+        else:  # 로컬
+            current_file = Path(__file__).resolve()
+            return current_file.parent.parent.parent.parent
 
     def _load_config(self) -> None:
         """설정 파일 로드 및 환경 변수 처리"""
         try:
             # 기본 설정 파일 경로
-            self.config_paths = {
-                'datasets': self.project_root / 'model_train' / 'datasets' / 'configs' / 'datasets.yaml',
-                'preprocess': self.project_root / 'model_train' / 'datasets' / 'configs' / 'preprocess_params.yaml'
-            }
+            # 서버
+            if os.path.exists('/app'):
+                self.config_paths = {
+                    'datasets': self.project_root / 'datasets' / 'configs' / 'datasets.yaml',
+                    'preprocess': self.project_root / 'datasets' / 'configs' / 'preprocess_params.yaml'
+                }
+            # 로컬
+            else:
+                self.config_paths = {
+                    'datasets': self.project_root / 'model_train' / 'datasets' / 'configs' / 'datasets.yaml',
+                    'preprocess': self.project_root / 'model_train' / 'datasets' / 'configs' / 'preprocess_params.yaml'
+                }
 
             # 환경 변수로 설정 파일 경로 오버라이드 가능
             if os.getenv('DATASETS_CONFIG_PATH'):
