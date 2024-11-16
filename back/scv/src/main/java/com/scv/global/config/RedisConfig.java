@@ -1,6 +1,5 @@
 package com.scv.global.config;
 
-import lombok.extern.slf4j.Slf4j;
 import org.springframework.beans.factory.annotation.Value;
 import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Configuration;
@@ -14,11 +13,9 @@ import org.springframework.data.redis.serializer.StringRedisSerializer;
 import java.util.Arrays;
 import java.util.List;
 
-@Slf4j
 @Configuration
 public class RedisConfig {
 
-    // Access Token Master
     @Value("${spring.data.redis.token.access.master.host}")
     private String accessMasterHost;
 
@@ -28,7 +25,6 @@ public class RedisConfig {
     @Value("${spring.data.redis.token.access.master.password}")
     private String accessMasterPassword;
 
-    // Access Token Slaves
     @Value("${spring.data.redis.token.access.slaves[0].host}")
     private String accessSlave1Host;
 
@@ -56,7 +52,6 @@ public class RedisConfig {
     @Value("${spring.data.redis.token.access.slaves[2].password}")
     private String accessSlave3Password;
 
-    // Refresh Token Master
     @Value("${spring.data.redis.token.refresh.host}")
     private String refreshMasterHost;
 
@@ -66,7 +61,15 @@ public class RedisConfig {
     @Value("${spring.data.redis.token.refresh.password}")
     private String refreshMasterPassword;
 
-    // Access Token Master Connection Factory
+    @Value("${spring.data.redis.token.oauth.host}")
+    private String oauthMasterHost;
+
+    @Value("${spring.data.redis.token.oauth.port}")
+    private int oauthMasterPort;
+
+    @Value("${spring.data.redis.token.oauth.password}")
+    private String oauthMasterPassword;
+
     @Primary
     @Bean
     public LettuceConnectionFactory accessMasterConnectionFactory() {
@@ -75,7 +78,6 @@ public class RedisConfig {
         return new LettuceConnectionFactory(config);
     }
 
-    // Access Token Slaves Connection Factories
     @Bean(name = "accessSlave1ConnectionFactory")
     public LettuceConnectionFactory accessSlave1ConnectionFactory() {
         RedisStandaloneConfiguration config = new RedisStandaloneConfiguration(accessSlave1Host, accessSlave1Port);
@@ -97,7 +99,6 @@ public class RedisConfig {
         return new LettuceConnectionFactory(config);
     }
 
-    // Refresh Token Master Connection Factory
     @Bean
     public LettuceConnectionFactory refreshMasterConnectionFactory() {
         RedisStandaloneConfiguration config = new RedisStandaloneConfiguration(refreshMasterHost, refreshMasterPort);
@@ -105,17 +106,19 @@ public class RedisConfig {
         return new LettuceConnectionFactory(config);
     }
 
-    // RedisTemplate for Access Token Master (Write operations)
+    @Bean
+    public LettuceConnectionFactory oauthMasterConnectionFactory() {
+        RedisStandaloneConfiguration config = new RedisStandaloneConfiguration(oauthMasterHost, oauthMasterPort);
+        config.setPassword(oauthMasterPassword);
+        return new LettuceConnectionFactory(config);
+    }
+
     @Bean(name = "accessMasterTemplate")
     public RedisTemplate<String, Object> accessMasterTemplate() {
         RedisTemplate<String, Object> template = new RedisTemplate<>();
         template.setConnectionFactory(accessMasterConnectionFactory());
         template.setKeySerializer(new StringRedisSerializer());
         template.setValueSerializer(new GenericJackson2JsonRedisSerializer());
-
-        log.error("accessMasterHost: {}", accessMasterHost);
-        log.error("accessMasterPort: {}", accessMasterPort);
-
         return template;
     }
 
@@ -124,17 +127,12 @@ public class RedisConfig {
         return Arrays.asList(accessSlave1Template(), accessSlave2Template(), accessSlave3Template());
     }
 
-    // RedisTemplates for Access Token Slaves (Read operations)
     @Bean(name = "accessSlave1Template")
     public RedisTemplate<String, Object> accessSlave1Template() {
         RedisTemplate<String, Object> template = new RedisTemplate<>();
         template.setConnectionFactory(accessSlave1ConnectionFactory());
         template.setKeySerializer(new StringRedisSerializer());
         template.setValueSerializer(new GenericJackson2JsonRedisSerializer());
-
-        log.error("accessSlave1Host: {}", accessSlave1Host);
-        log.error("accessSlave1Port: {}", accessSlave1Port);
-
         return template;
     }
 
@@ -144,10 +142,6 @@ public class RedisConfig {
         template.setConnectionFactory(accessSlave2ConnectionFactory());
         template.setKeySerializer(new StringRedisSerializer());
         template.setValueSerializer(new GenericJackson2JsonRedisSerializer());
-
-        log.error("accessSlave2Host: {}", accessSlave2Host);
-        log.error("accessSlave2Port: {}", accessSlave2Port);
-
         return template;
     }
 
@@ -157,24 +151,24 @@ public class RedisConfig {
         template.setConnectionFactory(accessSlave3ConnectionFactory());
         template.setKeySerializer(new StringRedisSerializer());
         template.setValueSerializer(new GenericJackson2JsonRedisSerializer());
-
-        log.error("accessSlave3Host: {}", accessSlave3Host);
-        log.error("accessSlave3Port: {}", accessSlave3Port);
-
         return template;
     }
 
-    // RedisTemplate for Refresh Token (Single Master)
     @Bean(name = "refreshMasterTemplate")
     public RedisTemplate<String, Object> refreshMasterTemplate() {
         RedisTemplate<String, Object> template = new RedisTemplate<>();
         template.setConnectionFactory(refreshMasterConnectionFactory());
         template.setKeySerializer(new StringRedisSerializer());
         template.setValueSerializer(new GenericJackson2JsonRedisSerializer());
+        return template;
+    }
 
-        log.error("refreshMasterHost: {}", refreshMasterHost);
-        log.error("refreshMasterPort: {}", refreshMasterPort);
-
+    @Bean(name = "oauthMasterTemplate")
+    public RedisTemplate<String, Object> oauthMasterTemplate() {
+        RedisTemplate<String, Object> template = new RedisTemplate<>();
+        template.setConnectionFactory(oauthMasterConnectionFactory());
+        template.setKeySerializer(new StringRedisSerializer());
+        template.setValueSerializer(new GenericJackson2JsonRedisSerializer());
         return template;
     }
 }
