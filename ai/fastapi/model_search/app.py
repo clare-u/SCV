@@ -112,7 +112,7 @@ def delete_model(model_id: str, version_id: str):
 @app.get("/{model_id}/{version_id}/{layer_id}/search", response_model=Model_Search_Response)
 async def search_model(model_id: str, version_id: str, layer_id: str):
     model_version_layer_id = "{}_{}".format(f"model_{model_id}_v{version_id}", layer_id)
-
+    model_version_id = f"model_{model_id}_v{version_id}"
     cached = redis.get(model_version_layer_id)
     if cached:
         print("응답이 캐싱되었습니다.")
@@ -125,7 +125,7 @@ async def search_model(model_id: str, version_id: str, layer_id: str):
         ids=[model_version_layer_id]
     )
 
-    print("layer를 찾았습니다.")
+    print(f"찾은 레이어: {model}")
 
     if (len(model) == 0):
         raise InvalidModelId(model_version_layer_id)
@@ -141,7 +141,7 @@ async def search_model(model_id: str, version_id: str, layer_id: str):
         output_fields=["model_version_layer_id", "test_accuracy", "cka_vec", "layers"],
         search_params={"metric_type": "IP"},
         limit=1,
-        # filter="model_version_layer_id != '{}'".format(model_version_layer_id)
+        filter="model_version_id != '{}'".format(model_version_id)
         # 성능이 더 좋은 모델만 찾아주려면, 아무 것도 찾지 못했을 수 있음
         # filter="test_accuracy > {}".format(model[0]["test_accuracy"])
     )
