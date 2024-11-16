@@ -25,6 +25,8 @@ spring:
         expiration: ${JWT_REFRESH_EXPIRATION}  # (단위: 초 / 현재 2주)
 
   security:
+    aes:
+      secret-key: ${AES_SECRET_KEY}
     oauth2:
       client:
         provider:
@@ -62,6 +64,10 @@ spring:
           host: ${REDIS_REFRESH_MASTER_HOST}
           port: ${REDIS_REFRESH_MASTER_PORT}
           password: ${REDIS_REFRESH_MASTER_PASSWORD}
+        oauth:
+          host: ${REDIS_OAUTH_MASTER_HOST}
+          port: ${REDIS_OAUTH_MASTER_PORT}
+          password: ${REDIS_OAUTH_MASTER_PASSWORD}
 
   fastapi:
     train:
