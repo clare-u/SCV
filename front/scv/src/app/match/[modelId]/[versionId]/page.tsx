@@ -320,7 +320,7 @@ export default function WorkspaceDetail({ params }: PageProps) {
   // 내 모델 블록
   const renderModelArchitecture = () => {
     try {
-      if (!versionData?.layers) return null;
+      if (!versionData || !versionData?.layers) return null;
 
       const blocks = convertApiToBlocks({ layers: versionData.layers });
 
