@@ -98,12 +98,17 @@ def delete_model(model_id: str, version_id: str):
         filter="model_version_id == '{}'".format(f"model_{model_id}_v{version_id}")
     )
     print(res)
-    res = dict(res)
-    print("{}개의 layer가 삭제되었습니다.".format(res["delete_count"]))
+    cnt = -1
+    try:
+        res = dict(res)
+        cnt = res["delete_count"]
+    except:
+        cnt = len(res)
+    print("{}개의 layer가 삭제되었습니다.".format(cnt))
     return JSONResponse(
         status_code=status.HTTP_200_OK,
         content={
-            "content": f"{res["delete_count"]}개의 layer가 삭제되었습니다."
+            "content": f"{cnt}개의 layer가 삭제되었습니다."
         }
     )
 
@@ -124,8 +129,6 @@ async def search_model(model_id: str, version_id: str, layer_id: str):
         collection_name=collection_name,
         ids=[model_version_layer_id]
     )
-
-    print(f"찾은 레이어: {model}")
 
     if (len(model) == 0):
         raise InvalidModelId(model_version_layer_id)
