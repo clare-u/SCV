@@ -10,7 +10,7 @@ public enum DataSet {
 
     MNIST(1, "MNIST"),
     Fashion(2, "Fashion"),
-    CIFAR10(3, "CIFAR-10"),
+    CIFAR10(3, "CIFAR10"),
     SVHN(4, "SVHN"),
     EMNIST(5, "EMNIST");
 
