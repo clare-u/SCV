@@ -95,7 +95,7 @@ def delete_model(model_id: str, version_id: str):
 
     res = client.delete(
         collection_name=collection_name,
-        filter="model_version_id == {}".format(f"model_{model_id}_v{version_id}")
+        filter="model_version_id == '{}'".format(f"model_{model_id}_v{version_id}")
     )
 
     res = dict(res)
