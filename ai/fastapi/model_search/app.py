@@ -155,7 +155,7 @@ async def search_model(model_id: str, version_id: str, layer_id: str):
     searched_model_version_id = id_parse[0] + id_parse[1] + id_parse[2]
     searched_layer_id = id_parse[1]
     searched_test_accuracy = results["entity"]["test_accuracy"]
-
+    print(f"searched_model_version_id: {searched_model_version_id}")
     target = model["layers"]
     target_test_accuracy = model["test_accuracy"]
     searched = results["entity"]["layers"]
