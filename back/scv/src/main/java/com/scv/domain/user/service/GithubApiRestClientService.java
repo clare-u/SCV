@@ -8,27 +8,36 @@ import com.scv.domain.user.dto.response.GithubRepoApiResponseDTO;
 import com.scv.domain.user.dto.response.GithubRepoFileApiResponseDTO;
 import com.scv.domain.user.exception.*;
 import com.scv.domain.user.util.GithubUrlBuilder;
-import com.scv.global.jwt.exception.ExpiredTokenException;
+import com.scv.global.jwt.service.RedisTokenService;
+import com.scv.global.jwt.util.CookieUtil;
 import com.scv.global.oauth2.auth.CustomOAuth2User;
+import com.scv.global.oauth2.service.RedisOAuth2AuthorizedClientService;
+import jakarta.servlet.http.HttpServletRequest;
+import jakarta.servlet.http.HttpServletResponse;
 import lombok.RequiredArgsConstructor;
 import org.springframework.context.annotation.Primary;
 import org.springframework.core.ParameterizedTypeReference;
 import org.springframework.http.HttpHeaders;
 import org.springframework.http.HttpStatusCode;
 import org.springframework.http.MediaType;
-import org.springframework.security.oauth2.client.OAuth2AuthorizedClientService;
 import org.springframework.stereotype.Service;
 import org.springframework.web.client.RestClient;
+import org.springframework.web.context.request.RequestContextHolder;
+import org.springframework.web.context.request.ServletRequestAttributes;
 
 import java.util.List;
 import java.util.Optional;
+
+import static com.scv.global.jwt.util.JwtUtil.ACCESS_TOKEN_NAME;
+import static com.scv.global.jwt.util.JwtUtil.REFRESH_TOKEN_NAME;
 
 @Service
 @Primary
 @RequiredArgsConstructor
 public class GithubApiRestClientService implements GithubApiService {
 
-    private final OAuth2AuthorizedClientService oAuth2AuthorizedClientService;
+    private final RedisTokenService redisTokenService;
+    private final RedisOAuth2AuthorizedClientService redisOAuth2AuthorizedClientService;
 
     private static final RestClient restClient = RestClient.builder()
             .defaultHeader(HttpHeaders.CONTENT_TYPE, MediaType.APPLICATION_JSON_VALUE)
@@ -47,13 +56,25 @@ public class GithubApiRestClientService implements GithubApiService {
 
     // 인증된 유저의 AccessToken 반환
     private String getAccessToken(CustomOAuth2User authUser) {
-        try {
-            return oAuth2AuthorizedClientService.loadAuthorizedClient("github", authUser.getName())
-                    .getAccessToken()
-                    .getTokenValue();
-        } catch (Exception e) {
-            throw ExpiredTokenException.getInstance();
+        String oauthToken = redisOAuth2AuthorizedClientService.getAccessToken("github", authUser.getName());
+
+        if (oauthToken == null) {
+            HttpServletRequest request = ((ServletRequestAttributes) RequestContextHolder.getRequestAttributes()).getRequest();
+            HttpServletResponse response = ((ServletRequestAttributes) RequestContextHolder.getRequestAttributes()).getResponse();
+
+            CookieUtil.getCookie(request, ACCESS_TOKEN_NAME)
+                    .ifPresent(cookie -> redisTokenService.addToBlacklist(cookie.getValue()));
+
+            CookieUtil.getCookie(request, REFRESH_TOKEN_NAME)
+                    .ifPresent(cookie -> redisTokenService.deleteFromWhitelist(cookie.getValue()));
+
+            CookieUtil.deleteCookie(response, ACCESS_TOKEN_NAME);
+            CookieUtil.deleteCookie(response, REFRESH_TOKEN_NAME);
+
+            throw GithubUnauthorizedException.getInstance();
         }
+
+        return oauthToken;
     }
 
     @Override
