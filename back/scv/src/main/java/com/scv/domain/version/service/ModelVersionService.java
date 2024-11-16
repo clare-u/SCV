@@ -133,7 +133,7 @@ public class ModelVersionService {
 
         // 버전, 정확도관리
         if (model.getLatestVersion() != 0) {
-            List<ModelVersion> modelVersionList = modelVersionRepository.findAllByModel_IdAndDeletedFalse(model.getId());
+            List<ModelVersion> modelVersionList = modelVersionRepository.findAllByModelIdAndDeletedFalse(model.getId());
             modelVersionList.sort(Comparator.comparingInt(ModelVersion::getVersionNo).reversed());
 
             if (!modelVersionList.isEmpty()) {
