@@ -97,7 +97,7 @@ def delete_model(model_id: str, version_id: str):
         collection_name=collection_name,
         filter="model_version_id == '{}'".format(f"model_{model_id}_v{version_id}")
     )
-
+    print(res)
     res = dict(res)
     print("{}개의 layer가 삭제되었습니다.".format(res["delete_count"]))
     return JSONResponse(
