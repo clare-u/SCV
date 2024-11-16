@@ -8,6 +8,7 @@ import com.scv.domain.user.dto.response.GithubRepoApiResponseDTO;
 import com.scv.domain.user.dto.response.GithubRepoFileApiResponseDTO;
 import com.scv.domain.user.exception.*;
 import com.scv.domain.user.util.GithubUrlBuilder;
+import com.scv.global.jwt.exception.ExpiredTokenException;
 import com.scv.global.oauth2.auth.CustomOAuth2User;
 import lombok.RequiredArgsConstructor;
 import org.springframework.context.annotation.Primary;
@@ -46,9 +47,13 @@ public class GithubApiRestClientService implements GithubApiService {
 
     // 인증된 유저의 AccessToken 반환
     private String getAccessToken(CustomOAuth2User authUser) {
-        return oAuth2AuthorizedClientService.loadAuthorizedClient("github", authUser.getName())
-                .getAccessToken()
-                .getTokenValue();
+        try {
+            return oAuth2AuthorizedClientService.loadAuthorizedClient("github", authUser.getName())
+                    .getAccessToken()
+                    .getTokenValue();
+        } catch (Exception e) {
+            throw ExpiredTokenException.getInstance();
+        }
     }
 
     @Override
