@@ -28,6 +28,7 @@ public class GithubUrlBuilder {
         return UriComponentsBuilder
                 .fromHttpUrl(GITHUB_API_URL)
                 .path(GET_REPO_LIST_PATH)
+                .queryParam("per_page", 100)
                 .buildAndExpand(authUser.getUserNickname())
                 .toUriString();
     }
