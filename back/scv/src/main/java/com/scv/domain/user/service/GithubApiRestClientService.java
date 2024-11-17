@@ -98,6 +98,16 @@ public class GithubApiRestClientService implements GithubApiService {
     }
 
     @Override
+    public void createGithubRepoReadme(CustomOAuth2User authUser, String repoName, ExportGithubRepoFileApiRequestDTO requestDTO) {
+        restClient.put()
+                .uri(GithubUrlBuilder.buildCreateRepoReadmeUrl(authUser, repoName))
+                .header(HttpHeaders.AUTHORIZATION, "Bearer " + getAccessToken(authUser))
+                .body(requestDTO)
+                .retrieve()
+                .toEntity(Void.class);
+    }
+
+    @Override
     public List<GithubRepoApiResponseDTO> getGithubRepoList(CustomOAuth2User authUser) {
         return restClient.get()
                 .uri(GithubUrlBuilder.buildRepoListUrl(authUser))
