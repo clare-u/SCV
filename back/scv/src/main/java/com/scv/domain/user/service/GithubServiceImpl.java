@@ -17,9 +17,12 @@ import com.scv.domain.user.exception.GithubConflictException;
 import com.scv.domain.user.exception.GithubNotFoundException;
 import com.scv.domain.user.repository.UserRepository;
 import lombok.RequiredArgsConstructor;
+import org.springframework.core.io.ClassPathResource;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
+import org.springframework.util.StreamUtils;
 
+import java.io.IOException;
 import java.nio.charset.StandardCharsets;
 import java.util.Base64;
 import java.util.Set;
@@ -51,11 +54,17 @@ public class GithubServiceImpl implements GithubService {
             throw GithubConflictException.getInstance();
         }
 
-        CreateGithubRepoApiRequestDTO newRequestDTO = CreateGithubRepoApiRequestDTO.builder()
+        CreateGithubRepoApiRequestDTO createGithubRepoApiRequestDTO = CreateGithubRepoApiRequestDTO.builder()
                 .name(requestDTO.getRepoName())
                 .description(getNewGithubRepoDescription(requestDTO.getRepoName()))
                 .build();
-        githubApiService.createGithubRepo(authUser, newRequestDTO);
+        githubApiService.createGithubRepo(authUser, createGithubRepoApiRequestDTO);
+
+        ExportGithubRepoFileApiRequestDTO exportGithubRepoFileApiRequestDTO = ExportGithubRepoFileApiRequestDTO.builder()
+                .content(Base64.getEncoder().encodeToString(getReadmeTemplate().getBytes(StandardCharsets.UTF_8)))
+                .message(getReadmeMessage())
+                .build();
+        githubApiService.createGithubRepoReadme(authUser, requestDTO.getRepoName(), exportGithubRepoFileApiRequestDTO);
 
         userRepository.updateUserRepoById(authUser.getUserId(), requestDTO.getRepoName());
         redisTokenService.addToBlacklist(accessToken);
@@ -76,9 +85,9 @@ public class GithubServiceImpl implements GithubService {
 
     // 깃허브에서 모델 import 서비스 로직
     @Override
-    public GithubRepoFileResponseDTO importGithubRepoFile(CustomOAuth2User auth2User, DataSet dataName, String modelName) {
+    public GithubRepoFileResponseDTO importGithubRepoFile(CustomOAuth2User authUser, DataSet dataName, String modelName) {
         return GithubRepoFileResponseDTO.builder()
-                .content(githubApiService.importGithubRepoFile(auth2User, dataName, modelName)
+                .content(githubApiService.importGithubRepoFile(authUser, dataName, modelName)
                         .map(GithubRepoFileApiResponseDTO::getContent)
                         .map(encodedContent -> new String(Base64.getDecoder().decode(encodedContent.replaceAll("\\s", ""))))
                         .orElse(null))
@@ -87,8 +96,8 @@ public class GithubServiceImpl implements GithubService {
 
     // 깃허브에 모델 export 서비스 로직
     @Override
-    public void exportGithubRepoFile(CustomOAuth2User auth2User, ExportGithubRepoFileRequestDTO requestDTO) {
-        String sha = githubApiService.importGithubRepoFile(auth2User, requestDTO.getDataName(), requestDTO.getModelName())
+    public void exportGithubRepoFile(CustomOAuth2User authUser, ExportGithubRepoFileRequestDTO requestDTO) {
+        String sha = githubApiService.importGithubRepoFile(authUser, requestDTO.getDataName(), requestDTO.getModelName())
                 .map(GithubRepoFileApiResponseDTO::getSha)
                 .orElse(null);
 
@@ -97,7 +106,16 @@ public class GithubServiceImpl implements GithubService {
                 .message(getExportMessage(requestDTO.getMessage(), requestDTO.getModelName(), requestDTO.getVersionNo(), sha))
                 .sha(sha)
                 .build();
-        githubApiService.exportGithubRepoFile(auth2User, requestDTO.getDataName(), requestDTO.getModelName(), newRequestDTO);
+        githubApiService.exportGithubRepoFile(authUser, requestDTO.getDataName(), requestDTO.getModelName(), newRequestDTO);
+    }
+
+    public String getReadmeTemplate() {
+        try {
+            ClassPathResource resource = new ClassPathResource("static/readme-template.txt");
+            return StreamUtils.copyToString(resource.getInputStream(), StandardCharsets.UTF_8);
+        } catch (IOException e) {
+            return "";
+        }
     }
 
     // 깃허브 새 리포 설명 메시지 반환
@@ -112,11 +130,16 @@ public class GithubServiceImpl implements GithubService {
                 .collect(Collectors.toSet());
     }
 
+    // 깃허브에 새 리포 생성 시 커밋 메시지 생성
+    private String getReadmeMessage() {
+        return "docs: README.md";
+    }
+
     // 깃허브에 모델 export 시 커밋 메시지 생성
     private String getExportMessage(String message, String modelName, Long versionNo, String sha) {
         if (message != null && !message.trim().isEmpty()) return message;
-        if (sha == null) return "feat: [" + modelName + " v-" + versionNo + "] - SCV";
-        return "refactor: [" + modelName + " v-" + versionNo + "] - SCV";
+        if (sha == null) return "feat: [" + modelName + "] version-" + versionNo + " - SCV";
+        return "refactor: [" + modelName + "] version-" + versionNo + " - SCV";
     }
 
 }

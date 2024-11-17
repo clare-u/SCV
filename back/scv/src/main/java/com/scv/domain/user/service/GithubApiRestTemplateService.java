@@ -98,6 +98,14 @@ public class GithubApiRestTemplateService implements GithubApiService {
     }
 
     @Override
+    public void createGithubRepoReadme(CustomOAuth2User authUser, String repoName, ExportGithubRepoFileApiRequestDTO requestDTO) {
+        String url = GithubUrlBuilder.buildCreateRepoReadmeUrl(authUser, repoName);
+
+        HttpEntity<ExportGithubRepoFileApiRequestDTO> entity = new HttpEntity<>(requestDTO, createHeaders(authUser));
+        restTemplate.exchange(url, HttpMethod.PUT, entity, Void.class);
+    }
+
+    @Override
     public List<GithubRepoApiResponseDTO> getGithubRepoList(CustomOAuth2User authUser) {
         String url = GithubUrlBuilder.buildRepoListUrl(authUser);
 

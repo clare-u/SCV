@@ -12,6 +12,8 @@ public class GithubUrlBuilder {
     private static final String GET_REPO_LIST_PATH = "/users/{userNickname}/repos";
     private static final String CREATE_REPO_PATH = "/user/repos";
 
+    private static final String CREATE_REPO_README_PATH = "/repos/{userNickname}/{userRepo}/contents/README.md";
+
     private static final String REPO_FILE_PATH = "/repos/{userNickname}/{userRepo}/contents/{dataName}/{modelName}/model.py";
 
     private GithubUrlBuilder() {
@@ -37,6 +39,14 @@ public class GithubUrlBuilder {
         return UriComponentsBuilder
                 .fromHttpUrl(GITHUB_API_URL)
                 .path(CREATE_REPO_PATH)
+                .toUriString();
+    }
+
+    public static String buildCreateRepoReadmeUrl(CustomOAuth2User authUser, String repoName) {
+        return UriComponentsBuilder
+                .fromHttpUrl(GITHUB_API_URL)
+                .path(CREATE_REPO_README_PATH)
+                .buildAndExpand(authUser.getUserNickname(), repoName)
                 .toUriString();
     }
 

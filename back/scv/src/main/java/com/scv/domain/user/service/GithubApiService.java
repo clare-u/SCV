@@ -28,6 +28,13 @@ public interface GithubApiService {
     void createGithubRepo(CustomOAuth2User authUser, CreateGithubRepoApiRequestDTO requestDTO);
 
     /**
+     * <p>GitHub 에 README 파일을 export 하는 메서드</p>
+     * <p>API Endpoint: <a href="https://api.github.com/repos/{userNickname}/{userRepo}/contents/README.md">[PUT] https://api.github.com/repos/{userNickname}/{userRepo}/contents/README.md</a></p>
+     * <p>GitHub API Document: <a href="https://docs.github.com/ko/rest/repos/contents?apiVersion=2022-11-28#create-or-update-file-contents">Create or update file contents</a></p>
+     */
+    void createGithubRepoReadme(CustomOAuth2User authUser, String repoName, ExportGithubRepoFileApiRequestDTO requestDTO);
+
+    /**
      * <p>GitHub 에서 Repository 목록을 조회하는 메서드</p>
      * <p>API Endpoint: <a href="https://api.github.com/users/{userNickname}/repos">[GET] https://api.github.com/users/{userNickname}/repos</a></p>
      * <p>GitHub API Document: <a href="https://docs.github.com/ko/rest/repos/repos?apiVersion=2022-11-28#list-repositories-for-a-user">List repositories for a user</a></p>

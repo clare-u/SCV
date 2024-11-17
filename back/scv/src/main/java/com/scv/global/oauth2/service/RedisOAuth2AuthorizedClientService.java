@@ -8,6 +8,8 @@ import org.springframework.security.oauth2.client.OAuth2AuthorizedClient;
 import org.springframework.security.oauth2.client.OAuth2AuthorizedClientService;
 import org.springframework.stereotype.Service;
 
+import java.util.concurrent.TimeUnit;
+
 @Service
 public class RedisOAuth2AuthorizedClientService implements OAuth2AuthorizedClientService {
 
@@ -34,7 +36,10 @@ public class RedisOAuth2AuthorizedClientService implements OAuth2AuthorizedClien
     @Override
     public void saveAuthorizedClient(OAuth2AuthorizedClient authorizedClient, Authentication principal) {
         String key = generateKey(authorizedClient.getClientRegistration().getRegistrationId(), principal.getName());
-        oauthRedisMasterTemplate.opsForValue().set(key, AESUtil.encrypt(authorizedClient.getAccessToken().getTokenValue()));
+
+        long duration = 14;
+
+        oauthRedisMasterTemplate.opsForValue().set(key, AESUtil.encrypt(authorizedClient.getAccessToken().getTokenValue()), duration, TimeUnit.DAYS);
     }
 
     @Override
