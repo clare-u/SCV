@@ -53,7 +53,7 @@ public class JwtUtil {
 
     public static String createRefreshToken(CustomOAuth2User authUser) {
         return Jwts.builder()
-                .setSubject(authUser.getUserId().toString())
+                .setSubject(authUser.getUserUuid())
                 .setIssuedAt(Date.from(ZonedDateTime.now(ZoneOffset.UTC).toInstant()))
                 .setExpiration(getExpirationDate(REFRESH_TOKEN_EXPIRATION))
                 .signWith(Keys.hmacShaKeyFor(REFRESH_TOKEN_SECRET_KEY_BYTES), SignatureAlgorithm.HS256)
