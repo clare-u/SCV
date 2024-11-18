@@ -5,7 +5,6 @@ import com.scv.domain.model.dto.request.ModelCreateRequest;
 import com.scv.domain.model.dto.response.ModelCreateResponse;
 import com.scv.domain.model.dto.response.ModelDetailResponse;
 import com.scv.domain.model.dto.response.ModelResponse;
-import com.scv.domain.model.repository.ModelRepository;
 import com.scv.domain.model.service.ModelService;
 import com.scv.global.oauth2.auth.AuthUser;
 import com.scv.global.oauth2.auth.CustomOAuth2User;
