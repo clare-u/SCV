@@ -19,6 +19,7 @@ export interface Model {
 export interface Content {
   content: Model[];
   pageable: Pageable;
+  totalElements: number;
 }
 
 // Pageable 객체에 대한 타입 정의
@@ -52,6 +53,7 @@ export interface MyModel {
 export interface MyModelList {
   content: MyModel[];
   pageable: Pageable;
+  totalElements: number;
 }
 
 // 모델의 버전들 조회

@@ -220,7 +220,7 @@ function Community() {
         </div>
 
         <Pagination
-          totalItems={data!.content.length || 0}
+          totalItems={data!.totalElements}
           currentPage={currentPage}
           pageCount={10}
           itemCountPerPage={12}
