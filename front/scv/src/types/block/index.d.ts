@@ -18,4 +18,5 @@ export interface BlockDefinition {
   name: string;
   params: BlockParam[];
   category?: BlockCategory;
+  tooltip?: string;
 }

@@ -179,6 +179,7 @@ export function convertApiToBlocks(apiData: {
       name: blockDef.name,
       params: params.filter((param) => param.value !== undefined),
       category: findBlockCategory(blockDef.name),
+      tooltip: blockDef.tooltip,
     };
   });
 }
