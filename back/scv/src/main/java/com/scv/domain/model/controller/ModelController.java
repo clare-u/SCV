@@ -1,13 +1,10 @@
 package com.scv.domain.model.controller;
 
 import com.scv.domain.data.enums.DataSet;
-import com.scv.domain.model.domain.Model;
 import com.scv.domain.model.dto.request.ModelCreateRequest;
 import com.scv.domain.model.dto.response.ModelCreateResponse;
 import com.scv.domain.model.dto.response.ModelDetailResponse;
 import com.scv.domain.model.dto.response.ModelResponse;
-import com.scv.domain.model.exception.ModelNotFoundException;
-import com.scv.domain.model.repository.ModelRepository;
 import com.scv.domain.model.service.ModelService;
 import com.scv.global.oauth2.auth.AuthUser;
 import com.scv.global.oauth2.auth.CustomOAuth2User;
@@ -36,7 +33,6 @@ public class ModelController {
 
     private final ModelService modelService;
     private final PageableUtil pageableUtil;
-    private final ModelRepository modelRepository;
 
     @PostMapping("")
     @Operation(summary = "모델 생성", description = "새로운 모델을 생성합니다.")
@@ -48,10 +44,6 @@ public class ModelController {
     })
     ResponseEntity<ModelCreateResponse> createModel(@RequestBody ModelCreateRequest request, @AuthUser CustomOAuth2User user) {
         ModelCreateResponse modelCreateResponse = modelService.createModel(request, user);
-        Long modelId = modelCreateResponse.modelId();
-        Model model = modelRepository.findById(modelId).orElseThrow(ModelNotFoundException::new);
-        log.info("model createdAt" + model.getCreatedAt().toString());
-        log.info("model updatedAt" + model.getUpdatedAt().toString());
 
         return ResponseEntity.status(201).body(modelCreateResponse);
     }
