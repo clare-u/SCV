@@ -6,7 +6,6 @@ import com.scv.global.jwt.service.RedisTokenService;
 import com.scv.global.jwt.util.CookieUtil;
 import com.scv.global.jwt.util.JwtUtil;
 import com.scv.global.jwt.enums.TokenStatus;
-import com.scv.global.oauth2.service.RedisOAuth2AuthorizedClientService;
 import com.scv.global.util.CustomResponse;
 import io.jsonwebtoken.Claims;
 import jakarta.servlet.FilterChain;
@@ -35,8 +34,7 @@ public class JwtVerifyFilter extends OncePerRequestFilter {
 
     private final CustomResponse customResponse;
     private final RedisTokenService redisTokenService;
-    private final RedisOAuth2AuthorizedClientService redisOAuth2AuthorizedClientService;
-    private final List<String> whitelistPatterns = List.of("^/api/v1/models(?!/users).*");
+    private final List<String> whitelistPatterns = List.of("^/api/v1/models(?!.*?/users).*");
 
     @Override
     protected void doFilterInternal(HttpServletRequest request, HttpServletResponse response, FilterChain filterChain) throws ServletException, IOException {
