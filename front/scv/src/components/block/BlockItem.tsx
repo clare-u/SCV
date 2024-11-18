@@ -110,8 +110,6 @@ const BlockItem: React.FC<BlockItemProps> = ({
     }
   };
 
-  console.log("Block tooltip:", block.tooltip); // 디버깅을 위한 로그 추가
-
   return (
     <div className={`transition-all duration-300 ease-in-out ${widthClass}`}>
       <div

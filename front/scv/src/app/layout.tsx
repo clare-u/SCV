@@ -29,7 +29,7 @@ export default function RootLayout({
           <div className="flex h-full flex-col items-center justify-center">
             {children}
           </div>
-          <Toaster richColors position="top-right" />
+          <Toaster richColors position="top-right" offset={60} />
         </QueryProvider>
       </body>
     </html>
