@@ -113,15 +113,28 @@ export default function Edit({ params }: EditProps) {
   // 버전 저장 함수 (patch)
   const { mutate: saveVersion, isPending, isError } = useSaveModelVersion();
 
-  const handleSaveVersion = () => {
-    const layerData = getLayerData(); // Layer 데이터를 가져옴
+  const handleSaveVersion = (callback?: () => void) => {
+    const layerData = getLayerData();
 
     const versionData: ModelVersionRequest = {
       model_version_id: params.versionId,
       layers: layerData,
     };
 
-    saveVersion({ versionId: params.versionId, versionData });
+    saveVersion(
+      { versionId: params.versionId, versionData },
+      {
+        onSuccess: () => {
+          if (callback && typeof callback === "function") {
+            callback();
+          }
+        },
+        onError: (error) => {
+          console.error("저장 중 오류 발생:", error);
+          toast.error("저장에 실패했습니다.");
+        },
+      },
+    );
   };
 
   // 실행
@@ -129,30 +142,33 @@ export default function Edit({ params }: EditProps) {
   const [runResult, setRunResult] = useState<RunResponse | null>(null);
   const { mutate: runModel, isPending: isRunning } = useRunModelVersion();
 
-  // 실행 버튼 핸들러 수정
-  // 실행 핸들러 수정
-  const handleRunModel = () => {
-    // 먼저 저장 작업 수행
-    handleSaveVersion();
-
-    // `modelData`와 유효성 검사를 수행합니다.
-    if (modelData && modelData.DataName) {
-      try {
-        blockListValidation(modelData.DataName as Dataset); // 유효성 검사 수행
-      } catch (error) {
-        console.log("블록 리스트가 유효하지 않습니다.");
-        return; // 유효하지 않으면 실행을 중단
-      }
-    } else {
+  // 실행 버튼 핸들러
+  const validateAndRun = () => {
+    if (!modelData?.DataName) {
       console.log("모델 데이터가 유효하지 않습니다.");
-      return; // modelData가 없으면 실행을 중단
+      return false;
     }
 
-    // 저장과 검사가 완료되면 실행 수행
-    runModel(params.versionId, {
-      onSuccess: (data) => {
-        setRunResult(data); // 실행 결과를 상태에 저장
-      },
+    const isValid = blockListValidation(modelData.DataName as Dataset);
+    if (!isValid) {
+      console.log("BlockList validation 실패");
+      return false;
+    }
+    // toast 메시지는 blockListValidation 내부에서 처리되므로
+    // 여기서는 단순히 true를 반환
+    return true;
+  };
+
+  // 실행 버튼 핸들러
+  const handleRunModel = () => {
+    // 저장 후 실행
+    handleSaveVersion(() => {
+      if (!validateAndRun()) return;
+      runModel(params.versionId, {
+        onSuccess: (data) => {
+          setRunResult(data);
+        },
+      });
     });
   };
 
