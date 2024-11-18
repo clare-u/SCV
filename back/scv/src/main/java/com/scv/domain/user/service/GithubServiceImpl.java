@@ -8,13 +8,13 @@ import com.scv.domain.user.dto.request.LinkGithubRepoRequestDTO;
 import com.scv.domain.user.dto.response.GithubEmailApiResponseDTO;
 import com.scv.domain.user.dto.response.GithubRepoApiResponseDTO;
 import com.scv.domain.user.dto.response.GithubRepoFileApiResponseDTO;
+import com.scv.domain.user.exception.GithubRepoNotFoundException;
 import com.scv.domain.user.exception.UserNotFoundException;
 import com.scv.global.jwt.service.RedisTokenService;
 import com.scv.global.jwt.util.JwtUtil;
 import com.scv.global.oauth2.auth.CustomOAuth2User;
 import com.scv.domain.user.dto.response.GithubRepoFileResponseDTO;
 import com.scv.domain.user.exception.GithubConflictException;
-import com.scv.domain.user.exception.GithubNotFoundException;
 import com.scv.domain.user.repository.UserRepository;
 import lombok.RequiredArgsConstructor;
 import org.springframework.core.io.ClassPathResource;
@@ -75,7 +75,7 @@ public class GithubServiceImpl implements GithubService {
     @Override
     public String linkCurrentGithubRepo(CustomOAuth2User authUser, LinkGithubRepoRequestDTO requestDTO, String accessToken) {
         if (!getGithubRepoNames(authUser).contains(requestDTO.getRepoName())) {
-            throw GithubNotFoundException.getInstance();
+            throw GithubRepoNotFoundException.getInstance();
         }
 
         userRepository.updateUserRepoById(authUser.getUserId(), requestDTO.getRepoName());

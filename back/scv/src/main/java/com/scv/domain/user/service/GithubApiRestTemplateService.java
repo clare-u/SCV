@@ -6,7 +6,7 @@ import com.scv.domain.user.dto.request.ExportGithubRepoFileApiRequestDTO;
 import com.scv.domain.user.dto.response.GithubEmailApiResponseDTO;
 import com.scv.domain.user.dto.response.GithubRepoApiResponseDTO;
 import com.scv.domain.user.dto.response.GithubRepoFileApiResponseDTO;
-import com.scv.domain.user.exception.GithubNotFoundException;
+import com.scv.domain.user.exception.GithubRepoNotFoundException;
 import com.scv.domain.user.exception.GithubUnauthorizedException;
 import com.scv.domain.user.util.GithubUrlBuilder;
 import com.scv.global.jwt.service.RedisTokenService;
@@ -124,7 +124,7 @@ public class GithubApiRestTemplateService implements GithubApiService {
             ResponseEntity<GithubRepoFileApiResponseDTO> responseEntity = restTemplate.exchange(url, HttpMethod.GET, entity, new ParameterizedTypeReference<>() {
             });
             return Optional.ofNullable(responseEntity.getBody());
-        } catch (GithubNotFoundException e) {
+        } catch (GithubRepoNotFoundException e) {
             return Optional.empty();
         }
     }
