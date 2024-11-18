@@ -91,6 +91,13 @@ const validateBlock = (
       return undefined;
     }
 
+    if (block.params[0].value && block.params[1].value && (block.params[0].value * block.params[1].value < 3)) {
+      toast.error(
+        `원활한 레이어 분석을 위해 in_channels 와 out_channels의 곱이 3 이상이 되게 해주세요.`,
+      );
+      return undefined;
+    }
+
     return {
       channels: out_channels,
       height: Math.floor(input.height - (kernel_size - 1) - 1 + 1),
