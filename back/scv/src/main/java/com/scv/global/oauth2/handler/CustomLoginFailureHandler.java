@@ -16,6 +16,7 @@ public class CustomLoginFailureHandler extends SimpleUrlAuthenticationFailureHan
 
     @Override
     public void onAuthenticationFailure(HttpServletRequest request, HttpServletResponse response, AuthenticationException exception) throws IOException {
+        log.error("CustomLoginFailureHandler Error");
         ResponseUtil.sendResponse(response, HttpServletResponse.SC_SERVICE_UNAVAILABLE, "CustomLoginFailureHandler", "소셜 로그인에 실패했습니다.");
     }
 }

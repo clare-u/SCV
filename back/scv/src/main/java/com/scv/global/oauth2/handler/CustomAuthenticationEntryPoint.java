@@ -23,7 +23,7 @@ public class CustomAuthenticationEntryPoint implements AuthenticationEntryPoint 
             return;
         }
 
-        log.error("CustomAuthenticationEntryPoint - authException: {}", authException.getMessage());
+        log.error("CustomAuthenticationEntryPoint Error");
         ResponseUtil.sendResponse(response, HttpServletResponse.SC_UNAUTHORIZED, "CustomAuthenticationEntryPoint", "인증되지 않은 사용자입니다.");
     }
 }
