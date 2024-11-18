@@ -81,11 +81,27 @@ export default function WorkspaceCard({
           <div className="flex flex-col items-end justify-center">
             <p className="text-12 text-gray-400">
               수정일:{" "}
-              {new Date(updatedAt).toISOString().replace("T", " ").slice(0, 19)}
+              {new Intl.DateTimeFormat("ko-KR", {
+                year: "numeric",
+                month: "2-digit",
+                day: "2-digit",
+                hour: "2-digit",
+                minute: "2-digit",
+                second: "2-digit",
+                timeZone: "Asia/Seoul",
+              }).format(new Date(updatedAt))}
             </p>
             <p className="text-12 text-gray-400">
               생성일:{" "}
-              {new Date(createdAt).toISOString().replace("T", " ").slice(0, 19)}
+              {new Intl.DateTimeFormat("ko-KR", {
+                year: "numeric",
+                month: "2-digit",
+                day: "2-digit",
+                hour: "2-digit",
+                minute: "2-digit",
+                second: "2-digit",
+                timeZone: "Asia/Seoul",
+              }).format(new Date(createdAt))}
             </p>
           </div>
           {/* dataset이 Editing이 아닐 때만 accuracy를 렌더링 */}
