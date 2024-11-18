@@ -22,8 +22,8 @@ import org.springframework.stereotype.Component;
 import org.springframework.web.filter.OncePerRequestFilter;
 
 import java.io.IOException;
+import java.util.List;
 import java.util.Optional;
-import java.util.Set;
 
 import static com.scv.global.jwt.util.JwtUtil.*;
 import static com.scv.global.jwt.enums.TokenStatus.EXPIRED;
@@ -36,7 +36,7 @@ public class JwtVerifyFilter extends OncePerRequestFilter {
     private final CustomResponse customResponse;
     private final RedisTokenService redisTokenService;
     private final RedisOAuth2AuthorizedClientService redisOAuth2AuthorizedClientService;
-    private final Set<String> whitelist = Set.of("/api/community/**");
+    private final List<String> whitelistPatterns = List.of("^/api/v1/models(?!/users).*");
 
     @Override
     protected void doFilterInternal(HttpServletRequest request, HttpServletResponse response, FilterChain filterChain) throws ServletException, IOException {
@@ -49,7 +49,7 @@ public class JwtVerifyFilter extends OncePerRequestFilter {
         }
 
         // 화이트 리스트의 API 는 JwtFilter 스킵
-        if (whitelist.contains(request.getRequestURI())) {
+        if (whitelistPatterns.stream().anyMatch(pattern -> request.getRequestURI().matches(pattern))) {
             filterChain.doFilter(request, response);
             return;
         }

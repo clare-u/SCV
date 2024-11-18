@@ -87,6 +87,8 @@ public class SecurityConfig {
                 .requestMatchers("/api/login/oauth2/code/*").permitAll()
                 .requestMatchers("/actuator/**").permitAll()
                 .requestMatchers("/api/v1/logout").permitAll()
+                .requestMatchers("/api/v1/models/users/**").denyAll()
+                .requestMatchers("/api/v1/models/**").permitAll()
                 .anyRequest().authenticated());
 
         // 세션 설정 : STATELESS
