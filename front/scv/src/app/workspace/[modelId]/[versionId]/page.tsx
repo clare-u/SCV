@@ -213,6 +213,7 @@ export default function WorkspaceDetail({ params }: PageProps) {
               ...param,
               value: param.value ?? 0,
             })),
+            tooltip: block.tooltip,
           }}
           category={findBlockCategory(block.name) || "Basic"} // 기본값 설정
           open={true}

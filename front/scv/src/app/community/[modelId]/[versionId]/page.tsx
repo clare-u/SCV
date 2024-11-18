@@ -191,6 +191,7 @@ export default function communityDetail({ params }: PageProps) {
               ...param,
               value: param.value ?? 0,
             })),
+            tooltip: block.tooltip,
           }}
           category={findBlockCategory(block.name)}
           open={true}

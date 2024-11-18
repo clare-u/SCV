@@ -2,6 +2,8 @@
 import { useState } from "react";
 import { BlockDefinition, BlockCategory } from "@/types";
 import { toast } from "sonner";
+import Tippy from "@tippyjs/react";
+import "tippy.js/dist/tippy.css";
 
 interface BlockItemProps {
   block: BlockDefinition;
@@ -65,9 +67,12 @@ const BlockItem: React.FC<BlockItemProps> = ({
     return initialValues;
   });
 
-  const toggleOpen = () => {
+  const toggleOpen = (e: React.MouseEvent) => {
     if (!small && isEditable) {
-      setIsOpen(!isOpen);
+      // 도움말 아이콘을 클릭했을 때는 토글하지 않음
+      if (!(e.target as HTMLElement).closest(".help-icon")) {
+        setIsOpen(!isOpen);
+      }
     }
   };
 
@@ -105,6 +110,8 @@ const BlockItem: React.FC<BlockItemProps> = ({
     }
   };
 
+  console.log("Block tooltip:", block.tooltip); // 디버깅을 위한 로그 추가
+
   return (
     <div className={`transition-all duration-300 ease-in-out ${widthClass}`}>
       <div
@@ -115,7 +122,19 @@ const BlockItem: React.FC<BlockItemProps> = ({
         } `}
         onClick={toggleOpen}
       >
-        <div className="text-20 font-extrabold text-white">{block.name}</div>
+        <div className="flex items-center gap-10 text-20 font-extrabold text-white">
+          {block.name}
+          {block.tooltip && (
+            <Tippy content={block.tooltip} interactive={true}>
+              <span
+                className="material-symbols-outlined help-icon cursor-pointer"
+                onClick={(e) => e.stopPropagation()}
+              >
+                help
+              </span>
+            </Tippy>
+          )}
+        </div>
       </div>
 
       <div
