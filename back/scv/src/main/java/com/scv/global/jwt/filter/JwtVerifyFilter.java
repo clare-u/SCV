@@ -6,7 +6,8 @@ import com.scv.global.jwt.service.RedisTokenService;
 import com.scv.global.jwt.util.CookieUtil;
 import com.scv.global.jwt.util.JwtUtil;
 import com.scv.global.jwt.enums.TokenStatus;
-import com.scv.global.util.ResponseUtil;
+import com.scv.global.oauth2.service.RedisOAuth2AuthorizedClientService;
+import com.scv.global.util.CustomResponse;
 import io.jsonwebtoken.Claims;
 import jakarta.servlet.FilterChain;
 import jakarta.servlet.ServletException;
@@ -14,7 +15,6 @@ import jakarta.servlet.http.Cookie;
 import jakarta.servlet.http.HttpServletRequest;
 import jakarta.servlet.http.HttpServletResponse;
 import lombok.RequiredArgsConstructor;
-import lombok.extern.slf4j.Slf4j;
 import org.springframework.security.authentication.UsernamePasswordAuthenticationToken;
 import org.springframework.security.core.Authentication;
 import org.springframework.security.core.context.SecurityContextHolder;
@@ -29,13 +29,14 @@ import static com.scv.global.jwt.util.JwtUtil.*;
 import static com.scv.global.jwt.enums.TokenStatus.EXPIRED;
 import static com.scv.global.jwt.enums.TokenStatus.TAMPERED;
 
-@Slf4j
 @Component
 @RequiredArgsConstructor
 public class JwtVerifyFilter extends OncePerRequestFilter {
 
+    private final CustomResponse customResponse;
     private final RedisTokenService redisTokenService;
-    private final Set<String> whitelist = Set.of();
+    private final RedisOAuth2AuthorizedClientService redisOAuth2AuthorizedClientService;
+    private final Set<String> whitelist = Set.of("/api/community/**");
 
     @Override
     protected void doFilterInternal(HttpServletRequest request, HttpServletResponse response, FilterChain filterChain) throws ServletException, IOException {
@@ -44,20 +45,17 @@ public class JwtVerifyFilter extends OncePerRequestFilter {
 
         // 유저 프로필 조회 API 는 특별 처리
         if (accessTokenCookie.isEmpty() && request.getRequestURI().equals("/api/v1/users")) {
-            log.error("User Profile Error");
             return;
         }
 
         // 화이트 리스트의 API 는 JwtFilter 스킵
         if (whitelist.contains(request.getRequestURI())) {
-            log.error("Whitelist Error");
             filterChain.doFilter(request, response);
             return;
         }
 
         // 나머지 API 는 엑세스 토큰이 없으면 필터 스킵
         if (accessTokenCookie.isEmpty()) {
-            log.error("Access Token is Empty Error");
             filterChain.doFilter(request, response);
             return;
         }
@@ -69,8 +67,8 @@ public class JwtVerifyFilter extends OncePerRequestFilter {
         // 엑세스 토큰이 블랙리스트에 있거나 위조됐으면 예외 발생
         if (redisTokenService.isBlacklisted(accessToken) ||
                 accessTokenStatus == TAMPERED) {
-            log.error("Access Token is Blacklisted or Tampered Error");
-            ResponseUtil.sendResponse(response, HttpServletResponse.SC_UNAUTHORIZED, "INVALID_TOKEN", "유효하지 않은 토큰입니다.");
+
+            customResponse.sendResponse(request, response, HttpServletResponse.SC_UNAUTHORIZED, "INVALID_TOKEN", "유효하지 않은 토큰입니다.");
             return;
         }
 
@@ -79,8 +77,7 @@ public class JwtVerifyFilter extends OncePerRequestFilter {
 
             // 리프레시 토큰이 없으면 예외 발생
             if (refreshTokenCookie.isEmpty()) {
-                log.error("Refresh Token is Empty Error");
-                ResponseUtil.sendResponse(response, HttpServletResponse.SC_FORBIDDEN, "EXPIRED_TOKEN", "만료된 토큰입니다.");
+                customResponse.sendResponse(request, response, HttpServletResponse.SC_UNAUTHORIZED, "INVALID_TOKEN", "유효하지 않은 토큰입니다.");
                 return;
             }
 
@@ -91,8 +88,8 @@ public class JwtVerifyFilter extends OncePerRequestFilter {
             // 리프레시 토큰이 화이트리스트에 없거나 위조됐으면 예외 발생
             if (!redisTokenService.isWhitelisted(refreshToken) ||
                     refreshTokenStatus == TAMPERED) {
-                log.error("Refresh Token is not Whitelisted or Tampered Error");
-                ResponseUtil.sendResponse(response, HttpServletResponse.SC_UNAUTHORIZED, "INVALID_TOKEN", "유효하지 않은 토큰입니다.");
+
+                customResponse.sendResponse(request, response, HttpServletResponse.SC_UNAUTHORIZED, "INVALID_TOKEN", "유효하지 않은 토큰입니다.");
                 return;
             }
 
