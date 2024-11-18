@@ -21,7 +21,6 @@ import org.springframework.stereotype.Component;
 import org.springframework.web.filter.OncePerRequestFilter;
 
 import java.io.IOException;
-import java.util.List;
 import java.util.Optional;
 
 import static com.scv.global.jwt.util.JwtUtil.*;
@@ -34,7 +33,6 @@ public class JwtVerifyFilter extends OncePerRequestFilter {
 
     private final CustomResponse customResponse;
     private final RedisTokenService redisTokenService;
-    private final List<String> whitelistPatterns = List.of("^/api/v1/models(?!.*?/users).*");
 
     @Override
     protected void doFilterInternal(HttpServletRequest request, HttpServletResponse response, FilterChain filterChain) throws ServletException, IOException {
@@ -47,7 +45,8 @@ public class JwtVerifyFilter extends OncePerRequestFilter {
         }
 
         // 화이트 리스트의 API 는 JwtFilter 스킵
-        if (whitelistPatterns.stream().anyMatch(pattern -> request.getRequestURI().matches(pattern))) {
+        if ((request.getRequestURI().startsWith("/api/v1/models/public") && request.getMethod().equalsIgnoreCase("GET"))
+        || (request.getRequestURI().startsWith("/api/v1/models/versions/public") && request.getMethod().equalsIgnoreCase("GET"))) {
             filterChain.doFilter(request, response);
             return;
         }

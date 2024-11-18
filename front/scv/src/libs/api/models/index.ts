@@ -33,7 +33,7 @@ export const fetchModels = async (
   });
 
   // 최종 URL 생성
-  const url = `/api/v1/models/?${queryParams.toString()}`;
+  const url = `/api/v1/models/public?${queryParams.toString()}`;
   console.log("API 요청 URL:", url);
   return handleApiRequest<Content, "get">(url, "get");
 };
@@ -103,7 +103,7 @@ export const fetchModelVersions = async (modelId: number) => {
 
 // 모델 버전 상세 조회
 export const fetchVersionDetails = async (versionId: number) => {
-  const url = `/api/v1/models/versions/${versionId}`;
+  const url = `/api/v1/models/versions/public/${versionId}`;
   console.log("API 요청 URL:", url);
   return handleApiRequest<VersionResponse, "get">(url, "get");
 };

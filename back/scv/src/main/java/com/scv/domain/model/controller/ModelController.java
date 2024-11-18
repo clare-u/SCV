@@ -85,7 +85,7 @@ public class ModelController {
         return ResponseEntity.ok(modelDetail);
     }
 
-    @GetMapping("/")
+    @GetMapping("/public")
     @Operation(summary = "전체 모델 조회", description = "전체 모델을 조회합니다. orderBy = createdAt or updatedAt, direction = asc or desc. 미입력시 정렬 안함.")
     @ApiResponses(value = {
             @ApiResponse(responseCode = "200", description = "모델 조회 성공"),

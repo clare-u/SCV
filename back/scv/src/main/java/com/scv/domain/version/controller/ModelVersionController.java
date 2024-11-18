@@ -49,7 +49,7 @@ public class ModelVersionController {
     }
 
     // 모델 버전 상세 조회
-    @GetMapping("/{versionId}")
+    @GetMapping("/public/{versionId}")
     @Operation(summary = "모델버전 상세조회", description = "모델 버전을 조회합니다.")
     @ApiResponses(value = {
             @ApiResponse(responseCode = "200", description = "모델버전 조회 성공"),
