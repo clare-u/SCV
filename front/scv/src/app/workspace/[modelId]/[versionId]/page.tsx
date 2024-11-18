@@ -14,7 +14,6 @@ import Chips from "@/components/chips/Chips";
 import type { ChipsProps } from "@/components/chips/Chips";
 import Button from "@/components/button/Button";
 import Dropdown from "@/components/dropdown/Dropdown";
-import CanvasComponent from "@/components/canvas/CanvasComponent";
 import CodeViewer from "@/components/code/CodeViewer";
 import BlockItem from "@/components/block/BlockItem";
 import { convertApiToBlocks, findBlockCategory } from "@/utils/block-converter";
@@ -113,14 +112,11 @@ export default function WorkspaceDetail({ params }: PageProps) {
   // github export
   const { mutate: exportModelMutation, isPending } = useExportModel();
 
-  // 블록 데이터를 JSON 문자열로 변환하는 함수
-  const getBlockContent = () => {
-    if (!versionData?.layers) return "";
-    const blocks = convertApiToBlocks({ layers: versionData.layers });
-    return JSON.stringify(blocks);
+  // 블록 코드를 내보내는 함수
+  const getBlockCode = () => {
+    if (!versionData?.resultResponseWithImages.codeView) return "";
+    return JSON.parse(versionData.resultResponseWithImages.codeView);
   };
-
-  console.log();
 
   // 유사모델 찾기
   const handleMatchClick = () => {
@@ -287,7 +283,7 @@ export default function WorkspaceDetail({ params }: PageProps) {
                   modelData.modelVersions.find(
                     (v) => v.versionId === Number(params.versionId),
                   )?.versionNo || 1,
-                content: getBlockContent(),
+                content: getBlockCode(),
               });
             }}
           >
