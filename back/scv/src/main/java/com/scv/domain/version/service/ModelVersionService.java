@@ -29,6 +29,7 @@ import com.scv.domain.version.exception.ModelVersionNotFoundException;
 import com.scv.domain.version.repository.ModelVersionRepository;
 import com.scv.global.util.ParsingUtil;
 import lombok.RequiredArgsConstructor;
+import lombok.extern.slf4j.Slf4j;
 import org.apache.coyote.BadRequestException;
 import org.springframework.data.domain.Page;
 import org.springframework.data.domain.Pageable;
@@ -37,10 +38,12 @@ import org.springframework.http.MediaType;
 import org.springframework.http.ResponseEntity;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
+import org.springframework.web.client.RestClientException;
 import org.springframework.web.client.RestTemplate;
 
 import java.util.*;
 
+@Slf4j
 @Service
 @RequiredArgsConstructor
 @Transactional
@@ -126,6 +129,20 @@ public class ModelVersionService {
         Model model = modelVersion.getModel();
 
         modelVersionRepository.softDeleteById(modelVersionId);
+        /**
+         * 벡터 DB 삭제 로직
+         */
+        String url = String.format("http://fast-search-service.scv.svc.cluster.local:8001/fast/v1/model/match/%d/%d", model.getId(), modelVersionId);
+        RestTemplate restTemplate = new RestTemplate();
+        try {
+            restTemplate.delete(url);
+            log.info("vectorDB 삭제 성공");
+        } catch (RestClientException e) {
+            log.error("vectorDB 삭제 실패: model_{}_v{}", model.getId(), modelVersionId);
+        }
+        /**
+         * 벡터 DB 삭제 로직
+         */
 
         // Result가 존재하는 경우에만 소프트 삭제
         Optional<Result> result = resultRepository.findByIdAndDeletedFalse(modelVersionId);
