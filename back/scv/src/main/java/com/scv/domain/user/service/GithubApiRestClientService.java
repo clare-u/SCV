@@ -46,7 +46,7 @@ public class GithubApiRestClientService implements GithubApiService {
                 switch (response.getStatusCode().value()) {
                     case 401 -> throw GithubUnauthorizedException.getInstance();
                     case 403 -> throw GithubForbiddenException.getInstance();
-                    case 404 -> throw GithubNotFoundException.getInstance();
+                    case 404 -> throw GithubRepoNotFoundException.getInstance();
                     case 409 -> throw GithubConflictException.getInstance();
                     case 422 -> throw GithubUnprocessableEntityException.getInstance();
                     default -> throw GithubBadRequestException.getInstance();
@@ -126,7 +126,7 @@ public class GithubApiRestClientService implements GithubApiService {
                     .retrieve()
                     .body(new ParameterizedTypeReference<>() {
                     });
-        } catch (GithubNotFoundException e) {
+        } catch (GithubRepoNotFoundException e) {
             return Optional.empty();
         }
     }

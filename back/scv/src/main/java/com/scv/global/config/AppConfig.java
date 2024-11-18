@@ -34,7 +34,7 @@ public class AppConfig {
                 case FORBIDDEN:
                     throw GithubForbiddenException.getInstance();
                 case NOT_FOUND:
-                    throw GithubNotFoundException.getInstance();
+                    throw GithubRepoNotFoundException.getInstance();
                 case CONFLICT:
                     throw GithubConflictException.getInstance();
                 case UNPROCESSABLE_ENTITY:
