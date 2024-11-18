@@ -10,6 +10,7 @@ import com.scv.global.jwt.filter.JwtVerifyFilter;
 import lombok.RequiredArgsConstructor;
 import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Configuration;
+import org.springframework.http.HttpMethod;
 import org.springframework.security.config.annotation.web.builders.HttpSecurity;
 import org.springframework.security.config.annotation.web.configuration.EnableWebSecurity;
 import org.springframework.security.config.annotation.web.configurers.AbstractHttpConfigurer;
@@ -87,10 +88,10 @@ public class SecurityConfig {
                 .requestMatchers("/api/login/oauth2/code/*").permitAll()
                 .requestMatchers("/actuator/**").permitAll()
                 .requestMatchers("/api/v1/logout").permitAll()
-                .requestMatchers("/api/v1/models/users/**").authenticated()
-                .requestMatchers("/api/v1/models/**").permitAll()
-                .requestMatchers("/api/v1/models/versions/users/**").authenticated()
-                .requestMatchers("/api/v1/models/versions/**").permitAll()
+                .requestMatchers("/api/v1/models/public").permitAll()
+                .requestMatchers("/api/v1/models/public/**").permitAll()
+                .requestMatchers("/api/v1/models/versions/public").permitAll()
+                .requestMatchers("/api/v1/models/versions/public/**").permitAll()
                 .anyRequest().authenticated());
 
         // 세션 설정 : STATELESS
