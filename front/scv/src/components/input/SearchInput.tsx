@@ -17,7 +17,7 @@ const SearchInput: React.FC<SearchInputProps> = ({
     onChange({ target: { value: "" } } as React.ChangeEvent<HTMLInputElement>);
 
   const handleKeyDown = (event: React.KeyboardEvent<HTMLInputElement>) => {
-    if (event.key === "Enter" && value.trim()) {
+    if (event.key === "Enter") {
       onSubmit(value);
     }
   };

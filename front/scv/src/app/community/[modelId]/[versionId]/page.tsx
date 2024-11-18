@@ -8,7 +8,6 @@ import Loading from "@/components/loading/Loading";
 import Chips from "@/components/chips/Chips";
 import type { ChipsProps } from "@/components/chips/Chips";
 import Image from "next/image";
-import CanvasComponent from "@/components/canvas/CanvasComponent";
 import CodeViewer from "@/components/code/CodeViewer";
 import BlockItem from "@/components/block/BlockItem";
 import { convertApiToBlocks, findBlockCategory } from "@/utils/block-converter";
