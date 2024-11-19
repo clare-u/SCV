@@ -45,23 +45,24 @@ public class CustomOAuth2UserService extends DefaultOAuth2UserService {
 
         // 신규 회원
         if (existUser == null) {
-            User user = User.builder()
-                    .userUuid(UUID.randomUUID().toString())
-                    .userEmail(oAuth2Response.getUserEmail())
-                    .userImageUrl(oAuth2Response.getUserImageUrl())
-                    .userNickname(oAuth2Response.getUserNickname())
-                    .userCreatedAt(oAuth2Response.getUserCreatedAt())
-                    .userUpdatedAt(oAuth2Response.getUserUpdatedAt())
-                    .build();
-            User savedUser = userRepository.save(user);
-
-            OAuth2UserDTO oAuth2UserDTO = OAuth2UserDTO.builder()
-                    .userId(savedUser.getUserId())
-                    .userUuid(savedUser.getUserUuid())
-                    .userNickname(savedUser.getUserNickname())
-                    .userRepo(savedUser.getUserRepo())
-                    .build();
-            return new CustomOAuth2User(oAuth2UserDTO);
+            return null;
+//            User user = User.builder()
+//                    .userUuid(UUID.randomUUID().toString())
+//                    .userEmail(oAuth2Response.getUserEmail())
+//                    .userImageUrl(oAuth2Response.getUserImageUrl())
+//                    .userNickname(oAuth2Response.getUserNickname())
+//                    .userCreatedAt(oAuth2Response.getUserCreatedAt())
+//                    .userUpdatedAt(oAuth2Response.getUserUpdatedAt())
+//                    .build();
+//            User savedUser = userRepository.save(user);
+//
+//            OAuth2UserDTO oAuth2UserDTO = OAuth2UserDTO.builder()
+//                    .userId(savedUser.getUserId())
+//                    .userUuid(savedUser.getUserUuid())
+//                    .userNickname(savedUser.getUserNickname())
+//                    .userRepo(savedUser.getUserRepo())
+//                    .build();
+//            return new CustomOAuth2User(oAuth2UserDTO);
         }
         // 기존 회원
         else {
