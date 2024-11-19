@@ -7,7 +7,7 @@ export const useSaveResult = () => {
   return useMutation<RunResponse, Error, number>({
     mutationFn: (versionId) => saveResult(versionId),
     onSuccess: (data) => {
-      console.log("실행 결과:", data); // 필요한 경우 실행 결과를 처리
+      // 필요한 경우 실행 결과를 처리
     },
     onError: (error) => {
       toast.error("결과 저장에 실패했습니다.");

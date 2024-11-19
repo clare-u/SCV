@@ -121,7 +121,6 @@ export default function WorkspaceDetail({ params }: PageProps) {
       )?.versionNo ?? 1
     }`,
   };
-  console.log("versionData:", versionData);
 
   const [selectedBlockIndex, setSelectedBlockIndex] = useState<number | null>(
     null,
@@ -178,7 +177,7 @@ export default function WorkspaceDetail({ params }: PageProps) {
       if (versionIdMatch && versionIdMatch.length === 3) {
         const modelId = parseInt(versionIdMatch[1], 10);
         const versionId = parseInt(versionIdMatch[2], 10);
-        console.log("Extracted modelId:", modelId, "and versionId:", versionId);
+
         setMatchModelModelId(modelId);
         setMatchModelVersionId(versionId);
       }
@@ -195,7 +194,7 @@ export default function WorkspaceDetail({ params }: PageProps) {
       },
     );
     if (!response.ok) {
-      console.log("HTTP response not OK, status:", response.status); // 오류 상태 로깅
+      // 오류 상태 로깅
       throw new Error("Network response was not ok");
     }
     const data = await response.json();
@@ -222,7 +221,7 @@ export default function WorkspaceDetail({ params }: PageProps) {
       },
     );
     if (!response.ok) {
-      console.log("HTTP response not OK, status:", response.status); // 오류 상태 로깅
+      // 오류 상태 로깅
       throw new Error("Network response was not ok");
     }
     const data = await response.json();
@@ -241,7 +240,7 @@ export default function WorkspaceDetail({ params }: PageProps) {
 
   // matchModelVersionData를 별도의 변수로 추출
   const matchModelVersionData = matchModelVersionQuery;
-  // console.log(matchModelData);
+  //
   const handleVersionChange = (version: Version) => {
     router.push(`/match/${params.modelId}/${version.id}`);
   };
@@ -346,9 +345,7 @@ export default function WorkspaceDetail({ params }: PageProps) {
             category={findBlockCategory(block.name) || "Basic"} // 기본값 설정
             open={true}
             isEditable={false}
-            onBlurParam={(paramIndex, value) => {
-              console.log(`Layer ${index}, Param ${paramIndex}: ${value}`);
-            }}
+            onBlurParam={(paramIndex, value) => {}}
           />
         </div>
       ));
@@ -395,9 +392,7 @@ export default function WorkspaceDetail({ params }: PageProps) {
           category={findBlockCategory(block.name) || "Basic"}
           open={true}
           isEditable={false}
-          onBlurParam={(paramIndex, value) => {
-            console.log(`Layer ${index}, Param ${paramIndex}: ${value}`);
-          }}
+          onBlurParam={(paramIndex, value) => {}}
         />
       </div>
     ));
