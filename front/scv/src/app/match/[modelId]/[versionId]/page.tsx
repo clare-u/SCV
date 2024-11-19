@@ -121,7 +121,6 @@ export default function WorkspaceDetail({ params }: PageProps) {
       )?.versionNo ?? 1
     }`,
   };
-  console.log("versionData:", versionData);
 
   const [selectedBlockIndex, setSelectedBlockIndex] = useState<number | null>(
     null,
@@ -130,8 +129,8 @@ export default function WorkspaceDetail({ params }: PageProps) {
   // 유사 모델 찾기
   const fetchMatchModelData = async (layerId: number) => {
     const response = await fetch(
-      // `http://localhost:8001/${params.modelId}/${params.versionId}/${layerId}/search`,
-      `https://k11a107.p.ssafy.io/fast/v1/model/match/${params.modelId}/${params.versionId}/${layerId}/search`,
+      `http://localhost:8001/${params.modelId}/${params.versionId}/${layerId}/search`,
+      // `https://k11a107.p.ssafy.io/fast/v1/model/match/${params.modelId}/${params.versionId}/${layerId}/search`,
       {
         method: "GET",
       },
@@ -178,7 +177,7 @@ export default function WorkspaceDetail({ params }: PageProps) {
       if (versionIdMatch && versionIdMatch.length === 3) {
         const modelId = parseInt(versionIdMatch[1], 10);
         const versionId = parseInt(versionIdMatch[2], 10);
-        console.log("Extracted modelId:", modelId, "and versionId:", versionId);
+
         setMatchModelModelId(modelId);
         setMatchModelVersionId(versionId);
       }
@@ -188,14 +187,14 @@ export default function WorkspaceDetail({ params }: PageProps) {
   // 유사모델 정보 불러오기 - matchModelVersionId가 있을 때만 호출
   const fetchVersionDetails = async (versionId: number) => {
     const response = await fetch(
-      // `http://localhost:8080/api/v1/models/versions/${versionId}`,
-      `https://k11a107.p.ssafy.io/api/v1/models/versions/${versionId}`,
+      `http://localhost:8080/api/v1/models/versions/${versionId}`,
+      // `https://k11a107.p.ssafy.io/api/v1/models/versions/${versionId}`,
       {
         credentials: "include", // 쿠키 및 인증 정보를 요청과 함께 보내기 위해 추가
       },
     );
     if (!response.ok) {
-      console.log("HTTP response not OK, status:", response.status); // 오류 상태 로깅
+      // 오류 상태 로깅
       throw new Error("Network response was not ok");
     }
     const data = await response.json();
@@ -215,14 +214,14 @@ export default function WorkspaceDetail({ params }: PageProps) {
   // 유사모델의 모델 정보 불러오기 - matchModelVersionId가 있을 때만 호출
   const fetchModelDetails = async (modelId: number) => {
     const response = await fetch(
-      // `http://localhost:8080/api/v1/models/${modelId}`,
-      `https://k11a107.p.ssafy.io/api/v1/models/${modelId}`,
+      `http://localhost:8080/api/v1/models/${modelId}`,
+      // `https://k11a107.p.ssafy.io/api/v1/models/${modelId}`,
       {
         credentials: "include", // 쿠키 및 인증 정보를 요청과 함께 보내기 위해 추가
       },
     );
     if (!response.ok) {
-      console.log("HTTP response not OK, status:", response.status); // 오류 상태 로깅
+      // 오류 상태 로깅
       throw new Error("Network response was not ok");
     }
     const data = await response.json();
@@ -241,7 +240,7 @@ export default function WorkspaceDetail({ params }: PageProps) {
 
   // matchModelVersionData를 별도의 변수로 추출
   const matchModelVersionData = matchModelVersionQuery;
-  // console.log(matchModelData);
+  //
   const handleVersionChange = (version: Version) => {
     router.push(`/match/${params.modelId}/${version.id}`);
   };
@@ -346,9 +345,7 @@ export default function WorkspaceDetail({ params }: PageProps) {
             category={findBlockCategory(block.name) || "Basic"} // 기본값 설정
             open={true}
             isEditable={false}
-            onBlurParam={(paramIndex, value) => {
-              console.log(`Layer ${index}, Param ${paramIndex}: ${value}`);
-            }}
+            onBlurParam={(paramIndex, value) => {}}
           />
         </div>
       ));
@@ -395,9 +392,7 @@ export default function WorkspaceDetail({ params }: PageProps) {
           category={findBlockCategory(block.name) || "Basic"}
           open={true}
           isEditable={false}
-          onBlurParam={(paramIndex, value) => {
-            console.log(`Layer ${index}, Param ${paramIndex}: ${value}`);
-          }}
+          onBlurParam={(paramIndex, value) => {}}
         />
       </div>
     ));

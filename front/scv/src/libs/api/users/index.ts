@@ -33,7 +33,6 @@ export const deleteRepo = async () => {
 // 모델 내보내기 함수
 export const exportModel = async (exportData: ExportRequest) => {
   const url = `/api/v1/users/repo/export`;
-  console.log("API 요청 URL:", url);
 
   return handleApiRequest<void, "post", ExportRequest>(url, "post", exportData);
 };

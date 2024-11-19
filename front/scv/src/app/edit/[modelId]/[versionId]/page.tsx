@@ -101,11 +101,7 @@ export default function Edit({ params }: EditProps) {
       const isValid = modelData.modelVersions.some(
         (version) => Number(version.versionId) === currentVersionId,
       );
-      console.log("Version validation:", {
-        currentVersionId,
-        availableVersions: modelData.modelVersions.map((v) => v.versionId),
-        isValid,
-      });
+  
       setIsVersionValid(isValid);
     }
   }, [modelData, params.versionId]);
@@ -145,13 +141,11 @@ export default function Edit({ params }: EditProps) {
   // 실행 버튼 핸들러
   const validateAndRun = () => {
     if (!modelData?.DataName) {
-      console.log("모델 데이터가 유효하지 않습니다.");
       return false;
     }
 
     const isValid = blockListValidation(modelData.DataName as Dataset);
     if (!isValid) {
-      console.log("BlockList validation 실패");
       return false;
     }
     // toast 메시지는 blockListValidation 내부에서 처리되므로

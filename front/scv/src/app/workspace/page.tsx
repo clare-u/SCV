@@ -123,7 +123,7 @@ function Community() {
   };
 
   if (data) {
-    console.log(data); // 데이터가 로드되었을 때만 출력
+    // 데이터가 로드되었을 때만 출력
   }
 
   // URL 파라미터가 변경될 때마다 데이터 리프레시
