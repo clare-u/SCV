@@ -2,6 +2,9 @@
 FROM node:18-alpine AS build
 WORKDIR /app
 
+# 안정적인 yarn 버전 설치
+RUN npm install -g yarn
+
 # 의존성 설치
 COPY package.json yarn.lock ./
 RUN yarn install
