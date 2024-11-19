@@ -8,7 +8,6 @@ import com.scv.global.oauth2.user.OAuth2GithubResponse;
 import com.scv.global.oauth2.user.OAuth2Response;
 import com.scv.domain.user.domain.User;
 import com.scv.domain.user.repository.UserRepository;
-import jakarta.servlet.http.HttpServletResponse;
 import lombok.RequiredArgsConstructor;
 import org.springframework.security.oauth2.client.userinfo.DefaultOAuth2UserService;
 import org.springframework.security.oauth2.client.userinfo.OAuth2UserRequest;
@@ -46,24 +45,23 @@ public class CustomOAuth2UserService extends DefaultOAuth2UserService {
 
         // 신규 회원
         if (existUser == null) {
-            return null;
-//            User user = User.builder()
-//                    .userUuid(UUID.randomUUID().toString())
-//                    .userEmail(oAuth2Response.getUserEmail())
-//                    .userImageUrl(oAuth2Response.getUserImageUrl())
-//                    .userNickname(oAuth2Response.getUserNickname())
-//                    .userCreatedAt(oAuth2Response.getUserCreatedAt())
-//                    .userUpdatedAt(oAuth2Response.getUserUpdatedAt())
-//                    .build();
-//            User savedUser = userRepository.save(user);
-//
-//            OAuth2UserDTO oAuth2UserDTO = OAuth2UserDTO.builder()
-//                    .userId(savedUser.getUserId())
-//                    .userUuid(savedUser.getUserUuid())
-//                    .userNickname(savedUser.getUserNickname())
-//                    .userRepo(savedUser.getUserRepo())
-//                    .build();
-//            return new CustomOAuth2User(oAuth2UserDTO);
+            User user = User.builder()
+                    .userUuid(UUID.randomUUID().toString())
+                    .userEmail(oAuth2Response.getUserEmail())
+                    .userImageUrl(oAuth2Response.getUserImageUrl())
+                    .userNickname(oAuth2Response.getUserNickname())
+                    .userCreatedAt(oAuth2Response.getUserCreatedAt())
+                    .userUpdatedAt(oAuth2Response.getUserUpdatedAt())
+                    .build();
+            User savedUser = userRepository.save(user);
+
+            OAuth2UserDTO oAuth2UserDTO = OAuth2UserDTO.builder()
+                    .userId(savedUser.getUserId())
+                    .userUuid(savedUser.getUserUuid())
+                    .userNickname(savedUser.getUserNickname())
+                    .userRepo(savedUser.getUserRepo())
+                    .build();
+            return new CustomOAuth2User(oAuth2UserDTO);
         }
         // 기존 회원
         else {
