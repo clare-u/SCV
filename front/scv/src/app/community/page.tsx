@@ -105,11 +105,6 @@ function Community() {
     window.scrollTo(0, 0);
   }, [currentPage]);
 
-  // data 로드 시 콘솔에 출력
-  if (data) {
-    console.log(data); // 데이터가 로드되었을 때만 출력
-  }
-
   if (isLoading) return <Loading />;
   if (error) return <div>에러 발생: {error.message}</div>;
 

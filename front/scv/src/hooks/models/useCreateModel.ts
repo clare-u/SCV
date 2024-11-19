@@ -11,7 +11,6 @@ export const useCreateModel = (options?: UseCreateModelOptions) => {
   return useMutation<ModelResponse, ApiErrorResponse, ModelRequest>({
     mutationFn: (modelData: ModelRequest) => createModel(modelData),
     onSuccess: (data) => {
-      console.log("모델 생성 성공:", data);
       options?.onSuccess?.(data);
     },
     onError: (error) => {

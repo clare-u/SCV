@@ -142,13 +142,6 @@ export function convertBlocksToApiFormat(blocks: BlockDefinition[]): {
         });
       }
 
-      // 변환된 레이어 로깅
-      console.log("Converting block to layer:", {
-        originalName: block.name,
-        convertedName: backendName,
-        layer,
-      });
-
       return layer;
     });
 

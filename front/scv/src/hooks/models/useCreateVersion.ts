@@ -20,7 +20,6 @@ export const useCreateVersion = () => {
 
     onError: (error) => {
       toast.error("모델 버전 생성에 실패했습니다.");
-      console.log("버전 생성 에러: ", error);
     },
   });
 };

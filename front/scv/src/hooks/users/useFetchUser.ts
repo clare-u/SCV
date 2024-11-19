@@ -7,7 +7,7 @@ export const useFetchUser = () => {
     queryKey: ["member"],
     queryFn: async () => {
       const data = await fetchUser();
-      console.log("Member Data:", data);
+
       return data;
     },
   });

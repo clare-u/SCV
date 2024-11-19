@@ -101,7 +101,6 @@ export default function communityDetail({ params }: PageProps) {
       )?.versionNo ?? 1
     }`,
   };
-  console.log("versionData:", versionData);
 
   // 에러 및 로딩 상태 처리
   if (!params.versionId || params.versionId === null) {
@@ -196,9 +195,7 @@ export default function communityDetail({ params }: PageProps) {
           category={findBlockCategory(block.name)}
           open={true}
           isEditable={false}
-          onBlurParam={(paramIndex, value) => {
-            console.log(`Layer ${index}, Param ${paramIndex}: ${value}`);
-          }}
+          onBlurParam={(paramIndex, value) => {}}
         />
       ));
     } catch (error) {

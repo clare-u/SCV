@@ -107,7 +107,6 @@ export default function WorkspaceDetail({ params }: PageProps) {
       )?.versionNo ?? 1
     }`,
   };
-  console.log("versionData:", versionData);
 
   // github export
   const { mutate: exportModelMutation, isPending } = useExportModel();
@@ -218,9 +217,7 @@ export default function WorkspaceDetail({ params }: PageProps) {
           category={findBlockCategory(block.name) || "Basic"} // 기본값 설정
           open={true}
           isEditable={false}
-          onBlurParam={(paramIndex, value) => {
-            console.log(`Layer ${index}, Param ${paramIndex}: ${value}`);
-          }}
+          onBlurParam={(paramIndex, value) => {}}
         />
       ));
     } catch (error) {
