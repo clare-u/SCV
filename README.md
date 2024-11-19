@@ -51,8 +51,8 @@
         </td>
     </tr>
     <tr>
-        <td><strong>AI, BE</strong></td>
-        <td><strong>FE, DESIGN</strong></td>
+        <td><strong>AI/BE</strong></td>
+        <td><strong>FE/DESIGN</strong></td>
         <td><strong>BE</strong></td>
         <td><strong>INFRA/DESIGN</strong></td>
         <td><strong>BE</strong></td>
@@ -62,21 +62,31 @@
 
 ## 기획 배경
 
-**개요**
+**개요**  
+블록 코딩 인터페이스를 활용하여, 딥러닝 지식이 거의 없어도 모델을 드래그 앤 드롭으로 손쉽게 구성할 수 있도록 구현하고자 하였습니다.
 
-**목적**
+**목적**  
+프로그래밍 지식이 없는 사용자도 쉽고 직관적으로 딥러닝 모델을 제작, 학습, 테스트할 수 있도록 서비스를 기획하였습니다.
 
 ## 서비스 구조
 
-### 아키텍쳐<hr>
+### 아키텍처
 
-### ERD<hr>
+<hr>
+<p>
+  <img src="./exec/img/architecture.PNG" alt="architecture" width="600">
+</p>
 
-![erd](./exec/img/erd.PNG)
+### ERD
 
-### 주요 기술<hr>
+<hr>
+<p>
+  <img src="./exec/img/erd.PNG" alt="erd" width="600">
+</p>
 
-**개발 환경**
+### Tech Stack<hr>
+
+**Environment**
 
 [![VSCode](https://img.shields.io/badge/VS%20Code-007ACC?&logo=visual-studio-code&logoColor=white)](https://code.visualstudio.com/)
 [![IntelliJ](https://img.shields.io/badge/IntelliJ%20IDEA-000000?&logo=intellij-idea&logoColor=white)](https://www.jetbrains.com/idea/)
@@ -115,7 +125,7 @@
 ![Jenkins](https://img.shields.io/badge/Jenkins-D24939?&logo=jenkins&logoColor=white)
 ![Ubuntu](https://img.shields.io/badge/Ubuntu-E95420?&logo=ubuntu&logoColor=white)
 
-**협업**
+**Communication**
 
 ![Mattermost](https://img.shields.io/badge/Mattermost-0072C6?&logo=mattermost&logoColor=white)
 ![Jira](https://img.shields.io/badge/Jira-0052CC?&logo=jira&logoColor=white)
