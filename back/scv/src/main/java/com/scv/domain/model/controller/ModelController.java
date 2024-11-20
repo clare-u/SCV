@@ -69,7 +69,7 @@ public class ModelController {
             @ApiResponse(responseCode = "401", description = "인가되지 않은 사용자", content = @Content(schema = @Schema(implementation = ErrorResponse.class))),
             @ApiResponse(responseCode = "404", description = "모델을 찾을 수 없음", content = @Content(schema = @Schema(implementation = ErrorResponse.class)))
     })
-    public ResponseEntity<Void> updateModelName(@PathVariable("modelId") Long modelId, String newName, @AuthUser CustomOAuth2User user) throws BadRequestException {
+    public ResponseEntity<Void> updateModelName(@PathVariable("modelId") Long modelId, @RequestBody String newName, @AuthUser CustomOAuth2User user) throws BadRequestException {
         modelService.updateModelName(modelId, newName, user);
         return ResponseEntity.ok().build();
     }
