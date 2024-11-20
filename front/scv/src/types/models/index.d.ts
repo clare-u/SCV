@@ -200,9 +200,3 @@ export interface MatchModelData {
   test_accuracy: number;
   layers: Layer[];
 }
-
-// 모델 이름 수정
-export interface ModelTitleRequest {
-  modelId: number;
-  newName: string;
-}

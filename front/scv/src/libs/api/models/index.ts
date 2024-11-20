@@ -8,7 +8,6 @@ import {
   ModelResponse,
   ModelVersionRequest,
   RunResponse,
-  ModelTitleRequest,
 } from "@/types";
 import { handleApiRequest } from "../client";
 
@@ -127,7 +126,6 @@ export const saveModelVersion = async (
 ) => {
   const url = `/api/v1/models/versions/${versionId}`;
 
-  // PATCH 요청을 통해 모델 버전 업데이트
   return handleApiRequest<void, "patch", ModelVersionRequest>(
     url,
     "patch",
@@ -170,15 +168,8 @@ export const createVersion = async (
 };
 
 // 모델 이름 수정
-export const updateModelTitle = async (
-  modelId: number,
-  titleData: ModelTitleRequest,
-) => {
+export const updateModelTitle = async (modelId: number, newName: string) => {
   const url = `/api/v1/models/${modelId}`;
 
-  return handleApiRequest<void, "patch", ModelTitleRequest>(
-    url,
-    "patch",
-    titleData,
-  );
+  return handleApiRequest<void, "patch", string>(url, "patch", newName);
 };
