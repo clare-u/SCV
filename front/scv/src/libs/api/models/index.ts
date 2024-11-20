@@ -8,6 +8,7 @@ import {
   ModelResponse,
   ModelVersionRequest,
   RunResponse,
+  ModelTitleRequest,
 } from "@/types";
 import { handleApiRequest } from "../client";
 
@@ -168,8 +169,16 @@ export const createVersion = async (
   return handleApiRequest<ModelResponse, "post">(url, "post");
 };
 
-interface UploadFileParams {
-  modelId: number;
-  versionId: number;
-  file: File;
-}
+// 모델 이름 수정
+export const updateModelTitle = async (
+  modelId: number,
+  titleData: ModelTitleRequest,
+) => {
+  const url = `/api/v1/models/${modelId}`;
+
+  return handleApiRequest<void, "patch", ModelTitleRequest>(
+    url,
+    "patch",
+    titleData,
+  );
+};

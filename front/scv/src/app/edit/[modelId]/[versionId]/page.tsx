@@ -17,6 +17,7 @@ import {
   useSaveModelVersion,
   useRunModelVersion,
   useSaveResult,
+  useUpdateModelTitle,
 } from "@/hooks";
 import Loading from "@/components/loading/Loading";
 import { useRouter } from "next/navigation";
@@ -76,6 +77,10 @@ export default function Edit({ params }: EditProps) {
     EMNIST: "red",
   };
 
+  // 모델 이름 수정
+  const { mutate: updateTitle, isPending: isTitleUpdating } =
+    useUpdateModelTitle();
+
   // 편집 모드 시작 시 editedTitle을 현재 title로 설정
   const handleStartEditing = () => {
     setEditedTitle(title);
@@ -83,9 +88,21 @@ export default function Edit({ params }: EditProps) {
   };
 
   const handleSaveTitle = () => {
-    // TODO: API 연동 시 제목 업데이트 로직 추가
-    setTitle(editedTitle);
-    setIsEditing(false);
+    updateTitle(
+      {
+        modelId: params.modelId,
+        titleData: {
+          modelId: params.modelId,
+          newName: editedTitle,
+        },
+      },
+      {
+        onSuccess: () => {
+          setTitle(editedTitle);
+          setIsEditing(false);
+        },
+      },
+    );
   };
 
   const handleCancelEdit = () => {
@@ -101,7 +118,7 @@ export default function Edit({ params }: EditProps) {
       const isValid = modelData.modelVersions.some(
         (version) => Number(version.versionId) === currentVersionId,
       );
-  
+
       setIsVersionValid(isValid);
     }
   }, [modelData, params.versionId]);
@@ -326,6 +343,7 @@ export default function Edit({ params }: EditProps) {
                     design="fill"
                     color="indigo"
                     onClick={handleSaveTitle}
+                    disabled={isTitleUpdating}
                     icon="edit"
                   >
                     수정
@@ -336,6 +354,7 @@ export default function Edit({ params }: EditProps) {
                     color="red"
                     onClick={handleCancelEdit}
                     icon="close"
+                    disabled={isTitleUpdating}
                   >
                     수정 취소
                   </Button>
