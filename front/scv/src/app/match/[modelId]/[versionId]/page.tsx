@@ -188,7 +188,7 @@ export default function WorkspaceDetail({ params }: PageProps) {
   const fetchVersionDetails = async (versionId: number) => {
     const response = await fetch(
       // `http://localhost:8080/api/v1/models/versions/${versionId}`,
-      `https://k11a107.p.ssafy.io/api/v1/models/versions/${versionId}`,
+      `https://k11a107.p.ssafy.io/api/v1/models/versions/public/${versionId}`,
       {
         credentials: "include", // 쿠키 및 인증 정보를 요청과 함께 보내기 위해 추가
       },
