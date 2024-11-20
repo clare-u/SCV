@@ -64,7 +64,7 @@ public class ModelService {
         return new ModelCreateResponse(savedModel.getId(), firstVersion.getId());
     }
 
-    
+
     // 전체 모델 조회
     @Transactional(readOnly = true)
     public Page<ModelResponse> getAllModels(Pageable pageable, DataSet dataName, String modelName) {
@@ -92,7 +92,7 @@ public class ModelService {
     public void updateModelName(Long modelId, String name, CustomOAuth2User user) throws BadRequestException {
         Model model = modelRepository.findById(modelId).orElseThrow(ModelNotFoundException::new);
 
-        if (user.getUserId() != model.getUser().getUserId()) {
+        if (user.getUserId().equals(model.getUser().getUserId())) {
             throw new BadRequestException("자신의 모델만 수정할 수 있습니다.");
         }
 
