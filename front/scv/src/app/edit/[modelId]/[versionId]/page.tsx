@@ -91,10 +91,7 @@ export default function Edit({ params }: EditProps) {
     updateTitle(
       {
         modelId: params.modelId,
-        titleData: {
-          modelId: params.modelId,
-          newName: editedTitle,
-        },
+        newName: editedTitle,
       },
       {
         onSuccess: () => {

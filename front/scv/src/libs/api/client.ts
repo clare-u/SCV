@@ -34,18 +34,18 @@ export const handleApiRequest = async <T, M extends HttpMethod, D = undefined>(
       const apiError: ApiErrorResponse = error.response.data;
       const { message, httpStatus, code } = apiError;
 
-      console.error(
-        `%c🚨 API Request Error 🚨\n%cEndpoint: %s\n%cHTTP Status: %s\n%cError Code: %s\n%cMessage: %s`,
-        "color: red; font-weight: bold; font-size: 16px; background-color: yellow; padding: 2px;",
-        "color: #333; font-weight: bold; background: #f1f1f1; padding: 2px; border-radius: 3px;",
-        url,
-        "color: #ff6347; font-weight: bold;",
-        httpStatus,
-        "color: #ff6347; font-weight: bold;",
-        code,
-        "color: #ff6347; font-weight: bold;",
-        message,
-      );
+      // console.error(
+      //   `%c🚨 API Request Error 🚨\n%cEndpoint: %s\n%cHTTP Status: %s\n%cError Code: %s\n%cMessage: %s`,
+      //   "color: red; font-weight: bold; font-size: 16px; background-color: yellow; padding: 2px;",
+      //   "color: #333; font-weight: bold; background: #f1f1f1; padding: 2px; border-radius: 3px;",
+      //   url,
+      //   "color: #ff6347; font-weight: bold;",
+      //   httpStatus,
+      //   "color: #ff6347; font-weight: bold;",
+      //   code,
+      //   "color: #ff6347; font-weight: bold;",
+      //   message,
+      // );
 
       if (httpStatus === 401) {
         // 리다이렉트 전에 메시지 저장
@@ -56,7 +56,7 @@ export const handleApiRequest = async <T, M extends HttpMethod, D = undefined>(
       throw apiError;
     }
 
-    console.error("🚨 Unexpected error making API request 🚨\n", error);
+    // console.error("🚨 Unexpected error making API request 🚨\n", error);
     throw error;
   }
 };
