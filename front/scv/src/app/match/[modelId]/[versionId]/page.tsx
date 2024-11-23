@@ -553,7 +553,7 @@ export default function WorkspaceDetail({ params }: PageProps) {
                     <Chips
                       color={
                         datasetColors[matchModelModelQuery.DataName] ||
-                        datasetColors.defaultt
+                        datasetColors.default
                       }
                       design="fill"
                     >
