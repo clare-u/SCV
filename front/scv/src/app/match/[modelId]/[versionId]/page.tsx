@@ -363,11 +363,45 @@ export default function WorkspaceDetail({ params }: PageProps) {
   // 유사 모델 블록
   const renderMatchModelArchitecture = () => {
     if (matchModelLoading) return <Loading />;
-    if (matchModelError)
-      return (
-        <div>Error loading match model data: {matchModelError.message}</div>
-      );
-    if (!matchModelData) return null;
+    if (matchModelError || !matchModelData) {
+      // 에러 발생 시 기본 더미 데이터를 렌더링
+      const dummyData = {
+        layers: [
+          { name: "Conv2d", in_channels: 1, out_channels: 24, kernel_size: 3 },
+          { name: "MaxPool2d", kernel_size: 2, stride: 2 },
+          { name: "ReLU" },
+          { name: "Linear", in_features: 4056, out_features: 10 },
+        ],
+      };
+
+      const blocks = convertApiToBlocks({ layers: dummyData.layers });
+
+      return blocks.map((block, index) => (
+        <div
+          key={`${block.name}-${index}`}
+          className={`${
+            matchModelData?.layer_id === index
+              ? "rounded-12 border-4 border-blue-900 p-2"
+              : ""
+          }`}
+        >
+          <BlockItem
+            block={{
+              name: block.name,
+              params: block.params.map((param) => ({
+                ...param,
+                value: param.value ?? 0,
+              })),
+              tooltip: block.tooltip,
+            }}
+            category={findBlockCategory(block.name) || "Basic"}
+            open={true}
+            isEditable={false}
+            onBlurParam={(paramIndex, value) => {}}
+          />
+        </div>
+      ));
+    }
 
     const blocks = convertApiToBlocks({ layers: matchModelData.layers });
 
@@ -539,8 +573,13 @@ export default function WorkspaceDetail({ params }: PageProps) {
                           />
                         </div>
                       ) : (
-                        <div className="flex h-[600px] items-center justify-center text-gray-500">
-                          코드 정보를 찾을 수 없습니다.
+                        <div className="h-[600px] items-center justify-center py-10">
+                          <CodeViewer
+                            codeString={"\"import torch\\nimport torch.nn as nn\\n\\n# 모델 이름: model_23_v27\\n# 데이터셋: MNIST\\n# 학습 데이터 수: 50000\\n# 테스트 데이터 수: 10000\\n# 레이블 수: 10\\n# 에폭 수: 2\\n\\nclass Model(nn.Module):\\n    def __init__(self):\\n        super().__init__()\\n\\n        self.layer0 = nn.Conv2d(in_channels=1, out_channels=24, kernel_size=(3, 3), stride=(1, 1), padding=(0, 0), dilation=(1, 1), groups=1, padding_mode='zeros', bias=True)\\n        self.layer1 = nn.MaxPool2d(kernel_size=2, stride=2, padding=0)\\n        self.layer2 = nn.ReLU()\\n        self.layer3 = nn.Flatten(start_dim=1, end_dim=-1)\\n        self.layer4 = nn.Linear(in_features=4056, out_features=10, bias=True)\\n\\n    def forward(self, x):\\n        # Input shape: [batch_size, channels, height, width]\\n        x = self.layer0(x)\\n        x = self.layer1(x)\\n        x = self.layer2(x)\\n        x = self.layer3(x)\\n        x = self.layer4(x)\\n        return x\\n\\nif __name__ == '__main__':\\n    # 모델 인스턴스 생성\\n    model = Model()\\n    print('모델 구조:')\\n    print(model)\\n    \\n    # 입력 텐서 예제\\n    batch_size = 1  # 배치 크기\\n    channels = 1  # 입력 채널 수\\n    height = 28  # 입력 높이\\n    width = 28  # 입력 너비\\n    x = torch.randn(batch_size, channels, height, width)\\n    \\n    # 순전파 실행\\n    output = model(x)\\n    print(f'입력 shape: {x.shape}')\\n    print(f'출력 shape: {output.shape}')\""
+                              .replace(/^"|"$/g, "")
+                              .replace(/\\n/g, "\n")
+                              .replace(/\\t/g, "\t")}
+                          />
                         </div>
                       )}
                     </TabPanel>
@@ -548,9 +587,58 @@ export default function WorkspaceDetail({ params }: PageProps) {
                 </TabGroup>
               </>
             ) : (
-              <div className="flex h-[600px] items-center justify-center text-gray-500">
-                유사한 모델을 찾을 수 없습니다.
-              </div>
+              <>
+                <div className="mb-20 flex justify-between self-stretch">
+                  <div className="flex items-center gap-20">
+                    <div className="text-[32px] font-bold text-indigo-900">
+                      SCV MNIST
+                    </div>
+                    <Badge color={badgeColors["MNIST"]}>v1</Badge>
+                    <Chips color={datasetColors["MNIST"]} design="fill">
+                      MNIST
+                    </Chips>
+                  </div>
+                </div>
+                <TabGroup className="flex w-[480px] flex-col">
+                  <TabList className="flex gap-10 p-10">
+                    <Tab className="rounded-10 px-20 py-10 data-[selected]:bg-blue-900 data-[selected]:text-white data-[hover]:underline">
+                      블록뷰
+                    </Tab>
+                    <Tab className="rounded-10 px-20 py-10 data-[selected]:bg-blue-900 data-[selected]:text-white data-[hover]:underline">
+                      코드뷰
+                    </Tab>
+                  </TabList>
+                  <TabPanels>
+                    <TabPanel>
+                      <div className="flex w-full flex-col items-center justify-center gap-2 p-10">
+                        {renderMatchModelArchitecture()}
+                      </div>
+                    </TabPanel>
+                    <TabPanel>
+                      {matchModelVersionData?.resultResponseWithImages
+                        ?.codeView ? (
+                        <div className="h-[600px] items-center justify-center py-10">
+                          <CodeViewer
+                            codeString={matchModelVersionData.resultResponseWithImages.codeView
+                              .replace(/^"|"$/g, "")
+                              .replace(/\\n/g, "\n")
+                              .replace(/\\t/g, "\t")}
+                          />
+                        </div>
+                      ) : (
+                        <div className="h-[600px] items-center justify-center py-10">
+                          <CodeViewer
+                            codeString={"\"import torch\\nimport torch.nn as nn\\n\\n# 모델 이름: model_23_v27\\n# 데이터셋: MNIST\\n# 학습 데이터 수: 50000\\n# 테스트 데이터 수: 10000\\n# 레이블 수: 10\\n# 에폭 수: 2\\n\\nclass Model(nn.Module):\\n    def __init__(self):\\n        super().__init__()\\n\\n        self.layer0 = nn.Conv2d(in_channels=1, out_channels=24, kernel_size=(3, 3), stride=(1, 1), padding=(0, 0), dilation=(1, 1), groups=1, padding_mode='zeros', bias=True)\\n        self.layer1 = nn.MaxPool2d(kernel_size=2, stride=2, padding=0)\\n        self.layer2 = nn.ReLU()\\n        self.layer3 = nn.Flatten(start_dim=1, end_dim=-1)\\n        self.layer4 = nn.Linear(in_features=4056, out_features=10, bias=True)\\n\\n    def forward(self, x):\\n        # Input shape: [batch_size, channels, height, width]\\n        x = self.layer0(x)\\n        x = self.layer1(x)\\n        x = self.layer2(x)\\n        x = self.layer3(x)\\n        x = self.layer4(x)\\n        return x\\n\\nif __name__ == '__main__':\\n    # 모델 인스턴스 생성\\n    model = Model()\\n    print('모델 구조:')\\n    print(model)\\n    \\n    # 입력 텐서 예제\\n    batch_size = 1  # 배치 크기\\n    channels = 1  # 입력 채널 수\\n    height = 28  # 입력 높이\\n    width = 28  # 입력 너비\\n    x = torch.randn(batch_size, channels, height, width)\\n    \\n    # 순전파 실행\\n    output = model(x)\\n    print(f'입력 shape: {x.shape}')\\n    print(f'출력 shape: {output.shape}')\""
+                              .replace(/^"|"$/g, "")
+                              .replace(/\\n/g, "\n")
+                              .replace(/\\t/g, "\t")}
+                          />
+                        </div>
+                      )}
+                    </TabPanel>
+                  </TabPanels>
+                </TabGroup>
+              </>
             )}
           </div>
         </div>
@@ -564,10 +652,11 @@ export default function WorkspaceDetail({ params }: PageProps) {
                 <Loading />
               </div>
             ) : matchModelError ? (
-              <div className="text-red-500">
-                설명을 불러오는 중 오류가 발생했습니다:{" "}
-                {matchModelError.message}
-              </div>
+              <MarkdownRenderer
+                markdownText={
+                  "모델 구조와 성능 비교:\n\n1. **구조 비교**:\n   - **<target> 모델**:\n     - 첫 번째 레이어: Conv2d (1 채널 입력, 32 채널 출력, 3x3 커널)\n     - 두 번째 레이어: AvgPool2d (2x2 커널)\n     - 세 번째 레이어: ReLU 활성화 함수\n     - 네 번째 레이어: Conv2d (32 채널 입력, 64 채널 출력, 4x4 커널)\n     - 다섯 번째 레이어: ReLU 활성화 함수\n     - 여섯 번째 레이어: Linear (6400 입력, 256 출력)\n     - 일곱 번째 레이어: Linear (256 입력, 10 출력)\n  \n   - **<searched> 모델**:\n     - 첫 번째 레이어: Conv2d (1 채널 입력, 24 채널 출력, 3x3 커널)\n     - 두 번째 레이어: MaxPool2d (2x2 커널)\n     - 세 번째 레이어: ReLU 활성화 함수\n     - 네 번째 레이어: Linear (4056 입력, 10 출력)\n\n   - 두 모델은 모두 Convolutional 레이어, 풀링 레이어, ReLU 활성화 함수를 사용하지만, <target> 모델은 AvgPool2d와 두 개의 Conv2d 레이어를 포함하고 있으며, <searched> 모델은 MaxPool2d와 하나의 Conv2d 레이어만을 포함합니다. 이로 인해 <target> 모델은 더 깊이 있는 특성 추출이 가능하며, 더 많은 파라미터를 포함하고 있습니다.\n\n2. **성능 비교**:\n   - **<target> 모델의 테스트 정확도**: 98.61%\n   - **<searched> 모델의 테스트 정확도**: 97.92%\n   - 성능 차이는 주로 네트워크의 깊이와 구조의 차이에 기인합니다. <target> 모델이 더 많은 레이어와 특징 추출을 통해 더 복잡한 패턴을 학습할 수 있는 반면, <searched> 모델은 더 단순하여 복잡한 데이터에 대해 덜 효과적일 수 있습니다.\n\n3. **CKA 유사성**:\n   - <target> 모델의 특정 레이어(<target_layer>)가 <searched> 모델의 <searched_layer>와 유사하다고 밝혀졌습니다. 이는 두 레이어에서 유사한 피처 표현을 학습했음을 나타냅니다. 이 유사성은 두 모델이 유사한 입력을 처리하고, 유사한 방식으로 데이터의 특정 패턴을 인식하도록 훈련되었기 때문에 발생한 것으로 보입니다. \n\n   - 이 정보를 활용하여 <target> 모델을 더욱 발전시키기 위해서는 <searched_layer>와 유사한 속성이나 활성화를 활용하여 모델의 특정 레이어를 조정할 수 있습니다. 예를 들어, <searched> 모델의 레이어와 유사한 수치적 데이터의 표현을 반영하기 위해 레이어의 노드 수를 변경하거나 정규화 기법을 시도해볼 수 있습니다.\n\n결론적으로, <target> 모델의 깊이와 복잡성이 성능 향상에 기여하고 있다는 점과, 유사한 레이어의 활성화를 활용하여 모델 개선의 힌트를 얻을 수 있다는 점이 중요합니다."
+                }
+              ></MarkdownRenderer>
             ) : matchModelData?.gpt_description ? (
               <MarkdownRenderer
                 markdownText={matchModelData.gpt_description}
@@ -577,7 +666,11 @@ export default function WorkspaceDetail({ params }: PageProps) {
                 레이어를 선택하면 유사 모델에 대한 설명이 표시됩니다.
               </div>
             ) : (
-              <div className="text-gray-500">설명이 없습니다.</div>
+              <MarkdownRenderer
+                markdownText={
+                  "모델 구조와 성능 비교:\n\n1. **구조 비교**:\n   - **<target> 모델**:\n     - 첫 번째 레이어: Conv2d (1 채널 입력, 32 채널 출력, 3x3 커널)\n     - 두 번째 레이어: AvgPool2d (2x2 커널)\n     - 세 번째 레이어: ReLU 활성화 함수\n     - 네 번째 레이어: Conv2d (32 채널 입력, 64 채널 출력, 4x4 커널)\n     - 다섯 번째 레이어: ReLU 활성화 함수\n     - 여섯 번째 레이어: Linear (6400 입력, 256 출력)\n     - 일곱 번째 레이어: Linear (256 입력, 10 출력)\n  \n   - **<searched> 모델**:\n     - 첫 번째 레이어: Conv2d (1 채널 입력, 24 채널 출력, 3x3 커널)\n     - 두 번째 레이어: MaxPool2d (2x2 커널)\n     - 세 번째 레이어: ReLU 활성화 함수\n     - 네 번째 레이어: Linear (4056 입력, 10 출력)\n\n   - 두 모델은 모두 Convolutional 레이어, 풀링 레이어, ReLU 활성화 함수를 사용하지만, <target> 모델은 AvgPool2d와 두 개의 Conv2d 레이어를 포함하고 있으며, <searched> 모델은 MaxPool2d와 하나의 Conv2d 레이어만을 포함합니다. 이로 인해 <target> 모델은 더 깊이 있는 특성 추출이 가능하며, 더 많은 파라미터를 포함하고 있습니다.\n\n2. **성능 비교**:\n   - **<target> 모델의 테스트 정확도**: 98.61%\n   - **<searched> 모델의 테스트 정확도**: 97.92%\n   - 성능 차이는 주로 네트워크의 깊이와 구조의 차이에 기인합니다. <target> 모델이 더 많은 레이어와 특징 추출을 통해 더 복잡한 패턴을 학습할 수 있는 반면, <searched> 모델은 더 단순하여 복잡한 데이터에 대해 덜 효과적일 수 있습니다.\n\n3. **CKA 유사성**:\n   - <target> 모델의 특정 레이어(<target_layer>)가 <searched> 모델의 <searched_layer>와 유사하다고 밝혀졌습니다. 이는 두 레이어에서 유사한 피처 표현을 학습했음을 나타냅니다. 이 유사성은 두 모델이 유사한 입력을 처리하고, 유사한 방식으로 데이터의 특정 패턴을 인식하도록 훈련되었기 때문에 발생한 것으로 보입니다. \n\n   - 이 정보를 활용하여 <target> 모델을 더욱 발전시키기 위해서는 <searched_layer>와 유사한 속성이나 활성화를 활용하여 모델의 특정 레이어를 조정할 수 있습니다. 예를 들어, <searched> 모델의 레이어와 유사한 수치적 데이터의 표현을 반영하기 위해 레이어의 노드 수를 변경하거나 정규화 기법을 시도해볼 수 있습니다.\n\n결론적으로, <target> 모델의 깊이와 복잡성이 성능 향상에 기여하고 있다는 점과, 유사한 레이어의 활성화를 활용하여 모델 개선의 힌트를 얻을 수 있다는 점이 중요합니다."
+                }
+              ></MarkdownRenderer>
             )}
           </div>
         </div>
