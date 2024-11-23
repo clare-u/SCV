@@ -540,7 +540,7 @@ export default function WorkspaceDetail({ params }: PageProps) {
                 <div className="mb-20 flex justify-between self-stretch">
                   <div className="flex items-center gap-20">
                     <div className="text-[32px] font-bold text-indigo-900">
-                      {matchModelModelQuery.modelName}
+                      {matchModelModelQuery.modelName || "SCV MNIST"}
                     </div>
                     <Badge
                       color={
@@ -548,7 +548,7 @@ export default function WorkspaceDetail({ params }: PageProps) {
                         badgeColors.default
                       }
                     >
-                      v{matchModelModelQuery.latestVersion}
+                      v{matchModelModelQuery.latestVersion || "1"}
                     </Badge>
                     <Chips
                       color={
@@ -557,7 +557,7 @@ export default function WorkspaceDetail({ params }: PageProps) {
                       }
                       design="fill"
                     >
-                      {matchModelModelQuery.DataName}
+                      {matchModelModelQuery.DataName || "MNIST"}
                     </Chips>
                   </div>
                 </div>
