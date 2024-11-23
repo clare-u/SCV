@@ -40,6 +40,7 @@ const datasetColors: Record<string, ChipsProps["color"]> = {
   CIFAR10: "green",
   SVHN: "teal",
   EMNIST: "red",
+  default: "gray",
 };
 
 const badgeColors: Record<string, BadgeProps["color"]> = {
@@ -48,6 +49,7 @@ const badgeColors: Record<string, BadgeProps["color"]> = {
   CIFAR10: "green",
   SVHN: "teal",
   EMNIST: "red",
+  default: "gray",
 };
 
 const ErrorPage = ({
@@ -456,7 +458,12 @@ export default function WorkspaceDetail({ params }: PageProps) {
                     options={versionOptions}
                   />
                 </div>
-                <Chips color={datasetColors[modelData.DataName]} design="fill">
+                <Chips
+                  color={
+                    datasetColors[modelData.DataName] || datasetColors.default
+                  }
+                  design="fill"
+                >
                   {modelData.DataName}
                 </Chips>
               </div>
@@ -535,11 +542,19 @@ export default function WorkspaceDetail({ params }: PageProps) {
                     <div className="text-[32px] font-bold text-indigo-900">
                       {matchModelModelQuery.modelName}
                     </div>
-                    <Badge color={badgeColors[matchModelModelQuery.DataName]}>
+                    <Badge
+                      color={
+                        badgeColors[matchModelModelQuery.DataName] ||
+                        badgeColors.default
+                      }
+                    >
                       v{matchModelModelQuery.latestVersion}
                     </Badge>
                     <Chips
-                      color={datasetColors[matchModelModelQuery.DataName]}
+                      color={
+                        datasetColors[matchModelModelQuery.DataName] ||
+                        datasetColors.defaultt
+                      }
                       design="fill"
                     >
                       {matchModelModelQuery.DataName}
