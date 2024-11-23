@@ -494,7 +494,7 @@ export default function WorkspaceDetail({ params }: PageProps) {
                   유사한 모델이 표시됩니다.
                 </p>
               </div>
-            ) : matchModelVersionData ? (
+            ) : matchModelVersionData && matchModelModelQuery ? (
               <>
                 <div className="mb-20 flex justify-between self-stretch">
                   <div className="flex items-center gap-20">
