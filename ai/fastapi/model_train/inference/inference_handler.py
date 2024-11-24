@@ -47,11 +47,6 @@ class ModelInferenceHandler:
         try:
             cached_path = self._get_cached_path(model_path)
 
-            # 캐시확인
-            if os.path.exists(cached_path):
-                logger.info(f"캐시된 모델 사용: {cached_path}")
-                return torch.load(cached_path, map_location=self.device)
-
             # MinIO에서 다운받기
             client = Minio(
                 endpoint=f"{minio_host_name}:{minio_api_port}",
@@ -60,7 +55,35 @@ class ModelInferenceHandler:
                 secure=False
             )
 
+            # MinIO에서 모델 메타데이터 가져오기
+            stat = client.stat_object(minio_model_bucket, model_path)
+
+            # 캐시된 모델이 있으면 메타데이터 비교
+            if os.path.exists(cached_path):
+                meta_path = cached_path + ".meta"
+                if os.path.exists(meta_path):
+                    with open(meta_path, 'r') as f:
+                        import json
+                        cached_meta = json.load(f)
+                        if cached_meta.get('etag') == stat.etag:
+                            logger.info(f"캐시된 모델 사용: {cached_path}")
+                            return torch.load(cached_path, map_location=self.device)
+                        else:
+                            # 메타데이터가 다르면 캐시 삭제
+                            os.remove(cached_path)
+                            os.remove(meta_path)
+                            logger.info("캐시된 모델이 최신이 아님, 새로 다운로드")
+
             client.fget_object(minio_model_bucket, model_path, cached_path)
+
+            # 메타데이터 저장
+            with open(cached_path + ".meta", 'w') as f:
+                import json
+                json.dump({
+                    'etag': stat.etag,
+                    'last_modified': str(stat.last_modified),
+                    'size': stat.size
+                }, f)
 
             # 모델 로드
             model = torch.load(cached_path, map_location=self.device)
