@@ -8,7 +8,7 @@ interface CodeViewerProps {
 const CodeViewer: React.FC<CodeViewerProps> = ({ codeString }) => (
   <MonacoEditor
     defaultLanguage="python"
-    theme="vs-dark"
+    theme="vs"
     value={codeString}
     options={{
       readOnly: true,
